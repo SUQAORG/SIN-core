@@ -9,7 +9,7 @@
 #include <sync.h>
 #include <utilstrencodings.h>
 #include <utilmoneystr.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <stdint.h>
 #include <vector>

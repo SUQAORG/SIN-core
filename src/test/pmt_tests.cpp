@@ -9,7 +9,7 @@
 #include <uint256.h>
 #include <arith_uint256.h>
 #include <version.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <vector>
 

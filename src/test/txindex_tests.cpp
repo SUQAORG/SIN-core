@@ -4,7 +4,7 @@
 
 #include <index/txindex.h>
 #include <script/standard.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 #include <util.h>
 #include <utiltime.h>
 #include <validation.h>

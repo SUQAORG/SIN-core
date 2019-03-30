@@ -12,7 +12,7 @@
 
 #include <support/events.h>
 
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <vector>
 

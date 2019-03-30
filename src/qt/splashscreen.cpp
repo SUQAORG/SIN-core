@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/suqa-config.h>
+#include <config/sin-config.h>
 #endif
 
 #include <qt/splashscreen.h>
@@ -57,7 +57,7 @@ SplashScreen::SplashScreen(interfaces::Node& node, Qt::WindowFlags f, const Netw
 
     // draw background
     QRect rectBg(QPoint(0, 0), QSize(splashSize.width(), splashSize.height()));
-    QPixmap bg(":/icons/suqa");
+    QPixmap bg(":/icons/sin");
     pixPaint.drawPixmap(rectBg, bg);
 
     pixPaint.setFont(QFont(font, 32*fontFactor, QFont::Bold));

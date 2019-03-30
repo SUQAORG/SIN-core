@@ -35,9 +35,9 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
         ui->payToLayout->setSpacing(4);
     ui->addAsLabel->setPlaceholderText(tr("Enter a label for this address to add it to your address book"));
 
-    // normal suqa address field
+    // normal sin address field
     GUIUtil::setupAddressWidget(ui->payTo, this);
-    // just a label for displaying suqa address(es)
+    // just a label for displaying sin address(es)
     ui->payTo_is->setFont(GUIUtil::fixedPitchFont());
 
     // Connect signals
@@ -115,7 +115,7 @@ void SendCoinsEntry::clear()
         ui->payToLabel->setText("Deposit Address:");
     }
 
-    // update the display unit, to not use the default ("SUQA")
+    // update the display unit, to not use the default ("SIN")
     updateDisplayUnit();
 }
 

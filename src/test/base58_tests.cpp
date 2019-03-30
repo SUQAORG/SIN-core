@@ -5,7 +5,7 @@
 #include <test/data/base58_encode_decode.json.h>
 
 #include <base58.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 #include <utilstrencodings.h>
 
 #include <univalue.h>

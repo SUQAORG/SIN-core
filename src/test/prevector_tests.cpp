@@ -9,7 +9,7 @@
 #include <serialize.h>
 #include <streams.h>
 
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <boost/test/unit_test.hpp>
 

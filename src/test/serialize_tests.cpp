@@ -5,7 +5,7 @@
 #include <serialize.h>
 #include <streams.h>
 #include <hash.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <stdint.h>
 

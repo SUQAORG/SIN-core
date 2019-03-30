@@ -25,7 +25,7 @@ QT_BEGIN_NAMESPACE
 class QUrl;
 QT_END_NAMESPACE
 
-/** Dialog for sending suqas */
+/** Dialog for sending sins */
 class DepositCoinsDialog : public QDialog
 {
     Q_OBJECT

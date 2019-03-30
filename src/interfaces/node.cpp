@@ -30,7 +30,7 @@
 #include <warnings.h>
 
 #if defined(HAVE_CONFIG_H)
-#include <config/suqa-config.h>
+#include <config/sin-config.h>
 #endif
 #ifdef ENABLE_WALLET
 #include <wallet/fees.h>

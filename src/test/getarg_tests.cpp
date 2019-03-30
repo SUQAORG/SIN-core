@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <util.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <string>
 #include <vector>

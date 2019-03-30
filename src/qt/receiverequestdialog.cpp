@@ -5,7 +5,7 @@
 #include <qt/receiverequestdialog.h>
 #include <qt/forms/ui_receiverequestdialog.h>
 
-#include <qt/suqaunits.h>
+#include <qt/sinunits.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
@@ -18,7 +18,7 @@
 #include <QPixmap>
 
 #if defined(HAVE_CONFIG_H)
-#include <config/suqa-config.h> /* for USE_QRCODE */
+#include <config/sin-config.h> /* for USE_QRCODE */
 #endif
 
 #ifdef USE_QRCODE

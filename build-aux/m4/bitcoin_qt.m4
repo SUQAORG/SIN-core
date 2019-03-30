@@ -3,21 +3,21 @@ dnl Distributed under the MIT software license, see the accompanying
 dnl file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 dnl Helper for cases where a qt dependency is not met.
-dnl Output: If qt version is auto, set suqa_enable_qt to false. Else, exit.
+dnl Output: If qt version is auto, set sin_enable_qt to false. Else, exit.
 AC_DEFUN([BITCOIN_QT_FAIL],[
-  if test "x$suqa_qt_want_version" = xauto && test "x$suqa_qt_force" != xyes; then
-    if test "x$suqa_enable_qt" != xno; then
-      AC_MSG_WARN([$1; suqa-qt frontend will not be built])
+  if test "x$sin_qt_want_version" = xauto && test "x$sin_qt_force" != xyes; then
+    if test "x$sin_enable_qt" != xno; then
+      AC_MSG_WARN([$1; sin-qt frontend will not be built])
     fi
-    suqa_enable_qt=no
-    suqa_enable_qt_test=no
+    sin_enable_qt=no
+    sin_enable_qt_test=no
   else
     AC_MSG_ERROR([$1])
   fi
 ])
 
 AC_DEFUN([BITCOIN_QT_CHECK],[
-  if test "x$suqa_enable_qt" != xno && test "x$suqa_qt_want_version" != xno; then
+  if test "x$sin_enable_qt" != xno && test "x$sin_qt_want_version" != xno; then
     true
     $1
   else
@@ -54,15 +54,15 @@ AC_DEFUN([BITCOIN_QT_INIT],[
   dnl enable qt support
   AC_ARG_WITH([gui],
     [AS_HELP_STRING([--with-gui@<:@=no|qt5|auto@:>@],
-    [build suqa-qt GUI (default=auto)])],
+    [build sin-qt GUI (default=auto)])],
     [
-     suqa_qt_want_version=$withval
-     if test "x$suqa_qt_want_version" = xyes; then
-       suqa_qt_force=yes
-       suqa_qt_want_version=auto
+     sin_qt_want_version=$withval
+     if test "x$sin_qt_want_version" = xyes; then
+       sin_qt_force=yes
+       sin_qt_want_version=auto
      fi
     ],
-    [suqa_qt_want_version=auto])
+    [sin_qt_want_version=auto])
 
   AC_ARG_WITH([qt-incdir],[AS_HELP_STRING([--with-qt-incdir=INC_DIR],[specify qt include path (overridden by pkgconfig)])], [qt_include_path=$withval], [])
   AC_ARG_WITH([qt-libdir],[AS_HELP_STRING([--with-qt-libdir=LIB_DIR],[specify qt lib path (overridden by pkgconfig)])], [qt_lib_path=$withval], [])
@@ -85,7 +85,7 @@ dnl Inputs: $2: If $1 is "yes" and --with-gui=auto, which qt version should be
 dnl         tried first.
 dnl Outputs: See _BITCOIN_QT_FIND_LIBS_*
 dnl Outputs: Sets variables for all qt-related tools.
-dnl Outputs: suqa_enable_qt, suqa_enable_qt_dbus, suqa_enable_qt_test
+dnl Outputs: sin_enable_qt, sin_enable_qt_dbus, sin_enable_qt_test
 AC_DEFUN([BITCOIN_QT_CONFIGURE],[
   use_pkgconfig=$1
 
@@ -113,10 +113,10 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
   CPPFLAGS="$QT_INCLUDES $CPPFLAGS"
   CXXFLAGS="$PIC_FLAGS $CXXFLAGS"
   _BITCOIN_QT_IS_STATIC
-  if test "x$suqa_cv_static_qt" = xyes; then
+  if test "x$sin_cv_static_qt" = xyes; then
     _BITCOIN_QT_FIND_STATIC_PLUGINS
     AC_DEFINE(QT_STATICPLUGIN, 1, [Define this symbol if qt plugins are static])
-    AC_CACHE_CHECK(for Qt < 5.4, suqa_cv_need_acc_widget,[
+    AC_CACHE_CHECK(for Qt < 5.4, sin_cv_need_acc_widget,[
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
           #include <QtCore/qconfig.h>
           #ifndef QT_VERSION
@@ -128,10 +128,10 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
           choke
           #endif
         ]])],
-      [suqa_cv_need_acc_widget=yes],
-      [suqa_cv_need_acc_widget=no])
+      [sin_cv_need_acc_widget=yes],
+      [sin_cv_need_acc_widget=no])
     ])
-    if test "x$suqa_cv_need_acc_widget" = xyes; then
+    if test "x$sin_cv_need_acc_widget" = xyes; then
       _BITCOIN_QT_CHECK_STATIC_PLUGINS([Q_IMPORT_PLUGIN(AccessibleFactory)], [-lqtaccessiblewidgets])
     fi
     _BITCOIN_QT_CHECK_STATIC_PLUGINS([Q_IMPORT_PLUGIN(QMinimalIntegrationPlugin)],[-lqminimal])
@@ -228,14 +228,14 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
   dnl enable qt support
   AC_MSG_CHECKING(whether to build ]AC_PACKAGE_NAME[ GUI)
   BITCOIN_QT_CHECK([
-    suqa_enable_qt=yes
-    suqa_enable_qt_test=yes
+    sin_enable_qt=yes
+    sin_enable_qt_test=yes
     if test "x$have_qt_test" = xno; then
-      suqa_enable_qt_test=no
+      sin_enable_qt_test=no
     fi
-    suqa_enable_qt_dbus=no
+    sin_enable_qt_dbus=no
     if test "x$use_dbus" != xno && test "x$have_qt_dbus" = xyes; then
-      suqa_enable_qt_dbus=yes
+      sin_enable_qt_dbus=yes
     fi
     if test "x$use_dbus" = xyes && test "x$have_qt_dbus" = xno; then
       AC_MSG_ERROR([libQtDBus not found. Install libQtDBus or remove --with-qtdbus.])
@@ -244,9 +244,9 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
       AC_MSG_WARN([lupdate is required to update qt translations])
     fi
   ],[
-    suqa_enable_qt=no
+    sin_enable_qt=no
   ])
-  AC_MSG_RESULT([$suqa_enable_qt (Qt5)])
+  AC_MSG_RESULT([$sin_enable_qt (Qt5)])
 
   AC_SUBST(QT_PIE_FLAGS)
   AC_SUBST(QT_INCLUDES)
@@ -266,9 +266,9 @@ dnl ----
 
 dnl Internal. Check if the included version of Qt is Qt5.
 dnl Requires: INCLUDES must be populated as necessary.
-dnl Output: suqa_cv_qt5=yes|no
+dnl Output: sin_cv_qt5=yes|no
 AC_DEFUN([_BITCOIN_QT_CHECK_QT5],[
-  AC_CACHE_CHECK(for Qt 5, suqa_cv_qt5,[
+  AC_CACHE_CHECK(for Qt 5, sin_cv_qt5,[
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
       #include <QtCore/qconfig.h>
       #ifndef QT_VERSION
@@ -280,15 +280,15 @@ AC_DEFUN([_BITCOIN_QT_CHECK_QT5],[
       choke
       #endif
     ]])],
-    [suqa_cv_qt5=yes],
-    [suqa_cv_qt5=no])
+    [sin_cv_qt5=yes],
+    [sin_cv_qt5=no])
 ])])
 
 dnl Internal. Check if the included version of Qt is greater than Qt58.
 dnl Requires: INCLUDES must be populated as necessary.
-dnl Output: suqa_cv_qt5=yes|no
+dnl Output: sin_cv_qt5=yes|no
 AC_DEFUN([_BITCOIN_QT_CHECK_QT58],[
-  AC_CACHE_CHECK(for > Qt 5.7, suqa_cv_qt58,[
+  AC_CACHE_CHECK(for > Qt 5.7, sin_cv_qt58,[
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
       #include <QtCore/qconfig.h>
       #ifndef QT_VERSION
@@ -300,18 +300,18 @@ AC_DEFUN([_BITCOIN_QT_CHECK_QT58],[
       choke
       #endif
     ]])],
-    [suqa_cv_qt58=yes],
-    [suqa_cv_qt58=no])
+    [sin_cv_qt58=yes],
+    [sin_cv_qt58=no])
 ])])
 
 
 dnl Internal. Check if the linked version of Qt was built as static libs.
 dnl Requires: Qt5.
 dnl Requires: INCLUDES and LIBS must be populated as necessary.
-dnl Output: suqa_cv_static_qt=yes|no
+dnl Output: sin_cv_static_qt=yes|no
 dnl Output: Defines QT_STATICPLUGIN if plugins are static.
 AC_DEFUN([_BITCOIN_QT_IS_STATIC],[
-  AC_CACHE_CHECK(for static Qt, suqa_cv_static_qt,[
+  AC_CACHE_CHECK(for static Qt, sin_cv_static_qt,[
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
         #include <QtCore/qconfig.h>
         #ifndef QT_VERSION OR QT_VERSION_STR
@@ -323,10 +323,10 @@ AC_DEFUN([_BITCOIN_QT_IS_STATIC],[
         choke
         #endif
       ]])],
-      [suqa_cv_static_qt=yes],
-      [suqa_cv_static_qt=no])
+      [sin_cv_static_qt=yes],
+      [sin_cv_static_qt=no])
     ])
-  if test "x$suqa_cv_static_qt" = xyes; then
+  if test "x$sin_cv_static_qt" = xyes; then
     AC_DEFINE(QT_STATICPLUGIN, 1, [Define this symbol for static Qt plugins])
   fi
 ])
@@ -362,7 +362,7 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
      if test "x$use_pkgconfig" = xyes; then
      : dnl
      m4_ifdef([PKG_CHECK_MODULES],[
-       if test x$suqa_cv_qt58 = xno; then
+       if test x$sin_cv_qt58 = xno; then
          PKG_CHECK_MODULES([QTPLATFORM], [Qt5PlatformSupport], [QT_LIBS="$QTPLATFORM_LIBS $QT_LIBS"])
        else
          PKG_CHECK_MODULES([QTFONTDATABASE], [Qt5FontDatabaseSupport], [QT_LIBS="-lQt5FontDatabaseSupport $QT_LIBS"])
@@ -385,7 +385,7 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
      ])
      else
        if test "x$TARGET_OS" = xwindows; then
-         AC_CACHE_CHECK(for Qt >= 5.6, suqa_cv_need_platformsupport,[
+         AC_CACHE_CHECK(for Qt >= 5.6, sin_cv_need_platformsupport,[
            AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
                #include <QtCore/qconfig.h>
                #ifndef QT_VERSION
@@ -397,11 +397,11 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
                choke
                #endif
              ]])],
-           [suqa_cv_need_platformsupport=yes],
-           [suqa_cv_need_platformsupport=no])
+           [sin_cv_need_platformsupport=yes],
+           [sin_cv_need_platformsupport=no])
          ])
-         if test "x$suqa_cv_need_platformsupport" = xyes; then
-           if test x$suqa_cv_qt58 = xno; then
+         if test "x$sin_cv_need_platformsupport" = xyes; then
+           if test x$sin_cv_qt58 = xno; then
              BITCOIN_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}PlatformSupport],[main],,BITCOIN_QT_FAIL(lib$QT_LIB_PREFIXPlatformSupport not found)))
            else
              BITCOIN_QT_CHECK(AC_CHECK_LIB([${QT_LIB_PREFIX}FontDatabaseSupport],[main],,BITCOIN_QT_FAIL(lib$QT_LIB_PREFIXFontDatabaseSupport not found)))
@@ -419,9 +419,9 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
 ])
 
 dnl Internal. Find Qt libraries using pkg-config.
-dnl Inputs: suqa_qt_want_version (from --with-gui=). The version to check
+dnl Inputs: sin_qt_want_version (from --with-gui=). The version to check
 dnl         first.
-dnl Inputs: $1: If suqa_qt_want_version is "auto", check for this version
+dnl Inputs: $1: If sin_qt_want_version is "auto", check for this version
 dnl         first.
 dnl Outputs: All necessary QT_* variables are set.
 dnl Outputs: have_qt_test and have_qt_dbus are set (if applicable) to yes|no.
@@ -449,7 +449,7 @@ AC_DEFUN([_BITCOIN_QT_FIND_LIBS_WITH_PKGCONFIG],[
 
 dnl Internal. Find Qt libraries without using pkg-config. Version is deduced
 dnl from the discovered headers.
-dnl Inputs: suqa_qt_want_version (from --with-gui=). The version to use.
+dnl Inputs: sin_qt_want_version (from --with-gui=). The version to use.
 dnl         If "auto", the version will be discovered by _BITCOIN_QT_CHECK_QT5.
 dnl Outputs: All necessary QT_* variables are set.
 dnl Outputs: have_qt_test and have_qt_dbus are set (if applicable) to yes|no.
@@ -470,7 +470,7 @@ AC_DEFUN([_BITCOIN_QT_FIND_LIBS_WITHOUT_PKGCONFIG],[
   BITCOIN_QT_CHECK([AC_CHECK_HEADER([QLocalSocket],, BITCOIN_QT_FAIL(QtNetwork headers missing))])
 
   BITCOIN_QT_CHECK([
-    if test "x$suqa_qt_want_version" = xauto; then
+    if test "x$sin_qt_want_version" = xauto; then
       _BITCOIN_QT_CHECK_QT5
       _BITCOIN_QT_CHECK_QT58
     fi
@@ -490,7 +490,7 @@ AC_DEFUN([_BITCOIN_QT_FIND_LIBS_WITHOUT_PKGCONFIG],[
 
   BITCOIN_QT_CHECK(AC_CHECK_LIB([z] ,[main],,AC_MSG_WARN([zlib not found. Assuming qt has it built-in])))
   BITCOIN_QT_CHECK(AC_SEARCH_LIBS([jpeg_create_decompress] ,[qtjpeg jpeg],,AC_MSG_WARN([libjpeg not found. Assuming qt has it built-in])))
-  if test x$suqa_cv_qt58 = xno; then
+  if test x$sin_cv_qt58 = xno; then
     BITCOIN_QT_CHECK(AC_SEARCH_LIBS([png_error] ,[qtpng png],,AC_MSG_WARN([libpng not found. Assuming qt has it built-in])))
     BITCOIN_QT_CHECK(AC_SEARCH_LIBS([pcre16_exec], [qtpcre pcre16],,AC_MSG_WARN([libpcre16 not found. Assuming qt has it built-in])))
   else

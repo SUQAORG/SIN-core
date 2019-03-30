@@ -25,7 +25,7 @@ apt install -y openssh-server build-essential git automake autoconf pkg-config l
 
 # build fusionx
 cd ~
-git clone https://github.com/SUQAORG/SIN-core.git && cd SIN-core
+git clone https://github.com/SINORG/SIN-core.git && cd SIN-core
 
 ./autogen.sh
 ./configure --with-incompatible-bdb CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-shared --disable-tests --disable-bench
@@ -64,7 +64,7 @@ echo masternodeaddr=$primaryip:$port >> .sin/sin.conf
 
 # sleep because sleeping is good.. sometimes
 sleep 1
-suqad
+sind
 
 # finished
-echo suqad
+echo sind

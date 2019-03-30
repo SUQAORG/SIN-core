@@ -485,7 +485,7 @@
             <string>Decrease font size</string>
            </property>
            <property name="icon">
-            <iconset resource="../suqa.qrc">
+            <iconset resource="../sin.qrc">
              <normaloff>:/icons/fontsmaller</normaloff>:/icons/fontsmaller</iconset>
            </property>
            <property name="iconSize">
@@ -517,7 +517,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../suqa.qrc">
+            <iconset resource="../sin.qrc">
              <normaloff>:/icons/fontbigger</normaloff>:/icons/fontbigger</iconset>
            </property>
            <property name="iconSize">
@@ -552,7 +552,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../suqa.qrc">
+            <iconset resource="../sin.qrc">
              <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
            </property>
            <property name="shortcut">
@@ -607,7 +607,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../suqa.qrc">
+            <iconset resource="../sin.qrc">
              <normaloff>:/icons/prompticon</normaloff>
              <disabledoff>:/icons/prompticon</disabledoff>:/icons/prompticon</iconset>
            </property>
@@ -1477,7 +1477,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../suqa.qrc"/>
+  <include location="../sin.qrc"/>
  </resources>
  <connections/>
 </ui>

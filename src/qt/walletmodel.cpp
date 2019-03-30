@@ -171,7 +171,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
             total += subtotal;
         }
         else
-        {   // User-entered suqa address / amount:
+        {   // User-entered sin address / amount:
             if(!validateAddress(rcp.address))
             {
                 return InvalidAddress;
@@ -195,13 +195,13 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
                 }
                 ss << "Term Deposit Instruction Detected: " << std::fixed;
                 ss.precision(8);
-                ss << "This will send the amount of " << (0.0+rcp.amount)/COIN <<" SUQA ";
+                ss << "This will send the amount of " << (0.0+rcp.amount)/COIN <<" SIN ";
                 ss << "to be locked for " << termDepositLength << " blocks. ";
                 ss.precision(2);
                 ss << "This is approximately " << (0.0+termDepositLength)/(720) << " days. ";
                 CAmount withInterest=GetInterest(rcp.amount, chainActive.Height()+1, chainActive.Height()+1+termDepositLength, chainActive.Height()+1+termDepositLength);
                 ss.precision(8);
-                ss << "Upon maturation, it will be worth " << (0.0+withInterest)/COIN << " SUQA. ";
+                ss << "Upon maturation, it will be worth " << (0.0+withInterest)/COIN << " SIN. ";
                 termdepositquestion = ss.str();
                 scriptPubKey = GetTimeLockScriptForDestination(address,chainActive.Height()+1+termDepositLength);
             }else{
@@ -310,7 +310,7 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
                 rcp.paymentRequest.SerializeToString(&value);
                 vOrderForm.emplace_back("PaymentRequest", std::move(value));
             }
-            else if (!rcp.message.isEmpty()) // Message from normal suqa:URI (suqa:123...?message=example)
+            else if (!rcp.message.isEmpty()) // Message from normal sin:URI (sin:123...?message=example)
                 vOrderForm.emplace_back("Message", rcp.message.toStdString());
         }
 

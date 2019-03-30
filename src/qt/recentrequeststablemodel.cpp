@@ -4,7 +4,7 @@
 
 #include <qt/recentrequeststablemodel.h>
 
-#include <qt/suqaunits.h>
+#include <qt/sinunits.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 

@@ -17,7 +17,7 @@ namespace Ui {
 }
 
 /**
- * A single entry in the dialog for sending suqas.
+ * A single entry in the dialog for sending sins.
  * Stacked widget, with different UIs for payment requests
  * with a strong payee identity.
  */

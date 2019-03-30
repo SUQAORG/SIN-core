@@ -4,8 +4,8 @@
 
 #include <qt/guiutil.h>
 
-#include <qt/suqaaddressvalidator.h>
-#include <qt/suqaunits.h>
+#include <qt/sinaddressvalidator.h>
+#include <qt/sinunits.h>
 #include <qt/qvalidatedlineedit.h>
 #include <qt/walletmodel.h>
 
@@ -120,7 +120,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
     widget->setFont(fixedPitchFont());
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a SUQA address (e.g. %1)").arg(
+    widget->setPlaceholderText(QObject::tr("Enter a SIN address (e.g. %1)").arg(
         QString::fromStdString(DummyAddress(Params()))));
     widget->setValidator(new BitcoinAddressEntryValidator(parent));
     widget->setCheckValidator(new BitcoinAddressCheckValidator(parent));
@@ -128,8 +128,8 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 
 bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no suqa: URI
-    if(!uri.isValid() || uri.scheme() != QString("suqa"))
+    // return if URI is not valid or is no sin: URI
+    if(!uri.isValid() || uri.scheme() != QString("sin"))
         return false;
 
     SendCoinsRecipient rv;
@@ -174,7 +174,7 @@ bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!BitcoinUnits::parse(BitcoinUnits::SUQA, i->second, &rv.amount))
+                if(!BitcoinUnits::parse(BitcoinUnits::SIN, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -200,12 +200,12 @@ bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
 
 QString formatBitcoinURI(const SendCoinsRecipient &info)
 {
-    QString ret = QString("suqa:%1").arg(info.address);
+    QString ret = QString("sin:%1").arg(info.address);
     int paramCount = 0;
 
     if (info.amount)
     {
-        ret += QString("?amount=%1").arg(BitcoinUnits::format(BitcoinUnits::SUQA, info.amount, false, BitcoinUnits::separatorNever));
+        ret += QString("?amount=%1").arg(BitcoinUnits::format(BitcoinUnits::SIN, info.amount, false, BitcoinUnits::separatorNever));
         paramCount++;
     }
 
@@ -422,7 +422,7 @@ bool openBitcoinConf()
 
     configFile.close();
 
-    /* Open suqa.conf with the associated application */
+    /* Open sin.conf with the associated application */
     return QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathConfig)));
 }
 
@@ -687,8 +687,8 @@ fs::path static GetAutostartFilePath()
 {
     std::string chain = gArgs.GetChainName();
     if (chain == CBaseChainParams::MAIN)
-        return GetAutostartDir() / "suqa.desktop";
-    return GetAutostartDir() / strprintf("suqa-%s.lnk", chain);
+        return GetAutostartDir() / "sin.desktop";
+    return GetAutostartDir() / strprintf("sin-%s.lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
@@ -728,7 +728,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
         if (!optionFile.good())
             return false;
         std::string chain = gArgs.GetChainName();
-        // Write a suqa.desktop file to the autostart directory:
+        // Write a sin.desktop file to the autostart directory:
         optionFile << "[Desktop Entry]\n";
         optionFile << "Type=Application\n";
         if (chain == CBaseChainParams::MAIN)
@@ -760,7 +760,7 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
         return nullptr;
     }
 
-    // loop through the list of startup items and try to find the suqa app
+    // loop through the list of startup items and try to find the sin app
     for(int i = 0; i < CFArrayGetCount(listSnapshot); i++) {
         LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(listSnapshot, i);
         UInt32 resolutionFlags = kLSSharedFileListNoUserInteraction | kLSSharedFileListDoNotMountVolumes;
@@ -794,38 +794,38 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
 
 bool GetStartOnSystemStartup()
 {
-    CFURLRef suqaAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    if (suqaAppUrl == nullptr) {
+    CFURLRef sinAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    if (sinAppUrl == nullptr) {
         return false;
     }
 
     LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, suqaAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, sinAppUrl);
 
-    CFRelease(suqaAppUrl);
+    CFRelease(sinAppUrl);
     return !!foundItem; // return boolified object
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
-    CFURLRef suqaAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    if (suqaAppUrl == nullptr) {
+    CFURLRef sinAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    if (sinAppUrl == nullptr) {
         return false;
     }
 
     LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, suqaAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, sinAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add suqa app to startup item list
-        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, suqaAppUrl, nullptr, nullptr);
+        // add sin app to startup item list
+        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, sinAppUrl, nullptr, nullptr);
     }
     else if(!fAutoStart && foundItem) {
         // remove item
         LSSharedFileListItemRemove(loginItems, foundItem);
     }
 
-    CFRelease(suqaAppUrl);
+    CFRelease(sinAppUrl);
     return true;
 }
 #pragma GCC diagnostic pop

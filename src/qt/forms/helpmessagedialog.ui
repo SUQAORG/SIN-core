@@ -52,7 +52,7 @@
         </size>
        </property>
        <property name="pixmap">
-        <pixmap resource="../suqa.qrc">:/icons/suqa</pixmap>
+        <pixmap resource="../sin.qrc">:/icons/sin</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -150,7 +150,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../suqa.qrc"/>
+  <include location="../sin.qrc"/>
  </resources>
  <connections>
   <connection>

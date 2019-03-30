@@ -7,17 +7,17 @@ define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
 define(_COPYRIGHT_YEAR, 2019)
 define(_COPYRIGHT_HOLDERS,[The %s developers])
-define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[SUQA]])
-AC_INIT([SUQA],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/SUQAORG/SUQA-0.17.1],[SUQA],[https://suqa.org])
+define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[sin]])
+AC_INIT([sin],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/sinORG/sin-0.17.1],[sin],[https://sin.org])
 AC_CONFIG_SRCDIR([src/validation.cpp])
-AC_CONFIG_HEADERS([src/config/suqa-config.h])
+AC_CONFIG_HEADERS([src/config/sin-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 
-BITCOIN_DAEMON_NAME=suqad
-BITCOIN_GUI_NAME=suqa-qt
-BITCOIN_CLI_NAME=suqa-cli
-BITCOIN_TX_NAME=suqa-tx
+BITCOIN_DAEMON_NAME=sind
+BITCOIN_GUI_NAME=sin-qt
+BITCOIN_CLI_NAME=sin-cli
+BITCOIN_TX_NAME=sin-tx
 
 dnl Unless the user specified ARFLAGS, force it to be cr
 AC_ARG_VAR(ARFLAGS, [Flags for the archiver, defaults to <cr> if not set])
@@ -83,7 +83,7 @@ AC_PATH_TOOL(RANLIB, ranlib)
 AC_PATH_TOOL(STRIP, strip)
 AC_PATH_TOOL(GCOV, gcov)
 AC_PATH_PROG(LCOV, lcov)
-dnl Python 3.x is supported from 3.4 on (see https://github.com/suqa/suqa/issues/7893)
+dnl Python 3.x is supported from 3.4 on (see https://github.com/sin/sin/issues/7893)
 AC_PATH_PROGS([PYTHON], [python3.7 python3.6 python3.5 python3.4 python3 python])
 AC_PATH_PROG(GENHTML, genhtml)
 AC_PATH_PROG([GIT], [git])
@@ -395,21 +395,21 @@ CPPFLAGS="$CPPFLAGS -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
 
 AC_ARG_WITH([utils],
   [AS_HELP_STRING([--with-utils],
-  [build suqa-cli suqa-tx (default=yes)])],
-  [build_suqa_utils=$withval],
-  [build_suqa_utils=yes])
+  [build sin-cli sin-tx (default=yes)])],
+  [build_sin_utils=$withval],
+  [build_sin_utils=yes])
 
 AC_ARG_WITH([libs],
   [AS_HELP_STRING([--with-libs],
   [build libraries (default=yes)])],
-  [build_suqa_libs=$withval],
-  [build_suqa_libs=yes])
+  [build_sin_libs=$withval],
+  [build_sin_libs=yes])
 
 AC_ARG_WITH([daemon],
   [AS_HELP_STRING([--with-daemon],
-  [build suqad daemon (default=yes)])],
-  [build_suqad=$withval],
-  [build_suqad=yes])
+  [build sind daemon (default=yes)])],
+  [build_sind=$withval],
+  [build_sind=yes])
 
 use_pkgconfig=yes
 case $host in
@@ -443,9 +443,9 @@ case $host in
      # In libtool-speak, it's -all-static.
      AX_CHECK_LINK_FLAG([[-static]],[LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
 
-     AC_PATH_PROG([MAKENSIS], [makensis], none)
-     if test x$MAKENSIS = xnone; then
-       AC_MSG_WARN("makensis not found. Cannot create installer.")
+     AC_PATH_PROG([SZA], [7za], none)
+     if test x$SZA = xnone; then
+       AC_MSG_WARN("7za not found. Cannot create installer.")
      fi
 
      AC_PATH_TOOL(WINDRES, windres, none)
@@ -621,7 +621,7 @@ AC_C_BIGENDIAN
 dnl Check for pthread compile/link requirements
 AX_PTHREAD
 
-# The following macro will add the necessary defines to suqa-config.h, but
+# The following macro will add the necessary defines to sin-config.h, but
 # they also need to be passed down to any subprojects. Pull the results out of
 # the cache and add them to CPPFLAGS.
 AC_SYS_LARGEFILE
@@ -872,10 +872,10 @@ fi
 
 BITCOIN_QT_INIT
 
-dnl sets $suqa_enable_qt, $suqa_enable_qt_test, $suqa_enable_qt_dbus
+dnl sets $sin_enable_qt, $sin_enable_qt_test, $sin_enable_qt_dbus
 BITCOIN_QT_CONFIGURE([$use_pkgconfig])
 
-if test x$build_suqa_utils$build_suqad$suqa_enable_qt$use_tests$use_bench = xnonononono; then
+if test x$build_sin_utils$build_sind$sin_enable_qt$use_tests$use_bench = xnonononono; then
     use_boost=no
 else
     use_boost=yes
@@ -889,7 +889,7 @@ define(MINIMUM_REQUIRED_BOOST, 1.47.0)
 dnl Check for boost libs
 AX_BOOST_BASE([MINIMUM_REQUIRED_BOOST])
 if test x$want_boost = xno; then
-    AC_MSG_ERROR([[only libsuqaconsensus can be built without boost]])
+    AC_MSG_ERROR([[only libsinconsensus can be built without boost]])
 fi
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
@@ -1063,7 +1063,7 @@ if test x$use_pkgconfig = xyes; then
       if test x$use_qr != xno; then
         BITCOIN_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
       fi
-      if test x$build_suqa_utils$build_suqad$suqa_enable_qt$use_tests != xnononono; then
+      if test x$build_sin_utils$build_sind$sin_enable_qt$use_tests != xnononono; then
         PKG_CHECK_MODULES([EVENT], [libevent],, [AC_MSG_ERROR(libevent not found.)])
         if test x$TARGET_OS != xwindows; then
           PKG_CHECK_MODULES([EVENT_PTHREADS], [libevent_pthreads],, [AC_MSG_ERROR(libevent_pthreads not found.)])
@@ -1088,7 +1088,7 @@ else
   AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
   AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
 
-  if test x$build_suqa_utils$build_suqad$suqa_enable_qt$use_tests != xnononono; then
+  if test x$build_sin_utils$build_sind$sin_enable_qt$use_tests != xnononono; then
     AC_CHECK_HEADER([event2/event.h],, AC_MSG_ERROR(libevent headers missing),)
     AC_CHECK_LIB([event],[main],EVENT_LIBS=-levent,AC_MSG_ERROR(libevent missing))
     if test x$TARGET_OS != xwindows; then
@@ -1137,7 +1137,7 @@ dnl univalue check
 
 need_bundled_univalue=yes
 
-if test x$build_suqa_utils$build_suqad$suqa_enable_qt$use_tests$use_bench = xnonononono; then
+if test x$build_sin_utils$build_sind$sin_enable_qt$use_tests$use_bench = xnonononono; then
   need_bundled_univalue=no
 else
 
@@ -1183,21 +1183,21 @@ AC_SUBST(UNIVALUE_LIBS)
 
 BITCOIN_QT_PATH_PROGS([PROTOC], [protoc],$protoc_bin_path)
 
-AC_MSG_CHECKING([whether to build suqad])
-AM_CONDITIONAL([BUILD_BITCOIND], [test x$build_suqad = xyes])
-AC_MSG_RESULT($build_suqad)
+AC_MSG_CHECKING([whether to build sind])
+AM_CONDITIONAL([BUILD_BITCOIND], [test x$build_sind = xyes])
+AC_MSG_RESULT($build_sind)
 
-AC_MSG_CHECKING([whether to build utils (suqa-cli suqa-tx)])
-AM_CONDITIONAL([BUILD_BITCOIN_UTILS], [test x$build_suqa_utils = xyes])
-AC_MSG_RESULT($build_suqa_utils)
+AC_MSG_CHECKING([whether to build utils (sin-cli sin-tx)])
+AM_CONDITIONAL([BUILD_BITCOIN_UTILS], [test x$build_sin_utils = xyes])
+AC_MSG_RESULT($build_sin_utils)
 
 AC_MSG_CHECKING([whether to build libraries])
-AM_CONDITIONAL([BUILD_BITCOIN_LIBS], [test x$build_suqa_libs = xyes])
-if test x$build_suqa_libs = xyes; then
+AM_CONDITIONAL([BUILD_BITCOIN_LIBS], [test x$build_sin_libs = xyes])
+if test x$build_sin_libs = xyes; then
   AC_DEFINE(HAVE_CONSENSUS_LIB, 1, [Define this symbol if the consensus lib has been built])
-  AC_CONFIG_FILES([libsuqaconsensus.pc:libsuqaconsensus.pc.in])
+  AC_CONFIG_FILES([libsinconsensus.pc:libsinconsensus.pc.in])
 fi
-AC_MSG_RESULT($build_suqa_libs)
+AC_MSG_RESULT($build_sin_libs)
 
 AC_LANG_POP
 
@@ -1259,13 +1259,13 @@ fi
 
 dnl these are only used when qt is enabled
 BUILD_TEST_QT=""
-if test x$suqa_enable_qt != xno; then
+if test x$sin_enable_qt != xno; then
   dnl enable dbus support
   AC_MSG_CHECKING([whether to build GUI with support for D-Bus])
-  if test x$suqa_enable_qt_dbus != xno; then
+  if test x$sin_enable_qt_dbus != xno; then
     AC_DEFINE([USE_DBUS],[1],[Define if dbus support should be compiled in])
   fi
-  AC_MSG_RESULT($suqa_enable_qt_dbus)
+  AC_MSG_RESULT($sin_enable_qt_dbus)
 
   dnl enable qr support
   AC_MSG_CHECKING([whether to build GUI with support for QR codes])
@@ -1288,8 +1288,8 @@ if test x$suqa_enable_qt != xno; then
     AC_MSG_WARN("xgettext is required to update qt translations")
   fi
 
-  AC_MSG_CHECKING([whether to build test_suqa-qt])
-  if test x$use_gui_tests$suqa_enable_qt_test = xyesyes; then
+  AC_MSG_CHECKING([whether to build test_sin-qt])
+  if test x$use_gui_tests$sin_enable_qt_test = xyesyes; then
     AC_MSG_RESULT([yes])
     BUILD_TEST_QT="yes"
   else
@@ -1299,7 +1299,7 @@ fi
 
 AM_CONDITIONAL([ENABLE_ZMQ], [test "x$use_zmq" = "xyes"])
 
-AC_MSG_CHECKING([whether to build test_suqa])
+AC_MSG_CHECKING([whether to build test_sin])
 if test x$use_tests = xyes; then
   AC_MSG_RESULT([yes])
   BUILD_TEST="yes"
@@ -1315,7 +1315,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-if test x$build_suqa_utils$build_suqa_libs$build_suqad$suqa_enable_qt$use_bench$use_tests = xnononononono; then
+if test x$build_sin_utils$build_sin_libs$build_sind$sin_enable_qt$use_bench$use_tests = xnononononono; then
   AC_MSG_ERROR([No targets! Please specify at least one of: --with-utils --with-libs --with-daemon --with-gui --enable-bench or --enable-tests])
 fi
 
@@ -1324,7 +1324,7 @@ AM_CONDITIONAL([BUILD_DARWIN], [test x$BUILD_OS = xdarwin])
 AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
 AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet = xyes])
 AM_CONDITIONAL([ENABLE_TESTS],[test x$BUILD_TEST = xyes])
-AM_CONDITIONAL([ENABLE_QT],[test x$suqa_enable_qt = xyes])
+AM_CONDITIONAL([ENABLE_QT],[test x$sin_enable_qt = xyes])
 AM_CONDITIONAL([ENABLE_QT_TESTS],[test x$BUILD_TEST_QT = xyes])
 AM_CONDITIONAL([ENABLE_BENCH],[test x$use_bench = xyes])
 AM_CONDITIONAL([USE_QRCODE], [test x$use_qr = xyes])
@@ -1401,7 +1401,7 @@ AC_CONFIG_FILES([contrib/devtools/split-debug.sh],[chmod +x contrib/devtools/spl
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/Doxyfile])])
 AC_CONFIG_LINKS([contrib/filter-lcov.py:contrib/filter-lcov.py])
 AC_CONFIG_LINKS([test/functional/test_runner.py:test/functional/test_runner.py])
-AC_CONFIG_LINKS([test/util/suqa-util-test.py:test/util/suqa-util-test.py])
+AC_CONFIG_LINKS([test/util/sin-util-test.py:test/util/sin-util-test.py])
 AC_CONFIG_LINKS([test/util/rpcauth-test.py:test/util/rpcauth-test.py])
 
 dnl boost's m4 checks do something really nasty: they export these vars. As a
@@ -1458,8 +1458,8 @@ esac
 echo
 echo "Options used to compile and link:"
 echo "  with wallet   = $enable_wallet"
-echo "  with gui / qt = $suqa_enable_qt"
-if test x$suqa_enable_qt != xno; then
+echo "  with gui / qt = $sin_enable_qt"
+if test x$sin_enable_qt != xno; then
     echo "    with qr     = $use_qr"
 fi
 echo "  with zmq      = $use_zmq"

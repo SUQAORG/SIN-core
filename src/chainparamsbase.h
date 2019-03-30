@@ -10,7 +10,7 @@
 #include <vector>
 
 /**
- * CBaseChainParams defines the base parameters (shared between suqa-cli and suqad)
+ * CBaseChainParams defines the base parameters (shared between sin-cli and sind)
  * of a given instance of the Bitcoin system.
  */
 class CBaseChainParams

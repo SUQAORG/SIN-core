@@ -6,7 +6,7 @@
 #include <qt/forms/ui_sendcoinsdialog.h>
 
 #include <qt/addresstablemodel.h>
-#include <qt/suqaunits.h>
+#include <qt/sinunits.h>
 #include <qt/clientmodel.h>
 #include <qt/coincontroldialog.h>
 #include <qt/guiutil.h>
@@ -896,7 +896,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString& text)
         }
         else if (!IsValidDestination(dest)) // Invalid address
         {
-            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid SUQA address"));
+            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid SIN address"));
         }
         else // Valid address
         {

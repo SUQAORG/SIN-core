@@ -701,7 +701,6 @@ bool CPrivateSendClient::CheckAutomaticBackup()
 //
 bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun)
 {
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --0\n");
     if(fMasterNode) return false; // no client-side mixing on masternodes
     if(!fEnablePrivateSend) return false;
 
@@ -710,7 +709,7 @@ bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun
 
     if(!pwallet || pwallet->IsLocked(true)) return false;
     if(nState != POOL_STATE_IDLE) return false;
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --1\n");
+
     if(!masternodeSync.IsMasternodeListSynced()) {
         strAutoDenomResult = _("Can't mix while sync in progress.");
         return false;
@@ -729,18 +728,18 @@ bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun
         strAutoDenomResult = _("Lock is already in place.");
         return false;
     }
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --2\n");
+
     if(!fDryRun && pwallet->IsLocked(true)) {
         strAutoDenomResult = _("Wallet is locked.");
         return false;
     }
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --3\n");
+
     if(WaitForAnotherBlock()) {
         LogPrintf("CPrivateSendClient::DoAutomaticDenominating -- Last successful PrivateSend action was too recent\n");
         strAutoDenomResult = _("Last successful PrivateSend action was too recent.");
         return false;
     }
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --4\n");
+
     if(mnodeman.size() == 0) {
         LogPrint(BCLog::PRIVATESEND, "CPrivateSendClient::DoAutomaticDenominating -- No Masternodes detected\n");
         strAutoDenomResult = _("No Masternodes detected.");
@@ -757,14 +756,14 @@ bool CPrivateSendClient::DoAutomaticDenominating(CConnman& connman, bool fDryRun
 
     // including denoms but applying some restrictions
     CAmount nBalanceNeedsAnonymized = pwallet->GetNeedsToBeAnonymizedBalance(nValueMin);
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --5\n");
+
     // anonymizable balance > 0.1 but is way too small
-    if(nBalanceNeedsAnonymized < nValueMin && nBalanceNeedsAnonymized > 0) {
+    if(nBalanceNeedsAnonymized < nValueMin) {
         LogPrintf("CPrivateSendClient::DoAutomaticDenominating -- Not enough funds to anonymize nBalanceNeedsAnonymized: %llf, nValueMin: %llf \n", nBalanceNeedsAnonymized, nValueMin);
         strAutoDenomResult = _("Not enough funds to anonymize.");
         return false;
     }
-    LogPrintf("CPrivateSendClient::DoAutomaticDenominating --6\n");
+
     // excluding denoms
     CAmount nBalanceAnonimizableNonDenom = pwallet->GetAnonymizableBalance(true);
     // denoms
@@ -951,7 +950,6 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
 bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized, CConnman& connman)
 {
-    LogPrintf("CPrivateSendClient::StartNewQueue -- 0\n");
     int nTries = 0;
     int nMnCountEnabled = mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
 
@@ -960,14 +958,13 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
     // ** find the coins we'll use
     std::vector<CTxIn> vecTxIn;
     CAmount nValueInTmp = 0;
-    LogPrintf("CPrivateSendClient::StartNewQueue -- 1\n");
     if(!pwallet->SelectCoinsDark(nValueMin, nBalanceNeedsAnonymized, vecTxIn, nValueInTmp, 0, nPrivateSendRounds)) {
         // this should never happen
-        LogPrintf("CPrivateSendClient::StartNewQueue -- Can't mix: no compatible inputs found! %llf\n", nValueMin);
+        LogPrintf("CPrivateSendClient::StartNewQueue -- Can't mix: no compatible inputs found!\n");
         strAutoDenomResult = _("Can't mix: no compatible inputs found!");
         return false;
     }
-    LogPrintf("CPrivateSendClient::StartNewQueue -- 2\n");
+
     // otherwise, try one randomly
     while(nTries < 10) {
         masternode_info_t infoMn = mnodeman.FindRandomNotInVec(vecMasternodesUsed, MIN_PRIVATESEND_PEER_PROTO_VERSION);
@@ -1535,11 +1532,8 @@ void ThreadCheckPrivateSendClient(CConnman& connman)
             privateSendClient.CheckTimeout();
             privateSendClient.ProcessPendingDsaRequest(connman);
             if(nDoAutoNextRun == nTick) {
-                LogPrintf("CPrivateSendClient::LOOP -- nTick!\n");
-                nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
-                LogPrintf("CPrivateSendClient::LOOP -- next is %d!\n",nDoAutoNextRun);
                 privateSendClient.DoAutomaticDenominating(connman);
-                LogPrintf("CPrivateSendClient::END LOOP -- nTick!\n");
+                nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
             }
         }
     }

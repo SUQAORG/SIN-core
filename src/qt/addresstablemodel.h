@@ -30,7 +30,7 @@ public:
 
     enum ColumnIndex {
         Label = 0,   /**< User specified label */
-        Address = 1  /**< SUQA address */
+        Address = 1  /**< SIN address */
     };
 
     enum RoleIndex {

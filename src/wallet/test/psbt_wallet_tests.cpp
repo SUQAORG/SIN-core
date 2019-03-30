@@ -10,7 +10,7 @@
 #include <univalue.h>
 
 #include <boost/test/unit_test.hpp>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 #include <wallet/test/wallet_test_fixture.h>
 
 extern bool ParseHDKeypath(std::string keypath_str, std::vector<uint32_t>& keypath);

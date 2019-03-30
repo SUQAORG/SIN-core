@@ -9,7 +9,7 @@
 #include <uint256.h>
 #include <util.h>
 #include <utilstrencodings.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <string>
 #include <vector>

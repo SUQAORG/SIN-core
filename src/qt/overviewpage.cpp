@@ -5,7 +5,7 @@
 #include <qt/overviewpage.h>
 #include <qt/forms/ui_overviewpage.h>
 
-#include <qt/suqaunits.h>
+#include <qt/sinunits.h>
 #include <qt/clientmodel.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
@@ -44,7 +44,7 @@ class TxViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 public:
     explicit TxViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
-        QAbstractItemDelegate(parent), unit(BitcoinUnits::SUQA),
+        QAbstractItemDelegate(parent), unit(BitcoinUnits::SIN),
         platformStyle(_platformStyle)
     {
 
@@ -322,7 +322,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
         ui->privateSendInfo->setFocusPolicy(Qt::NoFocus);
         ui->togglePrivateSend->setFocusPolicy(Qt::NoFocus);
     }
-    // update the display unit, to not use the default ("SUQA")
+    // update the display unit, to not use the default ("SIN")
     updateDisplayUnit();
 }
 

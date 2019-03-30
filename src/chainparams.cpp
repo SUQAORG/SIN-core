@@ -2,7 +2,7 @@
 // Copyright (c) 2009-2018 The Bitcoin Core developers
 // Copyright (c) 2014-2017 The Dash Core developers
 // Copyright (c) 2018 FXTC developers
-// Copyright (c) 2018-2019 SUQA developers
+// Copyright (c) 2018-2019 SIN developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -115,7 +115,7 @@ public:
         consensus.nMinerConfirmationWindow = 2016;
         consensus.devAddressPubKey = "841e6bf56b99a59545da932de2efb23ab93b4f44";
         consensus.devAddress = "SZLafuDjnjqh2tAfTrG9ZAGzbP8HkzNXvB";
-        consensus.cBurnAddress = "SinBurnAddress123456789SuqaXbx3AMC";
+        consensus.cBurnAddress = "SinBurnAddress123456789SinXbx3AMC";
 		strSporkPubKey = "045EB51EB748C6EB7A53531DF71BE998F3E77F4AFF801978D4AED543F21E224E49E10D679E8A99A001E93ADE704F761F2B8822D967F19DC3B50603797F344CBB58";
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -155,7 +155,7 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("000032bd27c65ec42967b7854a49df222abdfae8d9350a61083af8eab2a25e03"));
         assert(genesis.hashMerkleRoot == uint256S("c3555790e3804130514a674f3374b451dce058407dad6b9e82e191e198012680"));
 
-        vSeeds.push_back("suqaexplorer.com");
+        vSeeds.push_back("sinexplorer.com");
         vSeeds.push_back("139.59.139.105");
         vSeeds.push_back("104.248.133.94");
         vSeeds.push_back("104.248.17.3");
@@ -290,7 +290,7 @@ public:
         fRequireStandard = false;
         fMineBlocksOnDemand = false;
 
-        nPoolMaxTransactions = 2;
+	nPoolMaxTransactions = 10;
 
         checkpointData = {
         };

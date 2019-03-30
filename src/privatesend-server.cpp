@@ -351,7 +351,7 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
         TRY_LOCK(cs_main, lockMain);
         CValidationState validationState;
         /*SIN*/mempool.PrioritiseTransaction(hashTx, /*hashTx.ToString(), 1000,*/ 0.1*COIN);
-        if(!lockMain || !AcceptToMemoryPool(mempool, validationState, finalTransaction, nullptr, /*NULL*/nullptr,/* NULL,*/ false, maxTxFee/*, true*/))
+        if(!lockMain || !AcceptToMemoryPool(mempool, validationState, finalTransaction, nullptr, NULL,/* NULL,*/ false, maxTxFee/*, true*/))
         {
             LogPrintf("CPrivateSendServer::CommitFinalTransaction -- AcceptToMemoryPool() error: Transaction not valid\n");
             SetNull();
@@ -453,7 +453,7 @@ void CPrivateSendServer::ChargeFees(CConnman& connman)
         LOCK(cs_main);
 
         CValidationState state;
-        if(!AcceptToMemoryPool(mempool, state, vecOffendersCollaterals[0], nullptr, /*NULL*/nullptr, /*NULL,*/ false, maxTxFee)) {
+        if(!AcceptToMemoryPool(mempool, state, vecOffendersCollaterals[0], nullptr, NULL, /*NULL,*/ false, maxTxFee)) {
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
@@ -485,7 +485,7 @@ void CPrivateSendServer::ChargeRandomFees(CConnman& connman)
         LogPrintf("CPrivateSendServer::ChargeRandomFees -- charging random fees, txCollateral=%s", txCollateral->ToString());
 
         CValidationState state;
-        if(!AcceptToMemoryPool(mempool, state, txCollateral, nullptr, /*NULL*/ nullptr, /*NULL,*/ false, maxTxFee)) {
+        if(!AcceptToMemoryPool(mempool, state, txCollateral, nullptr, NULL, /*NULL,*/ false, maxTxFee)) {
             // should never really happen
             LogPrintf("CPrivateSendServer::ChargeRandomFees -- ERROR: AcceptToMemoryPool failed!\n");
         } else {
@@ -735,7 +735,7 @@ bool CPrivateSendServer::CreateNewSession(const CDarksendAccept& dsa, PoolMessag
     nSessionDenom = dsa.nDenom;
     // nInputCount is not covered by legacy signature, require SPORK_6_NEW_SIGS to activate to use new algo
     // (to make sure nInputCount wasn't modified by some intermediary node)
-    nSessionInputCount = dsa.nInputCount;
+    //nSessionInputCount = sporkManager.IsSporkActive(SPORK_6_NEW_SIGS) ? dsa.nInputCount : 0;
 
     SetState(POOL_STATE_QUEUE);
     nTimeLastSuccessfulStep = GetTime();

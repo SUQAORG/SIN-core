@@ -14,7 +14,7 @@
 #include <util.h>
 #include <validation.h>
 
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <stdint.h>
 

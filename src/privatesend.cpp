@@ -218,7 +218,9 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
 
     for (const auto& txout : txCollateral.vout) {
         nValueOut += txout.nValue;
-        if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
+
+        bool fAllowData = mnpayments.GetMinMasternodePaymentsProto() > 70208;
+        if(!txout.scriptPubKey.IsPayToPublicKeyHash() && !(fAllowData && txout.scriptPubKey.IsUnspendable())) {
             LogPrintf ("CPrivateSend::IsCollateralValid -- Invalid Script, txCollateral=%s", txCollateral.ToString());
             return false;
         }
@@ -245,14 +247,9 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
         LOCK(cs_main);
         CValidationState validationState;
         //if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), false, NULL, NULL, false, maxTxFee, true)) {
-        if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), nullptr, /*NULL*/nullptr, false, maxTxFee)) {
-            //Collateral is in mempool. we are in case: user stop and restart
-            if (validationState.GetRejectCode() == REJECT_DUPLICATE) {
-                return true;
-            } else {
-                LogPrint(BCLog::PRIVATESEND, "CPrivateSend::IsCollateralValid -- didn't pass AcceptToMemoryPool(): %s\n", FormatStateMessage(validationState));
-                return false;
-            }
+        if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), nullptr, NULL, false, maxTxFee)) {
+            LogPrint(BCLog::PRIVATESEND, "CPrivateSend::IsCollateralValid -- didn't pass AcceptToMemoryPool()\n");
+            return false;
         }
     }
 
@@ -261,15 +258,13 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
 
 bool CPrivateSend::IsCollateralAmount(CAmount nInputAmount)
 {
-    /*
     if (mnpayments.GetMinMasternodePaymentsProto() > 70208) {
         // collateral input can be anything between 1x and "max" (including both)
         return (nInputAmount >= GetCollateralAmount() && nInputAmount <= GetMaxCollateralAmount());
     } else { // <= 70208
-    */
         // collateral input can be anything between 2x and "max" (including both)
         return (nInputAmount >= GetCollateralAmount() * 2 && nInputAmount <= GetMaxCollateralAmount());
-    /*}*/
+    }
 }
 
 /*  Create a nice string to show the denominations

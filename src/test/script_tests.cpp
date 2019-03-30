@@ -12,11 +12,11 @@
 #include <script/sign.h>
 #include <util.h>
 #include <utilstrencodings.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 #include <rpc/server.h>
 
 #if defined(HAVE_CONSENSUS_LIB)
-#include <script/suqaconsensus.h>
+#include <script/sinconsensus.h>
 #endif
 
 #include <fstream>

@@ -11,7 +11,7 @@
 #include <random.h>
 #include <script/standard.h>
 #include <script/sign.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 #include <utiltime.h>
 #include <core_io.h>
 #include <keystore.h>

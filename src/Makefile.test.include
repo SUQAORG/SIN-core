@@ -2,10 +2,10 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-bin_PROGRAMS += test/test_suqa
-noinst_PROGRAMS += test/test_suqa_fuzzy
+bin_PROGRAMS += test/test_sin
+noinst_PROGRAMS += test/test_sin_fuzzy
 TEST_SRCDIR = test
-TEST_BINARY=test/test_suqa$(EXEEXT)
+TEST_BINARY=test/test_sin$(EXEEXT)
 
 JSON_TEST_FILES = \
   test/data/base58_encode_decode.json \
@@ -21,11 +21,11 @@ RAW_TEST_FILES =
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
 BITCOIN_TEST_SUITE = \
-  test/test_suqa_main.cpp \
-  test/test_suqa.h \
-  test/test_suqa.cpp
+  test/test_sin_main.cpp \
+  test/test_sin.h \
+  test/test_sin.cpp
 
-# test_suqa binary #
+# test_sin binary #
 BITCOIN_TESTS =\
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \
@@ -106,32 +106,32 @@ BITCOIN_TEST_SUITE += \
   wallet/test/wallet_test_fixture.h
 endif
 
-test_test_suqa_SOURCES = $(BITCOIN_TEST_SUITE) $(BITCOIN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
-test_test_suqa_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(TESTDEFS) $(EVENT_CFLAGS)
-test_test_suqa_LDADD =
+test_test_sin_SOURCES = $(BITCOIN_TEST_SUITE) $(BITCOIN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
+test_test_sin_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(TESTDEFS) $(EVENT_CFLAGS)
+test_test_sin_LDADD =
 if ENABLE_WALLET
-test_test_suqa_LDADD += $(LIBBITCOIN_WALLET)
+test_test_sin_LDADD += $(LIBBITCOIN_WALLET)
 endif
 
-test_test_suqa_LDADD += $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) \
+test_test_sin_LDADD += $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
-test_test_suqa_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_sin_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_suqa_LDADD += $(LIBBITCOIN_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
-test_test_suqa_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+test_test_sin_LDADD += $(LIBBITCOIN_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+test_test_sin_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-test_test_suqa_LDADD += $(ZMQ_LIBS)
+test_test_sin_LDADD += $(ZMQ_LIBS)
 endif
 #
 
-# test_suqa_fuzzy binary #
-test_test_suqa_fuzzy_SOURCES = test/test_suqa_fuzzy.cpp
-test_test_suqa_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-test_test_suqa_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-test_test_suqa_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# test_sin_fuzzy binary #
+test_test_sin_fuzzy_SOURCES = test/test_sin_fuzzy.cpp
+test_test_sin_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+test_test_sin_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_sin_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
-test_test_suqa_fuzzy_LDADD = \
+test_test_sin_fuzzy_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
@@ -143,10 +143,10 @@ test_test_suqa_fuzzy_LDADD = \
   $(LIBBITCOIN_CRYPTO_SHANI) \
   $(LIBSECP256K1)
 
-test_test_suqa_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+test_test_sin_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
-nodist_test_test_suqa_SOURCES = $(GENERATED_TEST_FILES)
+nodist_test_test_sin_SOURCES = $(GENERATED_TEST_FILES)
 
 $(BITCOIN_TESTS): $(GENERATED_TEST_FILES)
 
@@ -154,17 +154,17 @@ CLEAN_BITCOIN_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
 
 CLEANFILES += $(CLEAN_BITCOIN_TEST)
 
-suqa_test: $(TEST_BINARY)
+sin_test: $(TEST_BINARY)
 
-suqa_test_check: $(TEST_BINARY) FORCE
+sin_test_check: $(TEST_BINARY) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
-suqa_test_clean : FORCE
-	rm -f $(CLEAN_BITCOIN_TEST) $(test_test_suqa_OBJECTS) $(TEST_BINARY)
+sin_test_clean : FORCE
+	rm -f $(CLEAN_BITCOIN_TEST) $(test_test_sin_OBJECTS) $(TEST_BINARY)
 
 check-local: $(BITCOIN_TESTS:.cpp=.cpp.test)
-	@echo "Running test/util/suqa-util-test.py..."
-	$(PYTHON) $(top_builddir)/test/util/suqa-util-test.py
+	@echo "Running test/util/sin-util-test.py..."
+	$(PYTHON) $(top_builddir)/test/util/sin-util-test.py
 	@echo "Running test/util/rpcauth-test.py..."
 	$(PYTHON) $(top_builddir)/test/util/rpcauth-test.py
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 check

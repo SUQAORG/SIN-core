@@ -4,7 +4,7 @@
 
 #include <streams.h>
 #include <support/allocators/zeroafterfree.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <boost/test/unit_test.hpp>
 

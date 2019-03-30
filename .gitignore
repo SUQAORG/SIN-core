@@ -2,11 +2,11 @@
 
 *.exe
 src/bitcoin
-src/suqad
-src/suqa-cli
-src/suqa-tx
-src/test/test_suqa
-src/qt/test/test_suqa-qt
+src/sind
+src/sin-cli
+src/sin-tx
+src/test/test_sin
+src/qt/test/test_sin-qt
 
 # autoreconf
 Makefile.in
@@ -29,8 +29,8 @@ config.log
 config.status
 configure
 libtool
-src/config/suqa-config.h
-src/config/suqa-config.h.in
+src/config/sin-config.h
+src/config/sin-config.h.in
 src/config/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
@@ -77,8 +77,8 @@ src/qt/test/moc*.cpp
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-suqa-qt
-suqa-Qt.app
+sin-qt
+sin-Qt.app
 
 # Unit-tests
 Makefile.test
@@ -116,7 +116,8 @@ qa/pull-tester/test.*/*
 
 /doc/doxygen/
 
-libsuqaconsensus.pc
-src/bench/bench_suqa
-src/test/test_suqa_fuzzy
+libsinconsensus.pc
+src/bench/bench_sin
+src/test/test_sin_fuzzy
 test/config.ini
+/.project

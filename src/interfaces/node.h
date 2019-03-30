@@ -31,7 +31,7 @@ namespace interfaces {
 class Handler;
 class Wallet;
 
-//! Top-level interface for a bitcoin node (suqad process).
+//! Top-level interface for a bitcoin node (sind process).
 class Node
 {
 public:

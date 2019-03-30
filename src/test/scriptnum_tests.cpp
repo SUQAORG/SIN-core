@@ -4,7 +4,7 @@
 
 #include <test/scriptnum10.h>
 #include <script/script.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <boost/test/unit_test.hpp>
 #include <limits.h>

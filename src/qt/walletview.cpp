@@ -6,7 +6,7 @@
 
 #include <qt/addressbookpage.h>
 #include <qt/askpassphrasedialog.h>
-#include <qt/suqagui.h>
+#include <qt/singui.h>
 #include <qt/clientmodel.h>
 #include <qt/guiutil.h>
 // Dash

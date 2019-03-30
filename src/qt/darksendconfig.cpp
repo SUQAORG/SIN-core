@@ -1,7 +1,7 @@
 #include <qt/darksendconfig.h>
 #include <qt/forms/ui_darksendconfig.h>
 
-#include <qt/suqaunits.h>
+#include <qt/sinunits.h>
 #include <qt/guiconstants.h>
 #include <qt/optionsmodel.h>
 #include <privatesend-client.h>

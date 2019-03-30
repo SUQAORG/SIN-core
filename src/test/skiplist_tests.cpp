@@ -4,7 +4,7 @@
 
 #include <chain.h>
 #include <util.h>
-#include <test/test_suqa.h>
+#include <test/test_sin.h>
 
 #include <vector>
 

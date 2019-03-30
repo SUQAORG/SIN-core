@@ -24,36 +24,36 @@ BITCOIN_INCLUDES=-I$(builddir) $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFL
 BITCOIN_INCLUDES += -I$(srcdir)/secp256k1/include
 BITCOIN_INCLUDES += $(UNIVALUE_CFLAGS)
 
-LIBBITCOIN_SERVER=libsuqa_server.a
-LIBBITCOIN_COMMON=libsuqa_common.a
-LIBBITCOIN_CONSENSUS=libsuqa_consensus.a
-LIBBITCOIN_CLI=libsuqa_cli.a
-LIBBITCOIN_UTIL=libsuqa_util.a
-LIBBITCOIN_CRYPTO_BASE=crypto/libsuqa_crypto_base.a
+LIBBITCOIN_SERVER=libsin_server.a
+LIBBITCOIN_COMMON=libsin_common.a
+LIBBITCOIN_CONSENSUS=libsin_consensus.a
+LIBBITCOIN_CLI=libsin_cli.a
+LIBBITCOIN_UTIL=libsin_util.a
+LIBBITCOIN_CRYPTO_BASE=crypto/libsin_crypto_base.a
 LIBBITCOINQT=qt/libbitcoinqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
 if ENABLE_ZMQ
-LIBBITCOIN_ZMQ=libsuqa_zmq.a
+LIBBITCOIN_ZMQ=libsin_zmq.a
 endif
 if BUILD_BITCOIN_LIBS
-LIBBITCOINCONSENSUS=libsuqaconsensus.la
+LIBBITCOINCONSENSUS=libsinconsensus.la
 endif
 if ENABLE_WALLET
-LIBBITCOIN_WALLET=libsuqa_wallet.a
+LIBBITCOIN_WALLET=libsin_wallet.a
 endif
 
 LIBBITCOIN_CRYPTO= $(LIBBITCOIN_CRYPTO_BASE)
 if ENABLE_SSE41
-LIBBITCOIN_CRYPTO_SSE41 = crypto/libsuqa_crypto_sse41.a
+LIBBITCOIN_CRYPTO_SSE41 = crypto/libsin_crypto_sse41.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_SSE41)
 endif
 if ENABLE_AVX2
-LIBBITCOIN_CRYPTO_AVX2 = crypto/libsuqa_crypto_avx2.a
+LIBBITCOIN_CRYPTO_AVX2 = crypto/libsin_crypto_avx2.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_AVX2)
 endif
 if ENABLE_SHANI
-LIBBITCOIN_CRYPTO_SHANI = crypto/libsuqa_crypto_shani.a
+LIBBITCOIN_CRYPTO_SHANI = crypto/libsin_crypto_shani.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_SHANI)
 endif
 
@@ -80,11 +80,11 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += suqad
+  bin_PROGRAMS += sind
 endif
 
 if BUILD_BITCOIN_UTILS
-  bin_PROGRAMS += suqa-cli suqa-tx
+  bin_PROGRAMS += sin-cli sin-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
@@ -241,12 +241,12 @@ obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
 	@$(top_srcdir)/share/genbuild.sh "$(abs_top_builddir)/src/obj/build.h" \
 	  "$(abs_top_srcdir)"
-libsuqa_util_a-clientversion.$(OBJEXT): obj/build.h
+libsin_util_a-clientversion.$(OBJEXT): obj/build.h
 
-# server: shared between suqad and bitcoin-qt
-libsuqa_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
-libsuqa_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_server_a_SOURCES = \
+# server: shared between sind and bitcoin-qt
+libsin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
+libsin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   bloom.cpp \
@@ -291,7 +291,7 @@ libsuqa_server_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 # dash server
-libsuqa_server_a_SOURCES += \
+libsin_server_a_SOURCES += \
   activemasternode.cpp \
   dsnotificationinterface.cpp \
   governance.cpp \
@@ -318,9 +318,9 @@ libsuqa_server_a_SOURCES += \
 
 
 if ENABLE_ZMQ
-libsuqa_zmq_a_CPPFLAGS = $(BITCOIN_INCLUDES) $(ZMQ_CFLAGS)
-libsuqa_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_zmq_a_SOURCES = \
+libsin_zmq_a_CPPFLAGS = $(BITCOIN_INCLUDES) $(ZMQ_CFLAGS)
+libsin_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_zmq_a_SOURCES = \
   zmq/zmqabstractnotifier.cpp \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp \
@@ -328,11 +328,11 @@ libsuqa_zmq_a_SOURCES = \
 endif
 
 
-# wallet: shared between suqad and bitcoin-qt, but only linked
+# wallet: shared between sind and bitcoin-qt, but only linked
 # when wallet enabled
-libsuqa_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libsuqa_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_wallet_a_SOURCES = \
+libsin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libsin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_wallet_a_SOURCES = \
   interfaces/wallet.cpp \
   wallet/coincontrol.cpp \
   wallet/crypter.cpp \
@@ -349,15 +349,15 @@ libsuqa_wallet_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 # dash wallet
-libsuqa_wallet_a_SOURCES += \
+libsin_wallet_a_SOURCES += \
   keepass.cpp \
   privatesend-client.cpp \
   privatesend-util.cpp
 
 # crypto primitives library
-crypto_libsuqa_crypto_base_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libsuqa_crypto_base_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libsuqa_crypto_base_a_SOURCES = \
+crypto_libsin_crypto_base_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libsin_crypto_base_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libsin_crypto_base_a_SOURCES = \
   crypto/aes.cpp \
   crypto/aes.h \
   crypto/chacha20.h \
@@ -422,31 +422,31 @@ crypto_libsuqa_crypto_base_a_SOURCES = \
 
 
 if USE_ASM
-crypto_libsuqa_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
+crypto_libsin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
 endif
 
-crypto_libsuqa_crypto_sse41_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libsuqa_crypto_sse41_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libsuqa_crypto_sse41_a_CXXFLAGS += $(SSE41_CXXFLAGS)
-crypto_libsuqa_crypto_sse41_a_CPPFLAGS += -DENABLE_SSE41
-crypto_libsuqa_crypto_sse41_a_SOURCES = crypto/sha256_sse41.cpp
+crypto_libsin_crypto_sse41_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libsin_crypto_sse41_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libsin_crypto_sse41_a_CXXFLAGS += $(SSE41_CXXFLAGS)
+crypto_libsin_crypto_sse41_a_CPPFLAGS += -DENABLE_SSE41
+crypto_libsin_crypto_sse41_a_SOURCES = crypto/sha256_sse41.cpp
 
-crypto_libsuqa_crypto_avx2_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libsuqa_crypto_avx2_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libsuqa_crypto_avx2_a_CXXFLAGS += $(AVX2_CXXFLAGS)
-crypto_libsuqa_crypto_avx2_a_CPPFLAGS += -DENABLE_AVX2
-crypto_libsuqa_crypto_avx2_a_SOURCES = crypto/sha256_avx2.cpp
+crypto_libsin_crypto_avx2_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libsin_crypto_avx2_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libsin_crypto_avx2_a_CXXFLAGS += $(AVX2_CXXFLAGS)
+crypto_libsin_crypto_avx2_a_CPPFLAGS += -DENABLE_AVX2
+crypto_libsin_crypto_avx2_a_SOURCES = crypto/sha256_avx2.cpp
 
-crypto_libsuqa_crypto_shani_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libsuqa_crypto_shani_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libsuqa_crypto_shani_a_CXXFLAGS += $(SHANI_CXXFLAGS)
-crypto_libsuqa_crypto_shani_a_CPPFLAGS += -DENABLE_SHANI
-crypto_libsuqa_crypto_shani_a_SOURCES = crypto/sha256_shani.cpp
+crypto_libsin_crypto_shani_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libsin_crypto_shani_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libsin_crypto_shani_a_CXXFLAGS += $(SHANI_CXXFLAGS)
+crypto_libsin_crypto_shani_a_CPPFLAGS += -DENABLE_SHANI
+crypto_libsin_crypto_shani_a_SOURCES = crypto/sha256_shani.cpp
 
 # consensus: shared between all executables that validate any consensus rules.
-libsuqa_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libsuqa_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_consensus_a_SOURCES = \
+libsin_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libsin_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_consensus_a_SOURCES = \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
@@ -463,7 +463,7 @@ libsuqa_consensus_a_SOURCES = \
   primitives/transaction.h \
   pubkey.cpp \
   pubkey.h \
-  script/suqaconsensus.cpp \
+  script/sinconsensus.cpp \
   script/interpreter.cpp \
   script/interpreter.h \
   script/script.cpp \
@@ -479,10 +479,10 @@ libsuqa_consensus_a_SOURCES = \
   utilstrencodings.h \
   version.h
 
-# common: shared between suqad, and bitcoin-qt and non-server tools
-libsuqa_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libsuqa_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_common_a_SOURCES = \
+# common: shared between sind, and bitcoin-qt and non-server tools
+libsin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libsin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
   chainparams.cpp \
@@ -508,9 +508,9 @@ libsuqa_common_a_SOURCES = \
 # util: shared between all executables.
 # This library *must* be included to make sure that the glibc
 # backward-compatibility objects and their sanity checks are linked.
-libsuqa_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libsuqa_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_util_a_SOURCES = \
+libsin_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libsin_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_util_a_SOURCES = \
   support/lockedpool.cpp \
   chainparamsbase.cpp \
   clientversion.cpp \
@@ -533,31 +533,31 @@ libsuqa_util_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 if GLIBC_BACK_COMPAT
-libsuqa_util_a_SOURCES += compat/glibc_compat.cpp
+libsin_util_a_SOURCES += compat/glibc_compat.cpp
 AM_LDFLAGS += $(COMPAT_LDFLAGS)
 endif
 
-# cli: shared between suqa-cli and bitcoin-qt
-libsuqa_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libsuqa_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libsuqa_cli_a_SOURCES = \
+# cli: shared between sin-cli and bitcoin-qt
+libsin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libsin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsin_cli_a_SOURCES = \
   rpc/client.cpp \
   $(BITCOIN_CORE_H)
 
-nodist_libsuqa_util_a_SOURCES = $(srcdir)/obj/build.h
+nodist_libsin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
-# suqad binary #
-suqad_SOURCES = suqad.cpp
-suqad_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-suqad_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-suqad_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# sind binary #
+sind_SOURCES = sind.cpp
+sind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+sind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+sind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-suqad_SOURCES += suqad-res.rc
+sind_SOURCES += sind-res.rc
 endif
 
-suqad_LDADD = \
+sind_LDADD = \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \
@@ -571,38 +571,38 @@ suqad_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-suqad_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+sind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
-# suqa-cli binary #
-suqa_cli_SOURCES = suqa-cli.cpp
-suqa_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-suqa_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-suqa_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# sin-cli binary #
+sin_cli_SOURCES = sin-cli.cpp
+sin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+sin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+sin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-suqa_cli_SOURCES += suqa-cli-res.rc
+sin_cli_SOURCES += sin-cli-res.rc
 endif
 
-suqa_cli_LDADD = \
+sin_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-suqa_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+sin_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
-# suqa-tx binary #
-suqa_tx_SOURCES = suqa-tx.cpp
-suqa_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-suqa_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-suqa_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# sin-tx binary #
+sin_tx_SOURCES = sin-tx.cpp
+sin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+sin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+sin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-suqa_tx_SOURCES += suqa-tx-res.rc
+sin_tx_SOURCES += sin-tx-res.rc
 endif
 
-suqa_tx_LDADD = \
+sin_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
@@ -610,22 +610,22 @@ suqa_tx_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-suqa_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+sin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
 # bitcoinconsensus library #
 if BUILD_BITCOIN_LIBS
-include_HEADERS = script/suqaconsensus.h
-libsuqaconsensus_la_SOURCES = $(crypto_libsuqa_crypto_base_a_SOURCES) $(libsuqa_consensus_a_SOURCES)
+include_HEADERS = script/sinconsensus.h
+libsinconsensus_la_SOURCES = $(crypto_libsin_crypto_base_a_SOURCES) $(libsin_consensus_a_SOURCES)
 
 if GLIBC_BACK_COMPAT
-  libsuqaconsensus_la_SOURCES += compat/glibc_compat.cpp
+  libsinconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
-libsuqaconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libsuqaconsensus_la_LIBADD = $(LIBSECP256K1) $(CRYPTO_LIBS)
-libsuqaconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL $(SSL_CFLAGS)
-libsuqaconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libsinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
+libsinconsensus_la_LIBADD = $(LIBSECP256K1) $(CRYPTO_LIBS)
+libsinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL $(SSL_CFLAGS)
+libsinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
 #
@@ -655,12 +655,12 @@ CLEANFILES += obj/build.h
 EXTRA_DIST = $(CTAES_DIST)
 
 
-config/suqa-config.h: config/stamp-h1
+config/sin-config.h: config/stamp-h1
 	@$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-config/stamp-h1: $(top_srcdir)/$(subdir)/config/suqa-config.h.in $(top_builddir)/config.status
+config/stamp-h1: $(top_srcdir)/$(subdir)/config/sin-config.h.in $(top_builddir)/config.status
 	$(AM_V_at)$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-$(top_srcdir)/$(subdir)/config/suqa-config.h.in:  $(am__configure_deps)
-	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/suqa-config.h.in
+$(top_srcdir)/$(subdir)/config/sin-config.h.in:  $(am__configure_deps)
+	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/sin-config.h.in
 
 clean-local:
 	-$(MAKE) -C secp256k1 clean

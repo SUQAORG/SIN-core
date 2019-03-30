@@ -2,17 +2,17 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-bin_PROGRAMS += bench/bench_suqa
+bin_PROGRAMS += bench/bench_sin
 BENCH_SRCDIR = bench
-BENCH_BINARY = bench/bench_suqa$(EXEEXT)
+BENCH_BINARY = bench/bench_sin$(EXEEXT)
 
 RAW_BENCH_FILES = \
   bench/data/block413567.raw
 GENERATED_BENCH_FILES = $(RAW_BENCH_FILES:.raw=.raw.h)
 
-bench_bench_suqa_SOURCES = \
+bench_bench_sin_SOURCES = \
   $(RAW_BENCH_FILES) \
-  bench/bench_suqa.cpp \
+  bench/bench_sin.cpp \
   bench/bench.cpp \
   bench/bench.h \
   bench/block_assemble.cpp \
@@ -30,11 +30,11 @@ bench_bench_suqa_SOURCES = \
   bench/lockedpool.cpp \
   bench/prevector.cpp
 
-nodist_bench_bench_suqa_SOURCES = $(GENERATED_BENCH_FILES)
+nodist_bench_bench_sin_SOURCES = $(GENERATED_BENCH_FILES)
 
-bench_bench_suqa_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
-bench_bench_suqa_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-bench_bench_suqa_LDADD = \
+bench_bench_sin_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
+bench_bench_sin_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bench_bench_sin_LDADD = \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
@@ -48,15 +48,15 @@ bench_bench_suqa_LDADD = \
   $(LIBUNIVALUE)
 
 if ENABLE_ZMQ
-bench_bench_suqa_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+bench_bench_sin_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
 
 if ENABLE_WALLET
-bench_bench_suqa_SOURCES += bench/coin_selection.cpp
+bench_bench_sin_SOURCES += bench/coin_selection.cpp
 endif
 
-bench_bench_suqa_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-bench_bench_suqa_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+bench_bench_sin_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+bench_bench_sin_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 CLEAN_BITCOIN_BENCH = bench/*.gcda bench/*.gcno $(GENERATED_BENCH_FILES)
 
@@ -64,13 +64,13 @@ CLEANFILES += $(CLEAN_BITCOIN_BENCH)
 
 bench/checkblock.cpp: bench/data/block413567.raw.h
 
-suqa_bench: $(BENCH_BINARY)
+sin_bench: $(BENCH_BINARY)
 
 bench: $(BENCH_BINARY) FORCE
 	$(BENCH_BINARY)
 
-suqa_bench_clean : FORCE
-	rm -f $(CLEAN_BITCOIN_BENCH) $(bench_bench_suqa_OBJECTS) $(BENCH_BINARY)
+sin_bench_clean : FORCE
+	rm -f $(CLEAN_BITCOIN_BENCH) $(bench_bench_sin_OBJECTS) $(BENCH_BINARY)
 
 %.raw.h: %.raw
 	@$(MKDIR_P) $(@D)

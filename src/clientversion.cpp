@@ -9,10 +9,10 @@
 
 /**
  * Name of client reported in the 'version' message. Report the same name
- * for both suqad and bitcoin-qt, to make it harder for attackers to
+ * for both sind and bitcoin-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("SUQA");
+const std::string CLIENT_NAME("SIN");
 
 /**
  * Client version number
