@@ -74,18 +74,17 @@ done
 
 wait
 
-#CORES=$(getconf _NPROCESSORS_ONLN)
-CORES=4
+CORES=$(getconf _NPROCESSORS_ONLN)
 cd $BASE_DIR
-#./autogen.sh
+./autogen.sh
 
 for i in "${hosts[@]}"
 do
 	HOST=${i}_HOST
 	CONF=${i}_CONF
 	MAKE=${i}_MAKE
-	#CONFIG_SITE=$(pwd)/depends/${!HOST}/share/config.site ./configure --disable-tests --disable-bench --prefix=$(pwd)/depends/${!HOST} ${!CONF} > /dev/null
-	#make clean > /dev/null
+	CONFIG_SITE=$(pwd)/depends/${!HOST}/share/config.site ./configure --disable-tests --disable-bench --prefix=$(pwd)/depends/${!HOST} ${!CONF} > /dev/null
+	make clean > /dev/null
 	make deploy -j$CORES ${!MAKE}
 done
 

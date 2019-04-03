@@ -121,3 +121,4 @@ src/bench/bench_sin
 src/test/test_sin_fuzzy
 test/config.ini
 /.project
+/depends/MacOSX*.tar.xz

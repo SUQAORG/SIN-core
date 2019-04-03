@@ -98,7 +98,7 @@ SIN-LIN-PACKAGE: all-recursive
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(SIND_BIN) $(STG_DIR) | true
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(SIN_CLI_BIN) $(STG_DIR) | true
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(SIN_TX_BIN) $(STG_DIR) | true
-	tar --ignore-failed-read -c --lzma -f $(PACK_NAME).tar.lzma -C $(STG_DIR) $(BITCOIN_DAEMON_NAME) $(BITCOIN_TX_NAME) $(BITCOIN_GUI_NAME) $(BITCOIN_TX_NAME)
+	tar --ignore-failed-read -c --lzma -f $(PACK_NAME).tar.lzma -C $(STG_DIR) $(BITCOIN_DAEMON_NAME) $(BITCOIN_TX_NAME) $(BITCOIN_GUI_NAME) $(BITCOIN_TX_NAME) $(BITCOIN_CLI_NAME)
 
 $(OSX_APP)/Contents/PkgInfo:
 	$(MKDIR_P) $(@D)
