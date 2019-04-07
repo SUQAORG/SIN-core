@@ -911,6 +911,7 @@ public:
      */
     const std::string& GetName() const { return m_name; }
 
+    std::shared_ptr<CWallet> GetMainWallet();
     void LoadKeyPool(int64_t nIndex, const CKeyPool &keypool) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void MarkPreSplitKeys();
 

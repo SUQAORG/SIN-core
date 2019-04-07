@@ -8,6 +8,7 @@
 #include <qt/forms/ui_masternodelist.h>
 
 #include <activemasternode.h>
+#include <interfaces/wallet.h>
 #include <qt/clientmodel.h>
 #include <qt/guiutil.h>
 #include <init.h>
@@ -19,6 +20,8 @@
 #include <wallet/wallet.h>
 #include <qt/walletmodel.h>
 
+#include <QDialog>
+#include <QInputDialog>
 #include <QTimer>
 #include <QMessageBox>
 
@@ -390,36 +393,88 @@ void MasternodeList::on_startAllButton_clicked()
     StartAll();
 }
 
-void MasternodeList::on_startMissingButton_clicked()
+void MasternodeList::on_startAutoSINButton_clicked()
 {
+    std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
+    CWallet * const pwallet = (wallets.size() > 0) ? wallets[0].get() : nullptr;
 
-    if(!masternodeSync.IsMasternodeListSynced()) {
-        QMessageBox::critical(this, tr("Command is not available right now"),
-            tr("You can't use this command until masternode list is synced"));
-        return;
+    bool ok;
+    setStyleSheet( "QDialog{ background-color: #0d1827; }");
+    QString vpsip = QInputDialog::getText(this, tr("SINnode"), tr("Enter VPS address:"), QLineEdit::Normal, "", &ok);
+
+    if (!ok)
+       return;
+    // quick input parsing
+    int vpsiplen = strlen(vpsip.toUtf8().constData());
+    if (vpsiplen < 7 || vpsiplen > 16)
+       return;
+    // char type parsing
+    for (int i=0; i<vpsiplen; i++)
+       if ((vpsip[i] < 46 || vpsip[i] > 57) || vpsip[i] == 47)
+          return;
+
+    // generate masternode key
+    CKey secret;
+    secret.MakeNewKey(false);
+
+    // find suitable collateral outputs
+    std::vector<COutput> vPossibleCoins;
+    LOCK2(cs_main, pwallet->cs_wallet);
+    pwallet->AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_MASTERNODE_COLLATERAL);
+
+    int nCollatVout;
+    char nCollatHash[65];
+    bool foundCollat = false;
+    for (COutput& out : vPossibleCoins) {
+      if (!foundCollat) {
+        strcpy(nCollatHash, out.tx->GetHash().ToString().c_str());
+        nCollatVout = out.i;
+        foundCollat = true;
+      }
     }
 
-    // Display message box
-    QMessageBox::StandardButton retval = QMessageBox::question(this,
-        tr("Confirm missing masternodes start"),
-        tr("Are you sure you want to start MISSING masternodes?"),
-        QMessageBox::Yes | QMessageBox::Cancel,
-        QMessageBox::Cancel);
+    // find suitable burntx
+    int burnVout;
+    char burnTxid[65];
+    bool foundBurn = false;
 
-    if(retval != QMessageBox::Yes) return;
-
-    WalletModel::EncryptionStatus encStatus = walletModel->getEncryptionStatus();
-
-    if(encStatus == walletModel->Locked || encStatus == walletModel->UnlockedForMixingOnly) {
-        WalletModel::UnlockContext ctx(walletModel->requestUnlock());
-
-        if(!ctx.isValid()) return; // Unlock wallet was cancelled
-
-        StartAll("start-missing");
-        return;
+    for (map<uint256, CWalletTx>::const_iterator it = pwallet->mapWallet.begin(); it != pwallet->mapWallet.end(); ++it) {
+      const uint256* txid = &(*it).first;
+      const CWalletTx* pcoin = &(*it).second;
+      for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+        if ((strstr(pcoin->tx->vout[i].scriptPubKey.ToString().c_str(),Params().GetConsensus().cBurnAddressPubKey)!=NULL) &&
+          (pcoin->tx->vout[i].nValue == Params().GetConsensus().nMasternodeBurnSINNODE_1 * COIN ||
+           pcoin->tx->vout[i].nValue == Params().GetConsensus().nMasternodeBurnSINNODE_5 * COIN ||
+           pcoin->tx->vout[i].nValue == Params().GetConsensus().nMasternodeBurnSINNODE_10 * COIN)) {
+           if (!foundBurn) {
+             strcpy(burnTxid, txid->ToString().c_str());
+             burnVout = i;
+             foundBurn = true;
+           }
+        }
+      }
     }
 
-    StartAll("start-missing");
+    if (foundCollat && foundBurn) {
+
+       char mnconfig[224];
+       memset(mnconfig,'\0',224);
+       sprintf(mnconfig,"mn01 %s:%d %s %s %d %s %d\n", vpsip.toUtf8().constData(), Params().GetDefaultPort(), EncodeSecret(secret).c_str(), nCollatHash, nCollatVout, burnTxid, burnVout);
+
+       // debug
+       LogPrintf("wrote:\n%s\n", mnconfig);
+
+       // parts taken from phore's masternode tool (https://github.com/phoreproject/Phore/pull/128)
+       boost::filesystem::path pathMasternodeConfigFile = GetMasternodeConfigFile();
+       boost::filesystem::ifstream streamConfig(pathMasternodeConfigFile);
+       FILE* configFile = fopen(pathMasternodeConfigFile.string().c_str(), "w");
+       std::string strHeader = "# Masternode config file\n"
+                               "# Format: alias IP:port masternodeprivkey collateral_output_txid collateral_output_index burnfund_output_txid burnfund_output_index\n"
+                               "# mn01 127.0.0.1:20980 7RVuQhi45vfazyVtskTRLBgNuSrYGecS5zj2xERaooFVnWKKjhS b7ed8c1396cf57ac78d756186b6022d3023fd2f1c338b7fbae42d342fdd7070a 0 563d9434e816b3e8ffc5347c6b8db07509de6068f6759f21a16be5d92b7e3111 1\n";
+       fwrite(strHeader.c_str(), std::strlen(strHeader.c_str()), 1, configFile);
+       fwrite(mnconfig, strlen(mnconfig), 1, configFile);
+       fclose(configFile);
+    }
 }
 
 void MasternodeList::on_tableWidgetMyMasternodes_itemSelectionChanged()

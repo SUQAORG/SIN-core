@@ -433,4 +433,5 @@ std::string IntVersionToString(uint32_t nVersion);
 std::string SafeIntVersionToString(uint32_t nVersion);
 //
 
+boost::filesystem::path GetMasternodeConfigFile();
 #endif // BITCOIN_UTIL_H

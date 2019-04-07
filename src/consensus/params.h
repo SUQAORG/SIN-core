@@ -94,6 +94,7 @@ struct Params {
     const char *devAddressPubKey;
     const char *devAddress;
     const char *cBurnAddress;
+    const char *cBurnAddressPubKey;
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargeting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.
