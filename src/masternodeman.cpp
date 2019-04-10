@@ -206,15 +206,13 @@ void CMasternodeMan::CheckAndRemoveBurnFundNotUniqueNode(CConnman& connman)
                     }
             }
             //Ban node
-            /*
             std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
             for (auto pmn : vpMasternodesToBan) {
                 CAddress add = CAddress(pmn->addr, NODE_NETWORK);
                 for (auto* pnode : vNodesCopy) {
-                    if (pnode->addr == add) { Misbehaving(pnode->GetId(), 100, "invalid sinnode"); }
+                    if (pnode->addr == add) { MisbehavingBulk(pnode->GetId(), 100, "invalid sinnode"); }
                 }
             }
-            */
     }
 }
 

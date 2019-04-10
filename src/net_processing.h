@@ -27,6 +27,7 @@ static const unsigned int DEFAULT_BLOCK_RECONSTRUCTION_EXTRA_TXN = 100;
 /** Unregister a network node */
 ///void UnregisterNodeSignals(CNodeSignals& nodeSignals);
 void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+void MisbehavingBulk(NodeId nodeid, int howmuch, const std::string& message="");
 //
 
 /** Default for BIP61 (sending reject messages) */

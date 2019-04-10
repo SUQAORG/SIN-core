@@ -834,6 +834,12 @@ void Misbehaving(NodeId pnode, int howmuch, const std::string& message) EXCLUSIV
         LogPrint(BCLog::NET, "%s: %s peer=%d (%d -> %d)%s\n", __func__, state->name, pnode, state->nMisbehavior-howmuch, state->nMisbehavior, message_prefixed);
 }
 
+void MisbehavingBulk(NodeId pnode, int howmuch, const std::string& message)
+{
+    Misbehaving(pnode, howmuch, message);
+    return;
+}
+
 
 
 
