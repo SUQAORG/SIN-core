@@ -7,6 +7,8 @@
 
 #include <key.h> // for typr int65_t
 #include <validation.h>
+#include <script/standard.h>
+#include <key_io.h>
 
 using namespace std;
 
@@ -33,6 +35,10 @@ struct infinitynode_info_t
     int nExpireHeight = -1;
     int nLastRewardHeight = -1;
     int nNextRewardHeight = -1;
+    CAmount nBurnValue = 0;
+    int nSINType = 0;
+    std::string collateralAddress = "";
+    CScript scriptPubKey{};
 };
 
 class CInfinitynode : public infinitynode_info_t
@@ -49,13 +55,47 @@ public:
     CInfinitynode(const CInfinitynode& other);
     CInfinitynode(int nProtocolVersionIn, COutPoint outpointBurnFund);
 
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        LOCK(cs);
+        READWRITE(vinBurnFund);
+        READWRITE(sigTime);
+        READWRITE(nProtocolVersion);
+        READWRITE(nHeight);
+        READWRITE(nExpireHeight);
+        READWRITE(nLastRewardHeight);
+        READWRITE(nNextRewardHeight);
+        READWRITE(nBurnValue);
+        READWRITE(nSINType);
+        READWRITE(collateralAddress);
+        READWRITE(scriptPubKey);
+    }
+
+    void setHeight(int nInHeight){nHeight = nInHeight; nExpireHeight=nInHeight + 720*365;}
+    void setCollateralAddress(std::string address) {
+        collateralAddress = address;
+        CTxDestination dest = DecodeDestination(address);
+        scriptPubKey = GetScriptForDestination(dest);
+    }
+    void setBurnValue(CAmount burnFund){nBurnValue = burnFund;}
+    void setSINType(int SINType){nSINType = SINType;}
+    void setLastRewardHeight(int nReward){nLastRewardHeight = nReward;}
+
+    std::string getCollateralAddress(){return collateralAddress;}
+    CScript getScriptPublicKey(){return scriptPubKey;}
+    int getHeight(){return nHeight;}
+    int getExpireHeight(){return nExpireHeight ;}
+    int getRoundBurnValue(){CAmount nBurnAmount = nBurnValue / COIN + 1; return nBurnAmount;}
+    int getSINType(){return nSINType;}
+    int getLastRewardHeight(){return nLastRewardHeight;};
+
     CInfinitynode& operator=(CInfinitynode const& from)
     {
         static_cast<infinitynode_info_t&>(*this)=from;
         nHeight = from.nHeight;
         nExpireHeight = from.nExpireHeight;
-        nLastRewardHeight = from.nLastRewardHeight;
-        nNextRewardHeight = from.nNextRewardHeight;
         return *this;
     }
 };

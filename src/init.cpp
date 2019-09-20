@@ -74,7 +74,9 @@
 #include <privatesend-server.h>
 #include <spork.h>
 #include <sporkdb.h>
-
+//SIN
+#include <infinitynodeman.h>
+//
 
 #ifndef WIN32
 #include <signal.h>
@@ -267,6 +269,8 @@ void Shutdown()
     flatdb3.Dump(governance);
     CFlatDB<CNetFulfilledRequestManager> flatdb4("netfulfilled.dat", "magicFulfilledCache");
     flatdb4.Dump(netfulfilledman);
+    CFlatDB<CInfinitynodeMan> flatdb5("infinitynode.dat", "magicInfinityNodeCache");
+    flatdb5.Dump(infnodeman);
     //
 
     if (fFeeEstimatesInitialized)
@@ -1911,6 +1915,12 @@ bool AppInitMain()
         return InitError(_("Failed to load fulfilled requests cache from") + "\n" + (pathDB / strDBName).string());
     }
 
+    strDBName = "infinitynode.dat";
+    uiInterface.InitMessage(_("Loading infinitynode cache..."));
+    CFlatDB<CInfinitynodeMan> flatdb5(strDBName, "magicInfinityNodeCache");
+    if(!flatdb5.Load(infnodeman)) {
+        return InitError(_("Failed to load infinitynode cache from") + "\n" + (pathDB / strDBName).string());
+    }
     // ********************************************************* Step 11c: update block tip in Dash modules
 
     // force UpdatedBlockTip to initialize nCachedBlockHeight for DS, MN payments and budgets

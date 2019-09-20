@@ -13,6 +13,7 @@
 #include <masternode-sync.h>
 #include <masternodeconfig.h>
 #include <masternodeman.h>
+#include <infinitynodeman.h>
 #ifdef ENABLE_WALLET
 #include <privatesend-client.h>
 #include <wallet/coincontrol.h>
@@ -213,6 +214,15 @@ UniValue masternode(const JSONRPCRequest& request)
 
         if (strMode == "enabled")
             return mnodeman.CountEnabled();
+
+        if (strMode == "inf") {
+            CBlockIndex* pindex = NULL;
+            {
+                LOCK(cs_main);
+                pindex = chainActive.Tip();
+            }
+            return infnodeman.buildInfinitynodeList(pindex->nHeight);
+        }
 
         int nCount;
         masternode_info_t mnInfo;
@@ -888,6 +898,98 @@ UniValue sentinelping(const JSONRPCRequest& request)
     return true;
 }
 
+UniValue infinitynode(const JSONRPCRequest& request)
+{
+#ifdef ENABLE_WALLET
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet* const pwallet = wallet.get();
+#endif // ENABLE_WALLET
+
+    std::string strCommand;
+    if (request.params.size() >= 1) {
+        strCommand = request.params[0].get_str();
+    }
+	
+    if (request.fHelp  ||
+        (strCommand != "build-list" && strCommand != "show-lastscan" && strCommand != "show-infos" && strCommand != "stats"
+                                    && strCommand != "show-lastpaid"))
+            throw std::runtime_error(
+                "infinitynode \"command\"...\n"
+                "Set of commands to execute masternode related actions\n"
+                "\nArguments:\n"
+                "1. \"command\"        (string or set of strings, required) The command to execute\n"
+                "\nAvailable commands:\n"
+                "  build-list   - Build list of all infinitynode from block height 165000 to last block\n"
+                );
+
+    UniValue obj(UniValue::VOBJ);
+
+    if (strCommand == "build-list")
+    {
+        CBlockIndex* pindex = NULL;
+        {
+                LOCK(cs_main);
+                pindex = chainActive.Tip();
+        }
+        if (request.params.size() > 2)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Too many parameters");
+
+        if (request.params.size() == 1)
+            return infnodeman.buildInfinitynodeList(pindex->nHeight);
+
+        std::string strMode = request.params[1].get_str();
+
+        if (strMode == "lastscan")
+            return infnodeman.getLastScan();
+    }
+
+    if (strCommand == "build-lastpaid")
+    {
+        CBlockIndex* pindex = NULL;
+        {
+                LOCK(cs_main);
+                pindex = chainActive.Tip();
+        }
+        if (request.params.size() == 1)
+        return infnodeman.buildInfinitynodeLastPaid(pindex->nHeight);
+    }
+
+    if (strCommand == "show-lastscan")
+    {
+            return infnodeman.getLastScan();
+    }
+
+    if (strCommand == "show-lastpaid")
+    {
+        std::map<CScript, int>  mapLastPaid = infnodeman.GetFullLastPaidMap();
+        for (auto& pair : mapLastPaid) {
+            std::string scriptPublicKey = pair.first.ToString();
+            obj.push_back(Pair(scriptPublicKey, pair.second));
+        }
+        return obj;
+    }
+
+    if (strCommand == "show-infos")
+    {
+        std::map<COutPoint, CInfinitynode> mapInfinitynodes = infnodeman.GetFullInfinitynodeMap();
+        for (auto& infpair : mapInfinitynodes) {
+            std::string strOutpoint = infpair.first.ToStringShort();
+            CInfinitynode inf = infpair.second;
+                std::ostringstream streamInfo;
+                streamInfo << std::setw(8) <<
+                               inf.getCollateralAddress() << " " <<
+                               inf.getHeight() << " " <<
+                               inf.getExpireHeight() << " " <<
+                               inf.getRoundBurnValue() << " " <<
+                               inf.getSINType() << " " <<
+                               inf.getLastRewardHeight();
+                std::string strInfo = streamInfo.str();
+                obj.push_back(Pair(strOutpoint, strInfo));
+        }
+        return obj;
+    }
+}
+
 /**
  * @xtdevcoin
  * this function help user burn correctly their funds to run infinity node
@@ -1139,6 +1241,7 @@ static const CRPCCommand commands[] =
     { "dash",               "getpoolinfo",            &getpoolinfo,            {}  },
     { "SIN",                "mnsetup",                &mnsetup,                {}  },
     { "SIN",                "infinitynodeburnfund",   &infinitynodeburnfund,   {"amount"} },
+    { "SIN",                "infinitynode",           &infinitynode,           {"command"}  },
 #ifdef ENABLE_WALLET
 // SIN TODO:    { "dash",               "privatesend",            &privatesend,            {"command"}  },
 #endif
