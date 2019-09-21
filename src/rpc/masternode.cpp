@@ -215,15 +215,6 @@ UniValue masternode(const JSONRPCRequest& request)
         if (strMode == "enabled")
             return mnodeman.CountEnabled();
 
-        if (strMode == "inf") {
-            CBlockIndex* pindex = NULL;
-            {
-                LOCK(cs_main);
-                pindex = chainActive.Tip();
-            }
-            return infnodeman.buildInfinitynodeList(pindex->nHeight);
-        }
-
         int nCount;
         masternode_info_t mnInfo;
         mnodeman.GetNextMasternodeInQueueForPayment(true, nCount, mnInfo);
@@ -941,17 +932,6 @@ UniValue infinitynode(const JSONRPCRequest& request)
 
         if (strMode == "lastscan")
             return infnodeman.getLastScan();
-    }
-
-    if (strCommand == "build-lastpaid")
-    {
-        CBlockIndex* pindex = NULL;
-        {
-                LOCK(cs_main);
-                pindex = chainActive.Tip();
-        }
-        if (request.params.size() == 1)
-        return infnodeman.buildInfinitynodeLastPaid(pindex->nHeight);
     }
 
     if (strCommand == "show-lastscan")

@@ -84,8 +84,9 @@ public:
     std::map<CScript, int> GetFullLastPaidMap() { return mapLastPaid; }
     int64_t getLastScan(){return nLastScanHeight;}
 
-    bool buildInfinitynodeList(int nBlockHeight);
+    bool buildInfinitynodeList(int nBlockHeight, int nLowHeight = 165000);
     bool buildListForBlock(int nBlockHeight);
+    void updateLastPaid();
     bool updateInfinitynodeList(int fromHeight);
 
     void CheckAndRemove(CConnman& connman);

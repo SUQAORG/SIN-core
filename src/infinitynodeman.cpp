@@ -120,10 +120,15 @@ void CInfinitynodeMan::CheckAndRemove(CConnman& connman)
     }
 }
 
-bool CInfinitynodeMan::buildInfinitynodeList(int nBlockHeight)
+bool CInfinitynodeMan::buildInfinitynodeList(int nBlockHeight, int nLowHeight)
 {
-    assert(nBlockHeight > INF_BEGIN_HEIGHT);
-    Clear();
+    assert(nBlockHeight > nLowHeight);
+    //first run, make sure that all variable is clear
+    if (nLowHeight == INF_BEGIN_HEIGHT){
+        Clear();
+    } else {
+        nLowHeight = nLastScanHeight;
+    }
 
     uint256 blockHash;
     if(!GetBlockHash(blockHash, nBlockHeight)) {
@@ -135,7 +140,7 @@ bool CInfinitynodeMan::buildInfinitynodeList(int nBlockHeight)
     pindex = LookupBlockIndex(blockHash);
     CBlockIndex* prevBlockIndex = pindex;
     int nLastPaidScanDeepth = max(Params().GetConsensus().nLimitSINNODE_1, max(Params().GetConsensus().nLimitSINNODE_5, Params().GetConsensus().nLimitSINNODE_10));
-    while (prevBlockIndex->nHeight >= INF_BEGIN_HEIGHT)
+    while (prevBlockIndex->nHeight >= nLowHeight)
     {
         CBlock blockReadFromDisk;
         if (ReadBlockFromDisk(blockReadFromDisk, prevBlockIndex, Params().GetConsensus()))
@@ -214,32 +219,23 @@ bool CInfinitynodeMan::buildInfinitynodeList(int nBlockHeight)
     LOCK(cs);
     {
         nLastScanHeight = pindex->nHeight;
+        updateLastPaid();
     }
     LogPrintf("CInfinitynodeMan::buildInfinitynodeList -- list infinity node was built from blockchian and has %d nodes\n", Count());
     return true;
 }
 
-bool CInfinitynodeMan::buildListForBlock(int nBlockHeight)
+void CInfinitynodeMan::updateLastPaid()
 {
-    LOCK(cs);
-    assert(nBlockHeight > nLastScanHeight);
+    AssertLockHeld(cs);
 
-    uint256 blockHash;
-    if(!GetBlockHash(blockHash, nBlockHeight)) {
-        LogPrint(BCLog::INFINITYNODE, "CInfinitynodeMan::buildListForBlock -- can not read block hash\n");
-        return false;
-    }
+    if (mapInfinitynodes.empty())
+        return;
 
-    CBlockIndex* pindex;
-    pindex = LookupBlockIndex(blockHash);
-    CBlockIndex* prevBlockIndex = pindex;
-
-    while (prevBlockIndex->nHeight > nLastScanHeight)
-    {
-        CBlock blockReadFromDisk;
-        if (ReadBlockFromDisk(blockReadFromDisk, prevBlockIndex, Params().GetConsensus()))
-        {
+    for (auto& infpair : mapInfinitynodes) {
+        auto it = mapLastPaid.find(infpair.second.getScriptPublicKey());
+        if (it != mapLastPaid.end()) {
+            infpair.second.setLastRewardHeight(mapLastPaid[infpair.second.getScriptPublicKey()]);
         }
     }
-
 }
