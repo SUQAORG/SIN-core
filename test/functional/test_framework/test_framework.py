@@ -146,6 +146,14 @@ class SinTestFramework(metaclass=SinTestMetaClass):
                             help="Attach a python debugger if test fails")
         parser.add_argument("--usecli", dest="usecli", default=False, action="store_true",
                             help="use sin-cli instead of RPC for all commands")
+        parser.add_argument("--perf", dest="perf", default=False, action="store_true",
+                            help="profile running nodes with perf for the duration of the test")
+        parser.add_argument("--valgrind", dest="valgrind", default=False, action="store_true",
+                            help="run nodes under the valgrind memory error detector: expect at least a ~10x slowdown, valgrind 3.14 or later required")
+        parser.add_argument("--randomseed", type=int,
+                            help="set a random seed for deterministically reproducing a previous test run")
+        parser.add_argument("--descriptors", default=False, action="store_true",
+                            help="Run test using a descriptor wallet")
         self.add_options(parser)
         self.options = parser.parse_args()
 
@@ -274,11 +282,37 @@ class SinTestFramework(metaclass=SinTestMetaClass):
 
     def setup_nodes(self):
         """Override this method to customize test node setup"""
-        extra_args = None
+        extra_args = [[]] * self.num_nodes
+        wallets = [[]] * self.num_nodes
         if hasattr(self, "extra_args"):
             extra_args = self.extra_args
+            wallets = [[x for x in eargs if x.startswith('-wallet=')] for eargs in extra_args]
+        extra_args = [x + ['-nowallet'] for x in extra_args]
         self.add_nodes(self.num_nodes, extra_args)
         self.start_nodes()
+        for i, n in enumerate(self.nodes):
+            n.extra_args.pop()
+            if '-wallet=0' in n.extra_args or '-nowallet' in n.extra_args or '-disablewallet' in n.extra_args or not self.is_wallet_compiled():
+                continue
+            if '-wallet=' not in wallets[i] and not any([x.startswith('-wallet=') for x in wallets[i]]):
+                wallets[i].append('-wallet=')
+            for w in wallets[i]:
+                wallet_name = w.split('=', 1)[1]
+                n.createwallet(wallet_name=wallet_name, descriptors=self.options.descriptors)
+        self.import_deterministic_coinbase_privkeys()
+        if not self.setup_clean_chain:
+            for n in self.nodes:
+                assert_equal(n.getblockchaininfo()["blocks"], 199)
+            # To ensure that all nodes are out of IBD, the most recent block
+            # must have a timestamp not too old (see IsInitialBlockDownload()).
+            self.log.debug('Generate a block with current time')
+            block_hash = self.nodes[0].generate(1)[0]
+            block = self.nodes[0].getblock(blockhash=block_hash, verbosity=0)
+            for n in self.nodes:
+                n.submitblock(block)
+                chain_info = n.getblockchaininfo()
+                assert_equal(chain_info["blocks"], 200)
+                assert_equal(chain_info["initialblockdownload"], False)
 
     def import_deterministic_coinbase_privkeys(self):
         if self.setup_clean_chain:
@@ -313,7 +347,24 @@ class SinTestFramework(metaclass=SinTestMetaClass):
         assert_equal(len(extra_args), num_nodes)
         assert_equal(len(binary), num_nodes)
         for i in range(num_nodes):
-            self.nodes.append(TestNode(i, get_datadir_path(self.options.tmpdir, i), rpchost=rpchost, timewait=self.rpc_timewait, sind=binary[i], sin_cli=self.options.sincli, mocktime=self.mocktime, coverage_dir=self.options.coveragedir, extra_conf=extra_confs[i], extra_args=extra_args[i], use_cli=self.options.usecli))
+            self.nodes.append(TestNode(
+                i,
+                get_datadir_path(self.options.tmpdir, i),
+                chain=self.chain,
+                rpchost=rpchost,
+                timewait=self.rpc_timeout,
+                bitcoind=binary[i],
+                bitcoin_cli=binary_cli[i],
+                version=versions[i],
+                coverage_dir=self.options.coveragedir,
+                cwd=self.options.tmpdir,
+                extra_conf=extra_confs[i],
+                extra_args=extra_args[i],
+                use_cli=self.options.usecli,
+                start_perf=self.options.perf,
+                use_valgrind=self.options.valgrind,
+                descriptors=self.options.descriptors,
+            ))
 
     def start_node(self, i, *args, **kwargs):
         """Start a sind"""
@@ -447,6 +498,7 @@ class SinTestFramework(metaclass=SinTestMetaClass):
         Afterward, create num_nodes copies from the cache."""
 
         assert self.num_nodes <= MAX_NODES
+<<<<<<< HEAD
         create_cache = False
         for i in range(MAX_NODES):
             if not os.path.isdir(get_datadir_path(self.options.cachedir, i)):
@@ -470,6 +522,30 @@ class SinTestFramework(metaclass=SinTestMetaClass):
                 self.nodes.append(TestNode(i, get_datadir_path(self.options.cachedir, i), extra_conf=["bind=127.0.0.1"], extra_args=[], rpchost=None, timewait=self.rpc_timewait, sind=self.options.sind, sin_cli=self.options.sincli, mocktime=self.mocktime, coverage_dir=None))
                 self.nodes[i].args = args
                 self.start_node(i)
+=======
+
+        if not os.path.isdir(cache_node_dir):
+            self.log.debug("Creating cache directory {}".format(cache_node_dir))
+
+            initialize_datadir(self.options.cachedir, CACHE_NODE_ID, self.chain)
+            self.nodes.append(
+                TestNode(
+                    CACHE_NODE_ID,
+                    cache_node_dir,
+                    chain=self.chain,
+                    extra_conf=["bind=127.0.0.1"],
+                    extra_args=['-disablewallet'],
+                    rpchost=None,
+                    timewait=self.rpc_timeout,
+                    bitcoind=self.options.bitcoind,
+                    bitcoin_cli=self.options.bitcoincli,
+                    coverage_dir=None,
+                    cwd=self.options.tmpdir,
+                    descriptors=self.options.descriptors,
+                ))
+            self.start_node(CACHE_NODE_ID)
+            cache_node = self.nodes[CACHE_NODE_ID]
+>>>>>>> eef90c14e... Merge #16528: Native Descriptor Wallets using DescriptorScriptPubKeyMan
 
             # Wait for RPC connections to be ready
             for node in self.nodes:

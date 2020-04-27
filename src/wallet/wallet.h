@@ -121,6 +121,27 @@ enum WalletFeature
     FEATURE_LATEST = FEATURE_PRE_SPLIT_KEYPOOL
 };
 
+//! Default for -changetype
+constexpr OutputType DEFAULT_CHANGE_TYPE{OutputType::CHANGE_AUTO};
+
+static constexpr uint64_t KNOWN_WALLET_FLAGS =
+        WALLET_FLAG_AVOID_REUSE
+    |   WALLET_FLAG_BLANK_WALLET
+    |   WALLET_FLAG_KEY_ORIGIN_METADATA
+    |   WALLET_FLAG_DISABLE_PRIVATE_KEYS
+    |   WALLET_FLAG_DESCRIPTORS;
+
+static constexpr uint64_t MUTABLE_WALLET_FLAGS =
+        WALLET_FLAG_AVOID_REUSE;
+
+static const std::map<std::string,WalletFlags> WALLET_FLAG_MAP{
+    {"avoid_reuse", WALLET_FLAG_AVOID_REUSE},
+    {"blank", WALLET_FLAG_BLANK_WALLET},
+    {"key_origin_metadata", WALLET_FLAG_KEY_ORIGIN_METADATA},
+    {"disable_private_keys", WALLET_FLAG_DISABLE_PRIVATE_KEYS},
+    {"descriptor_wallet", WALLET_FLAG_DESCRIPTORS},
+};
+
 // Dash
 enum AvailableCoinsType
 {
@@ -1385,6 +1406,9 @@ public:
        returns false if unknown, non-tolerable flags are present */
     bool SetWalletFlags(uint64_t overwriteFlags, bool memOnly);
 
+    /** Determine if we are a legacy wallet */
+    bool IsLegacy() const;
+
     /** Returns a bracketed wallet name for displaying in logs, will return [default wallet] if the wallet has no name */
     const std::string GetDisplayName() const {
         std::string wallet_name = GetName().length() == 0 ? "default wallet" : GetName();
@@ -1402,6 +1426,59 @@ public:
 
     /** Add a KeyOriginInfo to the wallet */
     bool AddKeyOrigin(const CPubKey& pubkey, const KeyOriginInfo& info);
+    
+    /** Upgrade the wallet */
+    bool UpgradeWallet(int version, std::string& error, std::vector<std::string>& warnings);
+
+    //! Returns all unique ScriptPubKeyMans in m_internal_spk_managers and m_external_spk_managers
+    std::set<ScriptPubKeyMan*> GetActiveScriptPubKeyMans() const;
+
+    //! Returns all unique ScriptPubKeyMans
+    std::set<ScriptPubKeyMan*> GetAllScriptPubKeyMans() const;
+
+    //! Get the ScriptPubKeyMan for the given OutputType and internal/external chain.
+    ScriptPubKeyMan* GetScriptPubKeyMan(const OutputType& type, bool internal) const;
+
+    //! Get the ScriptPubKeyMan for a script
+    ScriptPubKeyMan* GetScriptPubKeyMan(const CScript& script) const;
+    //! Get the ScriptPubKeyMan by id
+    ScriptPubKeyMan* GetScriptPubKeyMan(const uint256& id) const;
+
+    //! Get all of the ScriptPubKeyMans for a script given additional information in sigdata (populated by e.g. a psbt)
+    std::set<ScriptPubKeyMan*> GetScriptPubKeyMans(const CScript& script, SignatureData& sigdata) const;
+
+    //! Get the SigningProvider for a script
+    std::unique_ptr<SigningProvider> GetSolvingProvider(const CScript& script) const;
+    std::unique_ptr<SigningProvider> GetSolvingProvider(const CScript& script, SignatureData& sigdata) const;
+
+    //! Get the LegacyScriptPubKeyMan which is used for all types, internal, and external.
+    LegacyScriptPubKeyMan* GetLegacyScriptPubKeyMan() const;
+    LegacyScriptPubKeyMan* GetOrCreateLegacyScriptPubKeyMan();
+
+    //! Make a LegacyScriptPubKeyMan and set it for all types, internal, and external.
+    void SetupLegacyScriptPubKeyMan();
+    
+//! Connect the signals from ScriptPubKeyMans to the signals in CWallet
+    void ConnectScriptPubKeyManNotifiers();
+
+    //! Instantiate a descriptor ScriptPubKeyMan from the WalletDescriptor and load it
+    void LoadDescriptorScriptPubKeyMan(uint256 id, WalletDescriptor& desc);
+
+    //! Sets the active ScriptPubKeyMan for the specified type and internal
+    //! @param[in] id The unique id for the ScriptPubKeyMan
+    //! @param[in] type The OutputType this ScriptPubKeyMan provides addresses for
+    //! @param[in] internal Whether this ScriptPubKeyMan provides change addresses
+    //! @param[in] memonly Whether to record this update to the database. Set to true for wallet loading, normally false when actually updating the wallet.
+    void SetActiveScriptPubKeyMan(uint256 id, OutputType type, bool internal, bool memonly = false);
+
+    //! Create new DescriptorScriptPubKeyMans and add them to the wallet
+    void SetupDescriptorScriptPubKeyMans();
+
+    //! Return the DescriptorScriptPubKeyMan for a WalletDescriptor if it is already in the wallet
+    DescriptorScriptPubKeyMan* GetDescriptorScriptPubKeyMan(const WalletDescriptor& desc) const;
+
+    //! Add a descriptor to the wallet, return a ScriptPubKeyMan & associated output type
+    ScriptPubKeyMan* AddWalletDescriptor(WalletDescriptor& desc, const FlatSigningProvider& signing_provider, const std::string& label);
 };
 
 /** A key allocated from the key pool. */

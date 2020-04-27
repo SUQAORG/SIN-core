@@ -4,71 +4,11 @@
 WARNING: This module does not mlock() secrets; your private keys may end up on
 disk in swap! Use with caution!
 
-This file is modified from python-sinlib.
-"""
+from .address import byte_to_base58
 
-import ctypes
-import ctypes.util
-import hashlib
-
-ssl = ctypes.cdll.LoadLibrary(ctypes.util.find_library ('ssl') or 'libeay32')
-
-ssl.BN_new.restype = ctypes.c_void_p
-ssl.BN_new.argtypes = []
-
-ssl.BN_bin2bn.restype = ctypes.c_void_p
-ssl.BN_bin2bn.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_void_p]
-
-ssl.BN_CTX_free.restype = None
-ssl.BN_CTX_free.argtypes = [ctypes.c_void_p]
-
-ssl.BN_CTX_new.restype = ctypes.c_void_p
-ssl.BN_CTX_new.argtypes = []
-
-ssl.ECDH_compute_key.restype = ctypes.c_int
-ssl.ECDH_compute_key.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p]
-
-ssl.ECDSA_sign.restype = ctypes.c_int
-ssl.ECDSA_sign.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
-
-ssl.ECDSA_verify.restype = ctypes.c_int
-ssl.ECDSA_verify.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
-
-ssl.EC_KEY_free.restype = None
-ssl.EC_KEY_free.argtypes = [ctypes.c_void_p]
-
-ssl.EC_KEY_new_by_curve_name.restype = ctypes.c_void_p
-ssl.EC_KEY_new_by_curve_name.argtypes = [ctypes.c_int]
-
-ssl.EC_KEY_get0_group.restype = ctypes.c_void_p
-ssl.EC_KEY_get0_group.argtypes = [ctypes.c_void_p]
-
-ssl.EC_KEY_get0_public_key.restype = ctypes.c_void_p
-ssl.EC_KEY_get0_public_key.argtypes = [ctypes.c_void_p]
-
-ssl.EC_KEY_set_private_key.restype = ctypes.c_int
-ssl.EC_KEY_set_private_key.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-
-ssl.EC_KEY_set_conv_form.restype = None
-ssl.EC_KEY_set_conv_form.argtypes = [ctypes.c_void_p, ctypes.c_int]
-
-ssl.EC_KEY_set_public_key.restype = ctypes.c_int
-ssl.EC_KEY_set_public_key.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-
-ssl.i2o_ECPublicKey.restype = ctypes.c_void_p
-ssl.i2o_ECPublicKey.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-
-ssl.EC_POINT_new.restype = ctypes.c_void_p
-ssl.EC_POINT_new.argtypes = [ctypes.c_void_p]
-
-ssl.EC_POINT_free.restype = None
-ssl.EC_POINT_free.argtypes = [ctypes.c_void_p]
-
-ssl.EC_POINT_mul.restype = ctypes.c_int
-ssl.EC_POINT_mul.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
-
-# this specifies the curve used with ECDSA.
-NID_secp256k1 = 714 # from openssl/obj_mac.h
+def modinv(a, n):
+    """Compute the modular inverse of a modulo n
+>>>>>>> eef90c14e... Merge #16528: Native Descriptor Wallets using DescriptorScriptPubKeyMan
 
 SECP256K1_ORDER = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
 SECP256K1_ORDER_HALF = SECP256K1_ORDER // 2
@@ -223,4 +163,48 @@ class CPubKey(bytes):
 
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, super(CPubKey, self).__repr__())
+
+<<<<<<< HEAD
+=======
+    def get_pubkey(self):
+        """Compute an ECPubKey object for this secret key."""
+        assert(self.valid)
+        ret = ECPubKey()
+        p = SECP256K1.mul([(SECP256K1_G, self.secret)])
+        ret.p = p
+        ret.valid = True
+        ret.compressed = self.compressed
+        return ret
+
+    def sign_ecdsa(self, msg, low_s=True):
+        """Construct a DER-encoded ECDSA signature with this key.
+
+        See https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm for the
+        ECDSA signer algorithm."""
+        assert(self.valid)
+        z = int.from_bytes(msg, 'big')
+        # Note: no RFC6979, but a simple random nonce (some tests rely on distinct transactions for the same operation)
+        k = random.randrange(1, SECP256K1_ORDER)
+        R = SECP256K1.affine(SECP256K1.mul([(SECP256K1_G, k)]))
+        r = R[0] % SECP256K1_ORDER
+        s = (modinv(k, SECP256K1_ORDER) * (z + self.secret * r)) % SECP256K1_ORDER
+        if low_s and s > SECP256K1_ORDER_HALF:
+            s = SECP256K1_ORDER - s
+        # Represent in DER format. The byte representations of r and s have
+        # length rounded up (255 bits becomes 32 bytes and 256 bits becomes 33
+        # bytes).
+        rb = r.to_bytes((r.bit_length() + 8) // 8, 'big')
+        sb = s.to_bytes((s.bit_length() + 8) // 8, 'big')
+        return b'\x30' + bytes([4 + len(rb) + len(sb), 2, len(rb)]) + rb + bytes([2, len(sb)]) + sb
+
+def bytes_to_wif(b, compressed=True):
+    if compressed:
+        b += b'\x01'
+    return byte_to_base58(b, 239)
+
+def generate_wif_key():
+    # Makes a WIF privkey for imports
+    k = ECKey()
+    k.generate()
+    return bytes_to_wif(k.get_bytes(), k.is_compressed)
 

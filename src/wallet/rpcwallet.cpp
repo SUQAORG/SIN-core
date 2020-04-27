@@ -2964,7 +2964,7 @@ static UniValue keypoolrefill(const JSONRPCRequest& request)
             + HelpExampleRpc("keypoolrefill", "")
         );
 
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (pwallet->IsLegacy() && pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: Private keys are disabled for this wallet");
     }
 
@@ -3485,13 +3485,17 @@ static UniValue getwalletinfo(const JSONRPCRequest& request)
     UniValue obj(UniValue::VOBJ);
 
     size_t kpExternalSize = pwallet->KeypoolCountExternalKeys();
+    const auto bal = pwallet->GetBalance();
+    int64_t kp_oldest = pwallet->GetOldestKeyPoolTime();
     obj.pushKV("walletname", pwallet->GetName());
     obj.pushKV("walletversion", pwallet->GetVersion());
     obj.pushKV("balance",       ValueFromAmount(pwallet->GetBalance()));
     obj.pushKV("unconfirmed_balance", ValueFromAmount(pwallet->GetUnconfirmedBalance()));
     obj.pushKV("immature_balance",    ValueFromAmount(pwallet->GetImmatureBalance()));
     obj.pushKV("txcount",       (int)pwallet->mapWallet.size());
-    obj.pushKV("keypoololdest", pwallet->GetOldestKeyPoolTime());
+    if (kp_oldest > 0) {
+        obj.pushKV("keypoololdest", kp_oldest);
+    }
     obj.pushKV("keypoolsize", (int64_t)kpExternalSize);
     CKeyID seed_id = pwallet->GetHDChain().seed_id;
     if (!seed_id.IsNull() && pwallet->CanSupportFeature(FEATURE_HD_SPLIT)) {
@@ -3505,7 +3509,7 @@ static UniValue getwalletinfo(const JSONRPCRequest& request)
         obj.pushKV("hdseedid", seed_id.GetHex());
         obj.pushKV("hdmasterkeyid", seed_id.GetHex());
     }
-    obj.pushKV("private_keys_enabled", !pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
+    obj.pushKV("descriptors", pwallet->IsWalletFlagSet(WALLET_FLAG_DESCRIPTORS));
     return obj;
 }
 
@@ -3603,6 +3607,10 @@ static UniValue createwallet(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"wallet_name\"          (string, required) The name for the new wallet. If this is a path, the wallet will be created at the path location.\n"
             "2. disable_private_keys   (boolean, optional, default: false) Disable the possibility of private keys (only watchonlys are possible in this mode).\n"
+            "3. blank   (boolean, optional, default: false) Create a blank wallet. A blank wallet has no keys or HD seed. One can be set using sethdseed.\n"
+            "4. \"passphrase\"          (string, omitted) Encrypt the wallet with this passphrase.\n"
+            "5. avoid_reuse   (boolean, optional, default: false) Keep track of coin reuse, and treat dirty and clean coins differently with privacy considerations in mind.\n"
+            "6. descriptors   (boolean, optional, default: false) Create a native descriptor wallet. The wallet will use descriptors internally to handle address creation\n"
             "\nResult:\n"
             "{\n"
             "  \"name\" :    <wallet_name>,        (string) The wallet name if created successfully. If the wallet was created using a full path, the wallet_name will be the full path.\n"
@@ -3630,6 +3638,9 @@ static UniValue createwallet(const JSONRPCRequest& request)
     // Wallet::Verify will check if we're trying to create a wallet with a duplication name.
     if (!CWallet::Verify(wallet_name, false, error, warning)) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Wallet file verification failed: " + error);
+    }
+    if (!request.params[5].isNull() && request.params[5].get_bool()) {
+        flags |= WALLET_FLAG_DESCRIPTORS;
     }
 
     std::shared_ptr<CWallet> const wallet = CWallet::CreateWalletFromFile(wallet_name, fs::absolute(wallet_name, GetWalletDir()), (disable_privatekeys ? (uint64_t)WALLET_FLAG_DISABLE_PRIVATE_KEYS : 0));
@@ -4725,26 +4736,18 @@ UniValue getaddressinfo(const JSONRPCRequest& request)
             ret.pushKV("account", pwallet->mapAddressBook[dest].name);
         }
     }
-    const CKeyMetadata* meta = nullptr;
-    CKeyID key_id = GetKeyForDestination(*pwallet, dest);
-    if (!key_id.IsNull()) {
-        auto it = pwallet->mapKeyMetadata.find(key_id);
-        if (it != pwallet->mapKeyMetadata.end()) {
-            meta = &it->second;
-        }
-    }
-    if (!meta) {
-        auto it = pwallet->m_script_metadata.find(CScriptID(scriptPubKey));
-        if (it != pwallet->m_script_metadata.end()) {
-            meta = &it->second;
-        }
-    }
-    if (meta) {
-        ret.pushKV("timestamp", meta->nCreateTime);
-        if (!meta->hdKeypath.empty()) {
-            ret.pushKV("hdkeypath", meta->hdKeypath);
-            ret.pushKV("hdseedid", meta->hd_seed_id.GetHex());
-            ret.pushKV("hdmasterkeyid", meta->hd_seed_id.GetHex());
+
+    ret.pushKV("ischange", pwallet->IsChange(scriptPubKey));
+
+    ScriptPubKeyMan* spk_man = pwallet->GetScriptPubKeyMan(scriptPubKey);
+    if (spk_man) {
+        if (const std::unique_ptr<CKeyMetadata> meta = spk_man->GetMetadata(dest)) {
+            ret.pushKV("timestamp", meta->nCreateTime);
+            if (meta->has_key_origin) {
+                ret.pushKV("hdkeypath", WriteHDKeypath(meta->key_origin.path));
+                ret.pushKV("hdseedid", meta->hd_seed_id.GetHex());
+                ret.pushKV("hdmasterfingerprint", HexStr(meta->key_origin.fingerprint, meta->key_origin.fingerprint + 4));
+            }
         }
     }
 
@@ -5243,18 +5246,22 @@ static UniValue exportaddressnewpass(const JSONRPCRequest& request)
     return results;
 }
 
-extern UniValue abortrescan(const JSONRPCRequest& request); // in rpcdump.cpp
-extern UniValue dumpprivkey(const JSONRPCRequest& request); // in rpcdump.cpp
-extern UniValue importprivkey(const JSONRPCRequest& request);
-extern UniValue importaddress(const JSONRPCRequest& request);
-extern UniValue importpubkey(const JSONRPCRequest& request);
-extern UniValue dumpwallet(const JSONRPCRequest& request);
-extern UniValue importwallet(const JSONRPCRequest& request);
-extern UniValue importprunedfunds(const JSONRPCRequest& request);
-extern UniValue removeprunedfunds(const JSONRPCRequest& request);
-extern UniValue importmulti(const JSONRPCRequest& request);
-extern UniValue rescanblockchain(const JSONRPCRequest& request);
+UniValue abortrescan(const JSONRPCRequest& request); // in rpcdump.cpp
+UniValue dumpprivkey(const JSONRPCRequest& request); // in rpcdump.cpp
+UniValue importprivkey(const JSONRPCRequest& request);
+UniValue importaddress(const JSONRPCRequest& request);
+UniValue importpubkey(const JSONRPCRequest& request);
+UniValue dumpwallet(const JSONRPCRequest& request);
+UniValue importwallet(const JSONRPCRequest& request);
+UniValue importprunedfunds(const JSONRPCRequest& request);
+UniValue removeprunedfunds(const JSONRPCRequest& request);
+UniValue importmulti(const JSONRPCRequest& request);
+UniValue importdescriptors(const JSONRPCRequest& request);
+UniValue rescanblockchain(const JSONRPCRequest& request);
 
+void RegisterWalletRPCCommands(interfaces::Chain& chain, std::vector<std::unique_ptr<interfaces::Handler>>& handlers)
+{
+// clang-format off
 static const CRPCCommand commands[] =
 { //  category              name                                actor (function)                argNames
     //  --------------------- ------------------------          -----------------------         ----------
@@ -5268,7 +5275,7 @@ static const CRPCCommand commands[] =
     { "hidden",             "addwitnessaddress",                &addwitnessaddress,             {"address","p2sh"} },
     { "wallet",             "backupwallet",                     &backupwallet,                  {"destination"} },
     { "wallet",             "bumpfee",                          &bumpfee,                       {"txid", "options"} },
-    { "wallet",             "createwallet",                     &createwallet,                  {"wallet_name", "disable_private_keys"} },
+    { "wallet",             "createwallet",                     &createwallet,                  {"wallet_name", "disable_private_keys", "blank", "passphrase", "avoid_reuse", "descriptors"} },
     { "wallet",             "dumpprivkey",                      &dumpprivkey,                   {"address"}  },
     { "wallet",             "dumpwallet",                       &dumpwallet,                    {"filename"} },
     { "wallet",             "encryptwallet",                    &encryptwallet,                 {"passphrase"} },
@@ -5280,6 +5287,8 @@ static const CRPCCommand commands[] =
     { "wallet",             "gettransaction",                   &gettransaction,                {"txid","include_watchonly"} },
     { "wallet",             "getunconfirmedbalance",            &getunconfirmedbalance,         {} },
     { "wallet",             "getwalletinfo",                    &getwalletinfo,                 {} },
+    { "wallet",             "importaddress",                    &importaddress,                 {"address","label","rescan","p2sh"} },
+    { "wallet",             "importdescriptors",                &importdescriptors,             {"requests"} },
     { "wallet",             "importmulti",                      &importmulti,                   {"requests","options"} },
     { "wallet",             "importprivkey",                    &importprivkey,                 {"privkey","label","rescan"} },
     { "wallet",             "importwallet",                     &importwallet,                  {"filename"} },

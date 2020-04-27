@@ -10,6 +10,7 @@
 #include <primitives/transaction.h>
 #include <script/sign.h>
 #include <wallet/db.h>
+#include <wallet/walletutil.h>
 #include <key.h>
 
 #include <list>
@@ -56,6 +57,37 @@ enum class DBErrors
     LOAD_FAIL,
     NEED_REWRITE
 };
+
+namespace DBKeys {
+extern const std::string ACENTRY;
+extern const std::string ACTIVEEXTERNALSPK;
+extern const std::string ACTIVEINTERNALSPK;
+extern const std::string BESTBLOCK;
+extern const std::string BESTBLOCK_NOMERKLE;
+extern const std::string CRYPTED_KEY;
+extern const std::string CSCRIPT;
+extern const std::string DEFAULTKEY;
+extern const std::string DESTDATA;
+extern const std::string FLAGS;
+extern const std::string HDCHAIN;
+extern const std::string KEY;
+extern const std::string KEYMETA;
+extern const std::string MASTER_KEY;
+extern const std::string MINVERSION;
+extern const std::string NAME;
+extern const std::string OLD_KEY;
+extern const std::string ORDERPOSNEXT;
+extern const std::string POOL;
+extern const std::string PURPOSE;
+extern const std::string SETTINGS;
+extern const std::string TX;
+extern const std::string VERSION;
+extern const std::string WALLETDESCRIPTOR;
+extern const std::string WALLETDESCRIPTORCKEY;
+extern const std::string WALLETDESCRIPTORKEY;
+extern const std::string WATCHMETA;
+extern const std::string WATCHS;
+} // namespace DBKeys
 
 /* simple HD chain data model */
 class CHDChain
@@ -218,10 +250,18 @@ public:
     bool WriteAccount(const std::string& strAccount, const CAccount& account);
     bool EraseAccount(const std::string& strAccount);
     
+    bool WriteDescriptorKey(const uint256& desc_id, const CPubKey& pubkey, const CPrivKey& privkey);
+    bool WriteCryptedDescriptorKey(const uint256& desc_id, const CPubKey& pubkey, const std::vector<unsigned char>& secret);
+    bool WriteDescriptor(const uint256& desc_id, const WalletDescriptor& descriptor);
+    bool WriteDescriptorDerivedCache(const CExtPubKey& xpub, const uint256& desc_id, uint32_t key_exp_index, uint32_t der_index);
+    bool WriteDescriptorParentCache(const CExtPubKey& xpub, const uint256& desc_id, uint32_t key_exp_index);
+
     /// Write destination data key,value tuple to database
     bool WriteDestData(const std::string &address, const std::string &key, const std::string &value);
     /// Erase destination data tuple from wallet database
     bool EraseDestData(const std::string &address, const std::string &key);
+
+    bool WriteActiveScriptPubKeyMan(uint8_t type, const uint256& id, bool internal);
 
     DBErrors LoadWallet(CWallet* pwallet);
     DBErrors FindWalletTx(std::vector<uint256>& vTxHash, std::vector<CWalletTx>& vWtx);
