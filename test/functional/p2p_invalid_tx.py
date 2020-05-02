@@ -14,14 +14,14 @@ from test_framework.messages import (
     CTxOut,
 )
 from test_framework.mininode import P2PDataStore
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import (
     assert_equal,
     wait_until,
 )
 
 
-class InvalidTxRequestTest(BitcoinTestFramework):
+class InvalidTxRequestTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.setup_clean_chain = True

@@ -6,8 +6,8 @@
 #include <chainparamsbase.h>
 
 #include <tinyformat.h>
-#include <util.h>
-#include <utilmemory.h>
+#include <util/system.h>
+#include <util/memory.h>
 
 #include <assert.h>
 
@@ -19,9 +19,9 @@ const std::string CBaseChainParams::REGTEST = "regtest";
 void SetupChainParamsBaseOptions()
 {
     gArgs.AddArg("-regtest", "Enter regression test mode, which uses a special chain in which blocks can be solved instantly. "
-                                   "This is intended for regression testing tools and app development.", true, OptionsCategory::CHAINPARAMS);
-    gArgs.AddArg("-testnet", "Use the test chain", false, OptionsCategory::CHAINPARAMS);
-    gArgs.AddArg("-finalnet", "Use the final chain", false, OptionsCategory::CHAINPARAMS);
+                                   "This is intended for regression testing tools and app development.", ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::CHAINPARAMS);
+    gArgs.AddArg("-testnet", "Use the test chain", ArgsManager::ALLOW_ANY, OptionsCategory::CHAINPARAMS);
+    gArgs.AddArg("-finalnet", "Use the final chain", ArgsManager::ALLOW_ANY, OptionsCategory::CHAINPARAMS);
 }
 
 static std::unique_ptr<CBaseChainParams> globalChainBaseParams;

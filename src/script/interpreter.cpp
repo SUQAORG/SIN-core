@@ -11,6 +11,7 @@
 #include <pubkey.h>
 #include <script/script.h>
 #include <uint256.h>
+#include <util/system.h> //fMasterNode variable
 
 typedef std::vector<unsigned char> valtype;
 
@@ -935,7 +936,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                         //serror is set
                         return false;
                     }
-                    bool fSuccess = checker.CheckSig(vchSig, vchPubKey, scriptCode, sigversion);
+                    bool fSuccess = checker.CheckSig(vchSig, vchPubKey, scriptCode, sigversion, flags);
 
                     if (!fSuccess && (flags & SCRIPT_VERIFY_NULLFAIL) && vchSig.size())
                         return set_error(serror, SCRIPT_ERR_SIG_NULLFAIL);
@@ -1013,7 +1014,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                         }
 
                         // Check signature
-                        bool fOk = checker.CheckSig(vchSig, vchPubKey, scriptCode, sigversion);
+                        bool fOk = checker.CheckSig(vchSig, vchPubKey, scriptCode, sigversion, flags);
 
                         if (fOk) {
                             isig++;
@@ -1301,13 +1302,13 @@ uint256 SignatureHash(const CScript& scriptCode, const T& txTo, unsigned int nIn
 }
 
 template <class T>
-bool GenericTransactionSignatureChecker<T>::VerifySignature(const std::vector<unsigned char>& vchSig, const CPubKey& pubkey, const uint256& sighash) const
+bool GenericTransactionSignatureChecker<T>::VerifySignature(const std::vector<unsigned char>& vchSig, const CPubKey& pubkey, const uint256& sighash, uint32_t flags) const
 {
-    return pubkey.Verify(sighash, vchSig);
+    return pubkey.VerifyECDSA(sighash, vchSig);
 }
 
 template <class T>
-bool GenericTransactionSignatureChecker<T>::CheckSig(const std::vector<unsigned char>& vchSigIn, const std::vector<unsigned char>& vchPubKey, const CScript& scriptCode, SigVersion sigversion) const
+bool GenericTransactionSignatureChecker<T>::CheckSig(const std::vector<unsigned char>& vchSigIn, const std::vector<unsigned char>& vchPubKey, const CScript& scriptCode, SigVersion sigversion, uint32_t flags) const
 {
     CPubKey pubkey(vchPubKey);
     if (!pubkey.IsValid())
@@ -1322,7 +1323,7 @@ bool GenericTransactionSignatureChecker<T>::CheckSig(const std::vector<unsigned 
 
     uint256 sighash = SignatureHash(scriptCode, *txTo, nIn, nHashType, amount, sigversion, this->txdata);
 
-    if (!VerifySignature(vchSig, pubkey, sighash))
+    if (!VerifySignature(vchSig, pubkey, sighash, flags))
         return false;
 
     return true;
@@ -1341,13 +1342,17 @@ bool GenericTransactionSignatureChecker<T>::CheckLockTime(const CScriptNum& nLoc
     if (!(
         (txTo->nLockTime <  LOCKTIME_THRESHOLD && nLockTime <  LOCKTIME_THRESHOLD) ||
         (txTo->nLockTime >= LOCKTIME_THRESHOLD && nLockTime >= LOCKTIME_THRESHOLD)
-    ))
+    )){
+		LogPrintf("CheckLockTime 1\n");
         return false;
+	}
 
     // Now that we know we're comparing apples-to-apples, the
     // comparison is a simple numeric one.
-    if (nLockTime > (int64_t)txTo->nLockTime)
+    if (nLockTime > (int64_t)txTo->nLockTime){
+		LogPrintf("CheckLockTime 2\n");
         return false;
+	}
 
     // Finally the nLockTime feature can be disabled and thus
     // CHECKLOCKTIMEVERIFY bypassed if every txin has been
@@ -1359,8 +1364,10 @@ bool GenericTransactionSignatureChecker<T>::CheckLockTime(const CScriptNum& nLoc
     // prevent this condition. Alternatively we could test all
     // inputs, but testing just this input minimizes the data
     // required to prove correct CHECKLOCKTIMEVERIFY execution.
-    if (CTxIn::SEQUENCE_FINAL == txTo->vin[nIn].nSequence)
+    if (CTxIn::SEQUENCE_FINAL == txTo->vin[nIn].nSequence){
+		LogPrintf("CheckLockTime 3\n");
         return false;
+	}
 
     return true;
 }

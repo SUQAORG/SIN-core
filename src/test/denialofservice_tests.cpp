@@ -11,7 +11,7 @@
 #include <pow.h>
 #include <script/sign.h>
 #include <serialize.h>
-#include <util.h>
+#include <util/system.h>
 #include <validation.h>
 
 #include <test/test_sin.h>
@@ -24,7 +24,6 @@
 extern bool AddOrphanTx(const CTransactionRef& tx, NodeId peer);
 extern void EraseOrphansFor(NodeId peer);
 extern unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans);
-extern void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="");
 
 struct COrphanTx {
     CTransactionRef tx;

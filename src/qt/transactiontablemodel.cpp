@@ -19,7 +19,7 @@
 #include <validation.h>
 #include <sync.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <QColor>
 #include <QDateTime>
@@ -324,7 +324,7 @@ QString TransactionTableModel::formatTxDate(const TransactionRecord *wtx) const
 /* Look up address in address book, if found return label (address)
    otherwise just return (address)
  */
-QString TransactionTableModel::lookupAddress(const std::string &address, bool tooltip) const
+QString TransactionTableModel::lookupAddress(const std::string &address, bool tooltip, const std::string &message) const
 {
     QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(address));
     QString description;
@@ -336,6 +336,7 @@ QString TransactionTableModel::lookupAddress(const std::string &address, bool to
     {
         description += QString(" (") + QString::fromStdString(address) + QString(")");
     }
+    if (message != "") description += QString::fromStdString(" [Message]");
     return description;
 }
 
@@ -391,7 +392,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::SendToAddress:
     case TransactionRecord::Generated:
-        return lookupAddress(wtx->address, tooltip) + watchAddress;
+        return lookupAddress(wtx->address, tooltip, wtx->message) + watchAddress;
     case TransactionRecord::SendToOther:
         return QString::fromStdString(wtx->address) + watchAddress;
     case TransactionRecord::SendToSelf:
@@ -486,6 +487,7 @@ QString TransactionTableModel::formatTooltip(const TransactionRecord *rec) const
     {
         tooltip += QString(" ") + formatTxToAddress(rec, true);
     }
+    if(rec->message != "") tooltip.append(QString("\nMessage: ")).append(QString::fromStdString(rec->message));
     return tooltip;
 }
 
@@ -579,7 +581,7 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
     case LongDescriptionRole:
         return priv->describe(walletModel->node(), walletModel->wallet(), rec, walletModel->getOptionsModel()->getDisplayUnit());
     case AddressRole:
-        return QString::fromStdString(rec->address);
+            return QString::fromStdString(rec->address);
     case LabelRole:
         return walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(rec->address));
     case AmountRole:

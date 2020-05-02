@@ -6,7 +6,7 @@
 
 #include <base58.h>
 #include <test/test_sin.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include <univalue.h>
 

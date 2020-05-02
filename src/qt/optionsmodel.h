@@ -57,6 +57,7 @@ public:
         SpendZeroConfChange,    // bool
         // Dash
         ShowMasternodesTab,     // bool
+        ShowInstaSwapTab,     // bool
         LowKeysWarning,         // bool
         Listen,                 // bool
         OptionIDRowCount,

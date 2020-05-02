@@ -4,7 +4,7 @@
 # Copyright (c) 2010-2018 The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Bitcoin P2P network half-a-node.
+"""Sin P2P network half-a-node.
 
 This python code was modified from ArtForz' public domain half-a-node, as
 found in the mini-node branch of http://github.com/jgarzik/pynode.
@@ -51,8 +51,8 @@ MESSAGEMAP = {
 }
 
 MAGIC_BYTES = {
-    "mainnet": b"\xf9\xbe\xb4\xd9",   # mainnet
-    "testnet3": b"\x0b\x11\x09\x07",  # testnet3
+    "mainnet": b"\xf8\xdd\xd4\xb8",   # mainnet
+    "testnet3": b"\xb8\xfd\xf4\xd8",  # testnet3
     "regtest": b"\xfa\xbf\xb5\xda",   # regtest
 }
 
@@ -87,7 +87,7 @@ class P2PConnection(asyncio.Protocol):
         self.on_connection_send_msg = None
         self.recvbuf = b""
         self.network = net
-        logger.debug('Connecting to Bitcoin Node: %s:%d' % (self.dstaddr, self.dstport))
+        logger.debug('Connecting to Sin Node: %s:%d' % (self.dstaddr, self.dstport))
 
         loop = NetworkThread.network_event_loop
         conn_gen_unsafe = loop.create_connection(lambda: self, host=self.dstaddr, port=self.dstport)
@@ -184,7 +184,7 @@ class P2PConnection(asyncio.Protocol):
             if not self._transport:
                 return
             # Python <3.4.4 does not have is_closing, so we have to check for
-            # its existence explicitly as long as Bitcoin Core supports all
+            # its existence explicitly as long as Sin Core supports all
             # Python 3.4 versions.
             if hasattr(self._transport, 'is_closing') and self._transport.is_closing():
                 return
@@ -220,7 +220,7 @@ class P2PConnection(asyncio.Protocol):
 
 
 class P2PInterface(P2PConnection):
-    """A high-level P2P interface class for communicating with a Bitcoin node.
+    """A high-level P2P interface class for communicating with a Sin node.
 
     This class provides high-level callbacks for processing P2P message
     payloads, as well as convenience methods for interacting with the

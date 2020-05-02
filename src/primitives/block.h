@@ -11,6 +11,7 @@
 #include <uint256.h>
 
 extern const int nSinHeightFinalnet;
+extern const int nSinHeightRegtest;
 extern const int nSinHeightTestnet;
 extern const int nSinHeightMainnet;
 

@@ -142,33 +142,8 @@ private:
     QAction* m_wallet_selector_label_action = nullptr;
     QAction* m_wallet_selector_action = nullptr;
 
-    /// start Exhange and Web Links
-    QAction* openWebsite1;
-    QAction* openWebsite2;
-    QAction* openWebsite3;
-    QAction* openWebsite4;
-    QAction* openWebsite5;
-    QAction* openWebsite6;
-    QAction* openWebsite7;
-    QAction* openWebsite8;
-    QAction* openWebsite9;
-    QAction* openWebsite10;
-    QAction* openWebsite11;
-    QAction* openWebsite12;
-    
-    QAction* Exchangesite1;
-    QAction* Exchangesite2;
-    QAction* Exchangesite3;
-    QAction* Exchangesite4;
-    QAction* Exchangesite5;
-    QAction* Exchangesite6;
-    QAction* Exchangesite7;
-    QAction* Exchangesite8;
-    QAction* Exchangesite9;
-    QAction* Exchangesite10;
-    QAction* Exchangesite11;
-    QAction* Exchangesite12;
-
+    /// start Resources Web Links
+          
     QAction* ResourcesWebsite1;
     QAction* ResourcesWebsite2;
     QAction* ResourcesWebsite3;
@@ -176,7 +151,21 @@ private:
     QAction* ResourcesWebsite5;
     QAction* ResourcesWebsite6;
     QAction* ResourcesWebsite7;
-/// end Exhange and Web Links
+    QAction* ResourcesWebsite8;
+    QAction* ResourcesWebsite9;
+    QAction* ResourcesWebsite10;
+/// end Resources Web Links
+
+////start Governance and I.D.S. Menu
+
+    QAction* GovernanceMenu1;
+    QAction* GovernanceMenu2;
+    
+    QAction* IDSMenu1;
+    QAction* IDSMenu2;
+    QAction* IDSMenu3;
+////end Governance and I.D.S. Menu
+
     QAction *showSpecsHelpAction;
     
     QLabel *m_wallet_selector_label = nullptr;

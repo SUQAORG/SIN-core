@@ -170,6 +170,9 @@ void OptionsDialog::setModel(OptionsModel *_model)
     // Dash
     connect(ui->showMasternodesTab, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
     //
+    // InstaSwap
+    connect(ui->showInstaSwapTab, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
+    //
     connect(ui->spendZeroConfChange, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
     /* Network */
     connect(ui->allowIncoming, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
@@ -194,7 +197,11 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->coinControlFeatures, OptionsModel::CoinControlFeatures);
     // Dash
     mapper->addMapping(ui->showMasternodesTab, OptionsModel::ShowMasternodesTab);
+    //mapper->addMapping(ui->spendZeroConfChange, OptionsModel::SpendZeroConfChange);
+    // InstaSwap
+    mapper->addMapping(ui->showInstaSwapTab, OptionsModel::ShowInstaSwapTab);
     mapper->addMapping(ui->spendZeroConfChange, OptionsModel::SpendZeroConfChange);
+
 
     /* Network */
     mapper->addMapping(ui->mapPortUpnp, OptionsModel::MapPortUPnP);

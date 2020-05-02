@@ -16,7 +16,7 @@
 #include <netmessagemaker.h>
 #include <spork.h>
 #include <ui_interface.h>
-#include <util.h>
+#include <util/system.h>
 
 class CMasternodeSync;
 CMasternodeSync masternodeSync;

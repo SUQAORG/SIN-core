@@ -6,10 +6,10 @@
 
 import os
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 
 
-class ConfArgsTest(BitcoinTestFramework):
+class ConfArgsTest(SinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1
@@ -21,7 +21,7 @@ class ConfArgsTest(BitcoinTestFramework):
         # Assume node is stopped
 
         inc_conf_file_path = os.path.join(self.nodes[0].datadir, 'include.conf')
-        with open(os.path.join(self.nodes[0].datadir, 'bitcoin.conf'), 'a', encoding='utf-8') as conf:
+        with open(os.path.join(self.nodes[0].datadir, 'sin.conf'), 'a', encoding='utf-8') as conf:
             conf.write('includeconf={}\n'.format(inc_conf_file_path))
 
         with open(inc_conf_file_path, 'w', encoding='utf-8') as conf:
@@ -35,8 +35,15 @@ class ConfArgsTest(BitcoinTestFramework):
         with open(inc_conf_file_path, 'w', encoding='utf-8') as conf:
             conf.write('')  # clear
 
+    def test_log_buffer(self):
+        with self.nodes[0].assert_debug_log(expected_msgs=['Warning: parsed potentially confusing double-negative -connect=0']):
+            self.start_node(0, extra_args=['-noconnect=0'])
+        self.stop_node(0)
+
     def run_test(self):
         self.stop_node(0)
+
+        self.test_log_buffer()
 
         self.test_config_file_parser()
 
@@ -52,7 +59,7 @@ class ConfArgsTest(BitcoinTestFramework):
         self.nodes[0].assert_start_raises_init_error(['-datadir=' + new_data_dir], 'Error: Specified data directory "' + new_data_dir + '" does not exist.')
 
         # Check that using non-existent datadir in conf file fails
-        conf_file = os.path.join(default_data_dir, "bitcoin.conf")
+        conf_file = os.path.join(default_data_dir, "sin.conf")
 
         # datadir needs to be set before [regtest] section
         conf_file_contents = open(conf_file, encoding='utf8').read()
@@ -60,12 +67,12 @@ class ConfArgsTest(BitcoinTestFramework):
             f.write("datadir=" + new_data_dir + "\n")
             f.write(conf_file_contents)
 
-        # Temporarily disabled, because this test would access the user's home dir (~/.bitcoin)
+        # Temporarily disabled, because this test would access the user's home dir (~/.sin)
         #self.nodes[0].assert_start_raises_init_error(['-conf=' + conf_file], 'Error reading configuration file: specified data directory "' + new_data_dir + '" does not exist.')
 
         # Create the directory and ensure the config file now works
         os.mkdir(new_data_dir)
-        # Temporarily disabled, because this test would access the user's home dir (~/.bitcoin)
+        # Temporarily disabled, because this test would access the user's home dir (~/.sin)
         #self.start_node(0, ['-conf='+conf_file, '-wallet=w1'])
         #self.stop_node(0)
         #assert os.path.exists(os.path.join(new_data_dir, 'regtest', 'wallets', 'w1'))

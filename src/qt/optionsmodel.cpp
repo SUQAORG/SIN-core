@@ -89,6 +89,13 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("fShowMasternodesTab"))
         settings.setValue("fShowMasternodesTab", masternodeConfig.getCount());
 
+    //InstaSwap
+
+    if (!settings.contains("fShowInstaSwapTab"))
+        settings.setValue("fShowInstaSwapTab", false);
+    //fShowInstaSwapTab = settings.value("fShowInstaSwapTab", false);
+
+
     if (!settings.contains("fLowKeysWarning"))
         settings.setValue("fLowKeysWarning", true);
 #endif // ENABLE_WALLET
@@ -298,6 +305,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return settings.value("bSpendZeroConfChange");
         case ShowMasternodesTab:
             return settings.value("fShowMasternodesTab");
+        case ShowInstaSwapTab:
+            return settings.value("fShowInstaSwapTab");
 #endif
         case DisplayUnit:
             return nDisplayUnit;
@@ -420,6 +429,14 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
                 setRestartRequired(true);
             }
             break;
+
+        // InstaSwap
+        case ShowInstaSwapTab:
+            if (settings.value("fShowInstaSwapTab") != value) {
+                settings.setValue("fShowInstaSwapTab", value);
+                setRestartRequired(true);
+            }
+            break;
 #endif
         case DisplayUnit:
             setDisplayUnit(value);
@@ -534,7 +551,7 @@ void OptionsModel::checkAndMigrate()
     if (settingsVersion < CLIENT_VERSION)
     {
         // -dbcache was bumped from 100 to 300 in 0.13
-        // see https://github.com/sin/sin/pull/8273
+        // see https://github.com/bitcoin/bitcoin/pull/8273
         // force people to upgrade to the new value if they are using 100MB
         if (settingsVersion < 130000 && settings.contains("nDatabaseCache") && settings.value("nDatabaseCache").toLongLong() == 100)
             settings.setValue("nDatabaseCache", (qint64)nDefaultDbCache);

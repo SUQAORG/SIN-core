@@ -8,8 +8,8 @@
 
 #include <protocol.h>
 
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 
 #ifndef WIN32
 # include <arpa/inet.h>
@@ -58,6 +58,12 @@ const char *MNPING="mnp";
 const char *DSEG="dseg";
 const char *SYNCSTATUSCOUNT="ssc";
 const char *MNVERIFY="mnv";
+// SIN message types
+const char *INFLOCKREWARDINIT="inflrwd";
+const char *INFVERIFY="infverify";
+const char *INFCOMMITMENT="infcommit";
+const char *INFLRMUSIG="inflrmusig";
+const char *INFLRGROUP="inflrgroup";
 } // namespace NetMsgType
 
 /** All known message types. Keep this in the same order as the list of
@@ -104,6 +110,11 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::DSEG,
     NetMsgType::SYNCSTATUSCOUNT,
     NetMsgType::MNVERIFY,
+    NetMsgType::INFLOCKREWARDINIT,
+    NetMsgType::INFVERIFY,
+    NetMsgType::INFCOMMITMENT,
+    NetMsgType::INFLRMUSIG,
+    NetMsgType::INFLRGROUP,
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 
@@ -226,7 +237,12 @@ std::string CInv::GetCommand() const
     case MSG_MASTERNODE_ANNOUNCE:      return cmd.append(NetMsgType::MNANNOUNCE);
     case MSG_MASTERNODE_PING:          return cmd.append(NetMsgType::MNPING);
     case MSG_MASTERNODE_VERIFY:        return cmd.append(NetMsgType::MNVERIFY);
-    //
+    // SIN
+    case MSG_LOCKREWARD_INIT:          return cmd.append(NetMsgType::INFLOCKREWARDINIT);
+    case MSG_INFCOMMITMENT:            return cmd.append(NetMsgType::INFCOMMITMENT);
+    case MSG_INFVERIFY:                return cmd.append(NetMsgType::INFVERIFY);
+    case MSG_INFLRMUSIG:               return cmd.append(NetMsgType::INFLRMUSIG);
+    case MSG_INFLRGROUP:               return cmd.append(NetMsgType::INFLRGROUP);
     default:
         throw std::out_of_range(strprintf("CInv::GetCommand(): type=%d unknown type", type));
     }

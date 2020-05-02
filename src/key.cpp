@@ -11,7 +11,9 @@
 #include <random.h>
 
 #include <secp256k1.h>
+#include <secp256k1_ecdh.h>
 #include <secp256k1_recovery.h>
+#include <secp256k1_schnorr.h>
 
 static secp256k1_context* secp256k1_context_sign = nullptr;
 
@@ -202,7 +204,7 @@ bool SigHasLowR(const secp256k1_ecdsa_signature* sig)
     return compact_sig[0] < 0x80;
 }
 
-bool CKey::Sign(const uint256 &hash, std::vector<unsigned char>& vchSig, bool grind, uint32_t test_case) const {
+bool CKey::SignECDSA(const uint256 &hash, std::vector<unsigned char>& vchSig, bool grind, uint32_t test_case) const {
     if (!fValid)
         return false;
     vchSig.resize(CPubKey::SIGNATURE_SIZE);
@@ -224,6 +226,19 @@ bool CKey::Sign(const uint256 &hash, std::vector<unsigned char>& vchSig, bool gr
     return true;
 }
 
+bool CKey::SignSchnorr(const uint256 &hash, std::vector<uint8_t> &vchSig, uint32_t test_case) const {
+    if (!fValid) {
+        return false;
+    }
+    vchSig.resize(64);
+    uint8_t extra_entropy[32] = {0};
+    WriteLE32(extra_entropy, test_case);
+
+    int ret = secp256k1_schnorr_sign(secp256k1_context_sign, &vchSig[0], hash.begin(), begin(), secp256k1_nonce_function_rfc6979, test_case ? extra_entropy : nullptr);
+    assert(ret);
+    return true;
+}
+
 bool CKey::VerifyPubKey(const CPubKey& pubkey) const {
     if (pubkey.IsCompressed() != fCompressed) {
         return false;
@@ -234,8 +249,8 @@ bool CKey::VerifyPubKey(const CPubKey& pubkey) const {
     uint256 hash;
     CHash256().Write((unsigned char*)str.data(), str.size()).Write(rnd, sizeof(rnd)).Finalize(hash.begin());
     std::vector<unsigned char> vchSig;
-    Sign(hash, vchSig);
-    return pubkey.Verify(hash, vchSig);
+    SignECDSA(hash, vchSig);
+    return pubkey.VerifyECDSA(hash, vchSig);
 }
 
 bool CKey::SignCompact(const uint256 &hash, std::vector<unsigned char>& vchSig) const {
@@ -283,6 +298,17 @@ bool CKey::Derive(CKey& keyChild, ChainCode &ccChild, unsigned int nChild, const
     keyChild.fCompressed = true;
     keyChild.fValid = ret;
     return ret;
+}
+
+bool CKey::ComputeECDHSecret(const CPubKey& pubkey, CPrivKey& secret_out) const
+{
+    secp256k1_pubkey pubkey_internal;
+    if (!secp256k1_ec_pubkey_parse(secp256k1_context_sign, &pubkey_internal, pubkey.data(), pubkey.size())) {
+        return false;
+    }
+
+    secret_out.resize(32);
+    return secp256k1_ecdh(secp256k1_context_sign, &secret_out[0], &pubkey_internal, keydata.data()) == 1;
 }
 
 bool CExtKey::Derive(CExtKey &out, unsigned int _nChild) const {

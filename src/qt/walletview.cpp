@@ -34,6 +34,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QVBoxLayout>
+#include <QLabel>
 
 WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     QStackedWidget(parent),
@@ -55,6 +56,21 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
         exportButton->setIcon(platformStyle->SingleColorIcon(":/icons/export"));
     }
     hbox_buttons->addStretch();
+
+
+    // Sum of selected transactions
+    QLabel *transactionSumLabel = new QLabel(); // Label
+    transactionSumLabel->setObjectName("transactionSumLabel"); // Label ID as CSS-reference
+    transactionSumLabel->setText(tr("Selected amount:"));
+    hbox_buttons->addWidget(transactionSumLabel);
+
+    transactionSum = new QLabel(); // Amount
+    transactionSum->setObjectName("transactionSum"); // Label ID as CSS-reference
+    transactionSum->setMinimumSize(200, 8);
+    transactionSum->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    hbox_buttons->addWidget(transactionSum);
+
+
     hbox_buttons->addWidget(exportButton);
     vbox->addLayout(hbox_buttons);
     transactionsPage->setLayout(vbox);
@@ -94,6 +110,10 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
 
     // Double-clicking on a transaction on the transaction history page shows details
     connect(transactionView, SIGNAL(doubleClicked(QModelIndex)), transactionView, SLOT(showDetails()));
+
+
+    // Update wallet with sum of selected transactions
+    connect(transactionView, SIGNAL(trxAmount(QString)), this, SLOT(trxAmount(QString)));
 
     // Clicking on "Export" allows to export the transaction list
     connect(exportButton, SIGNAL(clicked()), transactionView, SLOT(exportClicked()));
@@ -413,4 +433,9 @@ void WalletView::showProgress(const QString &title, int nProgress)
 void WalletView::requestedSyncWarningInfo()
 {
     Q_EMIT outOfSyncWarningClicked();
+}
+/** Update wallet with the sum of the selected transactions */
+void WalletView::trxAmount(QString amount)
+{
+    transactionSum->setText(amount);
 }

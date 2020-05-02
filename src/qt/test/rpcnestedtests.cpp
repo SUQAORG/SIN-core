@@ -14,7 +14,7 @@
 #include <qt/rpcconsole.h>
 #include <test/test_sin.h>
 #include <univalue.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <QDir>
 #include <QtGlobal>
@@ -38,7 +38,9 @@ void RPCNestedTests::rpcNestedTests()
     // could be moved to a more generic place when we add more tests on QT level
     tableRPC.appendCommand("rpcNestedTest", &vRPCCommands[0]);
     //mempool.setSanityCheck(1.0);
-
+    
+    ECC_Stop(); // Already started by the common test setup, so stop it to avoid interference
+    LogInstance().DisconnectTestLogger();
     TestingSetup test;
 
     SetRPCWarmupFinished();

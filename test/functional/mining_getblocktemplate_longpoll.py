@@ -6,7 +6,7 @@
 
 from decimal import Decimal
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import get_rpc_proxy, random_transaction
 
 import threading
@@ -24,7 +24,7 @@ class LongpollThread(threading.Thread):
     def run(self):
         self.node.getblocktemplate({'longpollid':self.longpollid})
 
-class GetBlockTemplateLPTest(BitcoinTestFramework):
+class GetBlockTemplateLPTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
 

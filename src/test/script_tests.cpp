@@ -10,8 +10,8 @@
 #include <script/script.h>
 #include <script/script_error.h>
 #include <script/sign.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 #include <test/test_sin.h>
 #include <rpc/server.h>
 
@@ -369,7 +369,7 @@ public:
         std::vector<unsigned char> vchSig, r, s;
         uint32_t iter = 0;
         do {
-            key.Sign(hash, vchSig, false, iter++);
+            key.SignECDSA(hash, vchSig, false, iter++);
             if ((lenS == 33) != (vchSig[5 + vchSig[3]] == 33)) {
                 NegateSignatureS(vchSig);
             }
@@ -1048,7 +1048,7 @@ sign_multisig(const CScript& scriptPubKey, const std::vector<CKey>& keys, const 
     for (const CKey &key : keys)
     {
         std::vector<unsigned char> vchSig;
-        BOOST_CHECK(key.Sign(hash, vchSig));
+        BOOST_CHECK(key.SignECDSA(hash, vchSig));
         vchSig.push_back((unsigned char)SIGHASH_ALL);
         result << vchSig;
     }
@@ -1238,15 +1238,15 @@ BOOST_AUTO_TEST_CASE(script_combineSigs)
     // A couple of partially-signed versions:
     std::vector<unsigned char> sig1;
     uint256 hash1 = SignatureHash(scriptPubKey, txTo, 0, SIGHASH_ALL, 0, SigVersion::BASE);
-    BOOST_CHECK(keys[0].Sign(hash1, sig1));
+    BOOST_CHECK(keys[0].SignECDSA(hash1, sig1));
     sig1.push_back(SIGHASH_ALL);
     std::vector<unsigned char> sig2;
     uint256 hash2 = SignatureHash(scriptPubKey, txTo, 0, SIGHASH_NONE, 0, SigVersion::BASE);
-    BOOST_CHECK(keys[1].Sign(hash2, sig2));
+    BOOST_CHECK(keys[1].SignECDSA(hash2, sig2));
     sig2.push_back(SIGHASH_NONE);
     std::vector<unsigned char> sig3;
     uint256 hash3 = SignatureHash(scriptPubKey, txTo, 0, SIGHASH_SINGLE, 0, SigVersion::BASE);
-    BOOST_CHECK(keys[2].Sign(hash3, sig3));
+    BOOST_CHECK(keys[2].SignECDSA(hash3, sig3));
     sig3.push_back(SIGHASH_SINGLE);
 
     // Not fussy about order (or even existence) of placeholders or signatures:

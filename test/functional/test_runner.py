@@ -10,7 +10,7 @@ forward all unrecognized arguments onto the individual test scripts.
 Functional tests are disabled on Windows by default. Use --force to run them anyway.
 
 For a description of arguments recognized by test scripts, see
-`test/functional/test_framework/test_framework.py:BitcoinTestFramework.main`.
+`test/functional/test_framework/test_framework.py:SinTestFramework.main`.
 
 """
 
@@ -64,7 +64,6 @@ BASE_SCRIPTS = [
     'feature_block.py',
     'rpc_fundrawtransaction.py',
     'p2p_compactblocks.py',
-    'feature_segwit.py',
     # vv Tests less than 2m vv
     'wallet_basic.py',
     'wallet_labels.py',
@@ -86,7 +85,7 @@ BASE_SCRIPTS = [
     # vv Tests less than 30s vv
     'wallet_keypool_topup.py',
     'interface_zmq.py',
-    'interface_bitcoin_cli.py',
+    'interface_sin_cli.py',
     'mempool_resurrect.py',
     'wallet_txn_doublespend.py --mineblock',
     'wallet_txn_clone.py',
@@ -155,6 +154,7 @@ BASE_SCRIPTS = [
     'feature_config_args.py',
     'rpc_help.py',
     'feature_help.py',
+    'feature_shutdown.py',
     # Don't append tests at the end to avoid merge conflicts
     # Put them in a random line within the section that fits their approximate run-time
 ]
@@ -162,7 +162,7 @@ BASE_SCRIPTS = [
 EXTENDED_SCRIPTS = [
     # These tests are not run by the travis build process.
     # Longest test should go first, to favor running tests in parallel
-    'feature_pruning.py',
+    # Here stood, for example, the long pruning test
     # vv Tests less than 20m vv
     'feature_fee_estimation.py',
     # vv Tests less than 5m vv
@@ -237,15 +237,15 @@ def main():
 
     logging.debug("Temporary test directory at %s" % tmpdir)
 
-    enable_bitcoind = config["components"].getboolean("ENABLE_BITCOIND")
+    enable_sind = config["components"].getboolean("ENABLE_BITCOIND")
 
     if config["environment"]["EXEEXT"] == ".exe" and not args.force:
-        # https://github.com/bitcoin/bitcoin/commit/d52802551752140cf41f0d9a225a43e84404d3e9
+        # https://github.com/sin/sin/commit/d52802551752140cf41f0d9a225a43e84404d3e9
         # https://github.com/bitcoin/bitcoin/pull/5677#issuecomment-136646964
         print("Tests currently disabled on Windows by default. Use --force option to enable")
         sys.exit(0)
 
-    if not enable_bitcoind:
+    if not enable_sind:
         print("No functional tests to run.")
         print("Rerun ./configure with --with-daemon and then make")
         sys.exit(0)
@@ -309,10 +309,10 @@ def main():
 def run_tests(test_list, src_dir, build_dir, tmpdir, jobs=1, enable_coverage=False, args=None, combined_logs_len=0, failfast=False):
     args = args or []
 
-    # Warn if bitcoind is already running (unix only)
+    # Warn if sind is already running (unix only)
     try:
-        if subprocess.check_output(["pidof", "bitcoind"]) is not None:
-            print("%sWARNING!%s There is already a bitcoind process running on this system. Tests may fail unexpectedly due to resource contention!" % (BOLD[1], BOLD[0]))
+        if subprocess.check_output(["pidof", "sind"]) is not None:
+            print("%sWARNING!%s There is already a sind process running on this system. Tests may fail unexpectedly due to resource contention!" % (BOLD[1], BOLD[0]))
     except (OSError, subprocess.SubprocessError):
         pass
 
@@ -553,7 +553,7 @@ class RPCCoverage():
     Coverage calculation works by having each test script subprocess write
     coverage files into a particular directory. These files contain the RPC
     commands invoked during testing, as well as a complete listing of RPC
-    commands per `bitcoin-cli help` (`rpc_interface.txt`).
+    commands per `sin-cli help` (`rpc_interface.txt`).
 
     After all tests complete, the commands run are combined and diff'd against
     the complete list to calculate uncovered RPC commands.

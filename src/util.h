@@ -22,8 +22,8 @@
 #include <logging.h>
 #include <sync.h>
 #include <tinyformat.h>
-#include <utiltime.h>
-#include <utilmemory.h>
+#include <util/time.h>
+#include <util/memory.h>
 
 #include <atomic>
 #include <exception>
@@ -57,6 +57,7 @@ extern bool fMasterNode;
 extern bool fLiteMode;
 extern int nWalletBackups;
 //
+extern bool fInfinityNode;
 
 /** Signals for translation. */
 class CTranslationInterface
@@ -66,7 +67,7 @@ public:
     boost::signals2::signal<std::string (const char* psz)> Translate;
 };
 
-// Dash
+//  
 extern bool fDebug;
 //-//extern bool fServer;
 //-//extern std::string strMiscWarning; // already defined in warnings.h

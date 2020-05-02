@@ -17,7 +17,7 @@
 #include <spork.h>
 #include <sync.h>
 #include <txmempool.h>
-#include <util.h>
+#include <util/system.h>
 #include <consensus/validation.h>
 #include <validationinterface.h>
 #ifdef ENABLE_WALLET

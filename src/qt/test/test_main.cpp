@@ -8,9 +8,10 @@
 
 #include <chainparams.h>
 #include <qt/test/rpcnestedtests.h>
-#include <util.h>
+#include <util/system.h>
 #include <qt/test/uritests.h>
 #include <qt/test/compattests.h>
+#include <test/test_sin.h>
 
 #ifdef ENABLE_WALLET
 #include <qt/test/addressbooktests.h>
@@ -39,6 +40,8 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin);
 #endif
 
 extern void noui_connect();
+
+const std::function<void(const std::string&)> G_TEST_LOG_FUN{};
 
 // This is all you need to run all the tests
 int main(int argc, char *argv[])

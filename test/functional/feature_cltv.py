@@ -12,7 +12,7 @@ from test_framework.blocktools import create_coinbase, create_block, create_tran
 from test_framework.messages import CTransaction, msg_block, ToHex
 from test_framework.mininode import mininode_lock, P2PInterface
 from test_framework.script import CScript, OP_1NEGATE, OP_CHECKLOCKTIMEVERIFY, OP_DROP, CScriptNum
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import assert_equal, bytes_to_hex_str, hex_str_to_bytes, wait_until
 
 from io import BytesIO
@@ -51,7 +51,7 @@ def cltv_validate(node, tx, height):
                                   list(CScript(new_tx.vin[0].scriptSig)))
     return new_tx
 
-class BIP65Test(BitcoinTestFramework):
+class BIP65Test(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [['-whitelist=127.0.0.1']]

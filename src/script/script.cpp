@@ -6,7 +6,7 @@
 #include <script/script.h>
 
 #include <tinyformat.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 namespace {
 inline std::string ValueString(const std::vector<unsigned char>& vch)

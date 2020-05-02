@@ -8,7 +8,7 @@ import random
 
 from test_framework.messages import CTransaction, CTxIn, CTxOut, COutPoint, ToHex, COIN
 from test_framework.script import CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import (
     assert_equal,
     assert_greater_than,
@@ -84,7 +84,7 @@ def split_inputs(from_node, txins, txouts, initial_split=False):
     tx.vin.append(CTxIn(COutPoint(int(prevtxout["txid"], 16), prevtxout["vout"]), b""))
 
     half_change = satoshi_round(prevtxout["amount"] / 2)
-    rem_change = prevtxout["amount"] - half_change - Decimal("0.00001000")
+    rem_change = prevtxout["amount"] - half_change - Decimal("0.000553")
     tx.vout.append(CTxOut(int(half_change * COIN), P2SH_1))
     tx.vout.append(CTxOut(int(rem_change * COIN), P2SH_2))
 
@@ -122,7 +122,7 @@ def check_estimates(node, fees_seen):
         else:
             assert_greater_than_or_equal(i + 1, e["blocks"])
 
-class EstimateFeeTest(BitcoinTestFramework):
+class EstimateFeeTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 3
 

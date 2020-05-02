@@ -16,7 +16,7 @@
 #include <validationinterface.h>
 #include <script/ismine.h>
 #include <script/sign.h>
-#include <util.h>
+#include <util/system.h>
 #include <wallet/crypter.h>
 #include <wallet/coinselection.h>
 #include <wallet/walletdb.h>
@@ -816,6 +816,9 @@ private:
     // Dash
     std::set<COutPoint> setWalletUTXO;
     //
+    // SIN
+    std::map<COutPoint, std::string> mapOnChainData;
+    //
 
     /* Mark a transaction (and its in-wallet descendants) as conflicting with a particular block. */
     void MarkConflicted(const uint256& hashBlock, const uint256& hashTx);
@@ -943,6 +946,7 @@ public:
 
     std::vector<COutput> GetTermDepositInfo();
     std::vector<COutput> GetTermDepositInfo(const std::string& strAccount);
+    std::map<COutPoint, std::string> GetOnchainData(){return mapOnChainData;};
 
     typedef std::pair<CWalletTx*, CAccountingEntry*> TxPair;
     typedef std::multimap<int64_t, CWalletTx*> TxItems;

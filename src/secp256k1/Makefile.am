@@ -42,6 +42,8 @@ noinst_HEADERS += src/field_5x52_asm_impl.h
 noinst_HEADERS += src/java/org_bitcoin_NativeSecp256k1.h
 noinst_HEADERS += src/java/org_bitcoin_Secp256k1Context.h
 noinst_HEADERS += src/util.h
+noinst_HEADERS += src/scratch.h
+noinst_HEADERS += src/scratch_impl.h
 noinst_HEADERS += src/testrand.h
 noinst_HEADERS += src/testrand_impl.h
 noinst_HEADERS += src/hash.h
@@ -174,4 +176,12 @@ endif
 
 if ENABLE_MODULE_RECOVERY
 include src/modules/recovery/Makefile.am.include
+endif
+
+if ENABLE_MODULE_SCHNORR
+include src/modules/schnorr/Makefile.am.include
+endif
+
+if ENABLE_MODULE_MUSIG
+include src/modules/musig/Makefile.am.include
 endif

@@ -26,7 +26,7 @@ public:
 
 typedef uint256 ChainCode;
 
-/** An encapsulated public key. */
+/** An encapsulated ECDSA public key. */
 class CPubKey
 {
 public:
@@ -183,17 +183,23 @@ public:
     }
 
     /**
-     * Verify a DER signature (~72 bytes).
+     * Verify an ECDSA DER signature (~72 bytes).
      * If this public key is not fully valid, the return value will be false.
      */
-    bool Verify(const uint256& hash, const std::vector<unsigned char>& vchSig) const;
+    bool VerifyECDSA(const uint256& hash, const std::vector<unsigned char>& vchSig) const;
 
     /**
-     * Check whether a signature is normalized (lower-S).
+     * Verify a Schnorr signature (=64 bytes).
+     * If this public key is not fully valid, the return value will be false.
+     */
+    bool VerifySchnorr(const uint256 &hash, const std::vector<unsigned char> &vchSig) const;
+
+    /**
+     * Check whether an ECDSA DER signature is normalized (lower-S).
      */
     static bool CheckLowS(const std::vector<unsigned char>& vchSig);
 
-    //! Recover a public key from a compact signature.
+    //! Recover a public key from a compact ECDSA signature.
     bool RecoverCompact(const uint256& hash, const std::vector<unsigned char>& vchSig);
 
     //! Turn this public key into an uncompressed public key.

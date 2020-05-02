@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <regex>
 #include <numeric>
+#include <test/test_sin.h>
+
+const std::function<void(const std::string&)> G_TEST_LOG_FUN{};
 
 void benchmark::ConsolePrinter::header()
 {

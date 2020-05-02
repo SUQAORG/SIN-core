@@ -5,7 +5,7 @@
 """Test the Partially Signed Transaction RPCs.
 """
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import assert_equal, assert_raises_rpc_error, find_output, disconnect_nodes, connect_nodes_bi, sync_blocks
 
 import json
@@ -14,7 +14,7 @@ import os
 MAX_BIP125_RBF_SEQUENCE = 0xfffffffd
 
 # Create one-input, one-output, no-fee transaction:
-class PSBTTest(BitcoinTestFramework):
+class PSBTTest(SinTestFramework):
 
     def set_test_params(self):
         self.setup_clean_chain = False

@@ -9,7 +9,7 @@
 
 #include <hash.h>
 #include <net.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 class CSporkDB;
 

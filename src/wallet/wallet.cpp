@@ -26,10 +26,10 @@
 #include <timedata.h>
 #include <txmempool.h>
 #include <util/bip32.h>
-#include <utilmoneystr.h>
+#include <util/moneystr.h>
 #include <wallet/fees.h>
 #include <wallet/walletutil.h>
-#include <utiltime.h>
+#include <util/time.h>
 
 #include <instantx.h>
 #include <keepass.h>
@@ -1062,6 +1062,20 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose)
             for(unsigned int i = 0; i < wtx.tx->vout.size(); ++i) {
                 if (IsMine(wtx.tx->vout[i]) && !IsSpent(hash, i)) {
                     setWalletUTXO.insert(COutPoint(hash, i));
+                }
+            }
+        //
+        // SIN
+            for(unsigned int i = 0; i < wtx.tx->vout.size(); ++i) {
+                std::vector<valtype> vSolutions;
+                txnouttype whichType;
+                Solver(wtx.tx->vout[i].scriptPubKey, whichType, vSolutions);
+
+                if (whichType == TX_BURN_DATA && vSolutions.size() == 2){
+                    if (HaveKey(CKeyID(uint160(vSolutions[0])))){
+                        std::string data(vSolutions[1].begin(), vSolutions[1].end());
+                        mapOnChainData[COutPoint(hash, i)] = data;
+                    }
                 }
             }
         //
@@ -2640,8 +2654,8 @@ std::map<CTxDestination, std::vector<COutput>> CWallet::ListCoins() const
     // CWalletTx objects, callers to this function really should acquire the
     // cs_wallet lock before calling it. However, the current caller doesn't
     // acquire this lock yet. There was an attempt to add the missing lock in
-    // https://github.com/sin/sin/pull/10340, but that change has been
-    // postponed until after https://github.com/sin/sin/pull/10244 to
+    // https://github.com/bitcoin/bitcoin/pull/10340, but that change has been
+    // postponed until after https://github.com/bitcoin/bitcoin/pull/10244 to
     // avoid adding some extra complexity to the Qt code.
 
     std::map<CTxDestination, std::vector<COutput>> result;
@@ -3700,6 +3714,19 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
                 setWalletUTXO.insert(COutPoint(pair.first, i));
             }
         }
+        // SIN
+            for(unsigned int i = 0; i <  pair.second.tx->vout.size(); ++i) {
+                std::vector<valtype> vSolutions;
+                txnouttype whichType;
+                Solver(pair.second.tx->vout[i].scriptPubKey, whichType, vSolutions);
+                if (whichType == TX_BURN_DATA && vSolutions.size() == 2){
+                    if (HaveKey(CKeyID(uint160(vSolutions[0])))){
+                        std::string data(vSolutions[1].begin(), vSolutions[1].end());
+                        mapOnChainData[COutPoint(pair.first, i)] = data;
+                    }
+                }
+            }
+        //
     }
     //
 
@@ -4449,7 +4476,7 @@ void CWallet::GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) c
  *
  * For more information see CWalletTx::nTimeSmart,
  * https://sintalk.org/?topic=54527, or
- * https://github.com/sin/sin/pull/1393.
+ * https://github.com/bitcoin/bitcoin/pull/1393.
  */
 unsigned int CWallet::ComputeTimeSmart(const CWalletTx& wtx) const
 {

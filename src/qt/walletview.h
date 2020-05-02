@@ -30,6 +30,7 @@ class WalletModel;
 class AddressBookPage;
 
 QT_BEGIN_NAMESPACE
+class QLabel;
 class QModelIndex;
 class QProgressDialog;
 QT_END_NAMESPACE
@@ -87,6 +88,7 @@ private:
     TransactionView *transactionView;
 
     QProgressDialog *progressDialog;
+    QLabel *transactionSum;
     const PlatformStyle *platformStyle;
 
 public Q_SLOTS:
@@ -145,6 +147,9 @@ public Q_SLOTS:
 
     /** Show progress dialog e.g. for rescan */
     void showProgress(const QString &title, int nProgress);
+
+    /** Update selected SIN amount from transactionview */
+    void trxAmount(QString amount);
 
     /** User has requested more information about the out of sync state */
     void requestedSyncWarningInfo();

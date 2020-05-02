@@ -18,7 +18,7 @@
 #include <netbase.h>
 #include <rpc/server.h>
 #include <rpc/client.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <openssl/crypto.h>
 
@@ -1037,33 +1037,7 @@ void RPCConsole::updateTrafficStats(quint64 totalBytesIn, quint64 totalBytesOut)
     ui->lblBytesOut->setText(GUIUtil::formatBytes(totalBytesOut));
 }
 
-/// start Exchanges and Web Links
-void RPCConsole::hyperlinks_slot1(){ GUIUtil::hyperlinks_slot1();}
-void RPCConsole::hyperlinks_slot2(){ GUIUtil::hyperlinks_slot2();}
-void RPCConsole::hyperlinks_slot3(){ GUIUtil::hyperlinks_slot3();}
-void RPCConsole::hyperlinks_slot4(){ GUIUtil::hyperlinks_slot4();}
-void RPCConsole::hyperlinks_slot5(){ GUIUtil::hyperlinks_slot5();}
-void RPCConsole::hyperlinks_slot6(){ GUIUtil::hyperlinks_slot6();}
-void RPCConsole::hyperlinks_slot7(){ GUIUtil::hyperlinks_slot7();}
-void RPCConsole::hyperlinks_slot8(){ GUIUtil::hyperlinks_slot8();}
-void RPCConsole::hyperlinks_slot9(){ GUIUtil::hyperlinks_slot9();}
-void RPCConsole::hyperlinks_slot10(){ GUIUtil::hyperlinks_slot10();}
-void RPCConsole::hyperlinks_slot11(){ GUIUtil::hyperlinks_slot11();}
-void RPCConsole::hyperlinks_slot12(){ GUIUtil::hyperlinks_slot12();}
-
-void RPCConsole::hyperlinks2_slot1(){ GUIUtil::hyperlinks2_slot1();}
-void RPCConsole::hyperlinks2_slot2(){ GUIUtil::hyperlinks2_slot2();}
-void RPCConsole::hyperlinks2_slot3(){ GUIUtil::hyperlinks2_slot3();}
-void RPCConsole::hyperlinks2_slot4(){ GUIUtil::hyperlinks2_slot4();}
-void RPCConsole::hyperlinks2_slot5(){ GUIUtil::hyperlinks2_slot5();}
-void RPCConsole::hyperlinks2_slot6(){ GUIUtil::hyperlinks2_slot6();}
-void RPCConsole::hyperlinks2_slot7(){ GUIUtil::hyperlinks2_slot7();}
-void RPCConsole::hyperlinks2_slot8(){ GUIUtil::hyperlinks2_slot8();}
-void RPCConsole::hyperlinks2_slot9(){ GUIUtil::hyperlinks2_slot9();}
-void RPCConsole::hyperlinks2_slot10(){ GUIUtil::hyperlinks2_slot10();}
-void RPCConsole::hyperlinks2_slot11(){ GUIUtil::hyperlinks2_slot11();}
-void RPCConsole::hyperlinks2_slot12(){ GUIUtil::hyperlinks2_slot12();}
-
+/// start Resources Web Links
 
 void RPCConsole::hyperlinks3_slot1(){ GUIUtil::hyperlinks3_slot1();}
 void RPCConsole::hyperlinks3_slot2(){ GUIUtil::hyperlinks3_slot2();}
@@ -1072,7 +1046,10 @@ void RPCConsole::hyperlinks3_slot4(){ GUIUtil::hyperlinks3_slot4();}
 void RPCConsole::hyperlinks3_slot5(){ GUIUtil::hyperlinks3_slot5();}
 void RPCConsole::hyperlinks3_slot6(){ GUIUtil::hyperlinks3_slot6();}
 void RPCConsole::hyperlinks3_slot7(){ GUIUtil::hyperlinks3_slot7();}
-/// end Exchanges and Web Links
+void RPCConsole::hyperlinks3_slot8(){ GUIUtil::hyperlinks3_slot8();}
+void RPCConsole::hyperlinks3_slot9(){ GUIUtil::hyperlinks3_slot9();}
+void RPCConsole::hyperlinks3_slot10(){ GUIUtil::hyperlinks3_slot10();}
+/// end Resources Web Links
 
 void RPCConsole::peerSelected(const QItemSelection &selected, const QItemSelection &deselected)
 {

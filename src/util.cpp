@@ -6,12 +6,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
+#include <util/system.h>
 
 #include <chainparamsbase.h>
 #include <random.h>
 #include <serialize.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include <stdarg.h>
 
@@ -73,7 +73,7 @@
 #ifdef HAVE_MALLOPT_ARENA_MAX
 #include <malloc.h>
 #endif
-
+ 
 // Dash
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -94,6 +94,7 @@ const int64_t nStartupTime = GetTime();
 //Dash only features
 bool fMasterNode = false;
 bool fLiteMode = false;
+bool fInfinityNode = false;
 /**
     nWalletBackups:
         1..10   - number of automatic backups to keep
@@ -574,7 +575,7 @@ void ArgsManager::AddArg(const std::string& name, const std::string& help, const
 void ArgsManager::AddHiddenArgs(const std::vector<std::string>& names)
 {
     for (const std::string& name : names) {
-        AddArg(name, "", false, OptionsCategory::HIDDEN);
+        AddArg(name, "", ArgsManager::ALLOW_ANY, OptionsCategory::HIDDEN);
     }
 }
 

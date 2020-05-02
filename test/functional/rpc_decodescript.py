@@ -5,12 +5,12 @@
 """Test decoding scripts via decodescript RPC command."""
 
 from test_framework.messages import CTransaction, sha256
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import assert_equal, bytes_to_hex_str, hex_str_to_bytes
 
 from io import BytesIO
 
-class DecodeScriptTest(BitcoinTestFramework):
+class DecodeScriptTest(SinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1

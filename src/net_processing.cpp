@@ -28,9 +28,9 @@
 #include <tinyformat.h>
 #include <txmempool.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <utilmoneystr.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/moneystr.h>
+#include <util/strencodings.h>
 
 #include <memory>
 
@@ -41,7 +41,9 @@
 #include <masternode-sync.h>
 #include <masternodeman.h>
 //
-
+// SIN
+#include <infinitynodelockreward.h>
+//
 #if defined(NDEBUG)
 # error "SIN cannot be compiled without assertions."
 #endif
@@ -87,10 +89,7 @@ std::map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(g_cs_orphans);
 
 void EraseOrphansFor(NodeId peer);
 
-/** Increase a node's misbehavior score. */
-// Dash
-//void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-//
+//Moved Misbehaving() to header for IN and MN code compatibility
 
 /** Average delay between local address broadcasts in seconds. */
 static constexpr unsigned int AVG_LOCAL_ADDRESS_BROADCAST_INTERVAL = 24 * 60 * 60;
@@ -1069,7 +1068,16 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_BLOCK:
     case MSG_WITNESS_BLOCK:
         return LookupBlockIndex(inv.hash) != nullptr;
-
+    // SIN
+    case MSG_INFCOMMITMENT:
+        return inflockreward.AlreadyHave(inv.hash);
+    case MSG_LOCKREWARD_INIT:
+        return inflockreward.AlreadyHave(inv.hash);
+    case MSG_INFLRGROUP:
+        return inflockreward.AlreadyHave(inv.hash);
+    case MSG_INFLRMUSIG:
+        return inflockreward.AlreadyHave(inv.hash);
+    //
     // Dash
     /*
         Dash Related Inventory Messages
@@ -1338,36 +1346,33 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
 
             const CInv &inv = *it;
             it++;
-            // Dash
-            LogPrint(BCLog::NET, "ProcessGetData -- inv = %s\n", inv.ToString());
 
           // Process non-Dash messages by original Bitcoin Core processor
           if (inv.type == MSG_TX || inv.type == MSG_WITNESS_TX) {
-				LogPrint(BCLog::NET, "ProcessGetData -- NON Node message\n");
-				// Send stream from relay memory
-				bool push = false;
-				auto mi = mapRelay.find(inv.hash);
-				int nSendFlags = (inv.type == MSG_TX ? SERIALIZE_TRANSACTION_NO_WITNESS : 0);
-				if (mi != mapRelay.end()) {
-					connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *mi->second));
-					push = true;
-				} else if (pfrom->timeLastMempoolReq) {
-					auto txinfo = mempool.info(inv.hash);
-					// To protect privacy, do not answer getdata using the mempool when
-					// that TX couldn't have been INVed in reply to a MEMPOOL request.
-					if (txinfo.tx && txinfo.nTime <= pfrom->timeLastMempoolReq) {
-						connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *txinfo.tx));
-						push = true;
-					}
-				}
-				if (!push) {
-					vNotFound.push_back(inv);
-				}
+              // Send stream from relay memory
+              bool push = false;
+              auto mi = mapRelay.find(inv.hash);
+              int nSendFlags = (inv.type == MSG_TX ? SERIALIZE_TRANSACTION_NO_WITNESS : 0);
+              if (mi != mapRelay.end()) {
+                  connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *mi->second));
+                  push = true;
+              } else if (pfrom->timeLastMempoolReq) {
+                  auto txinfo = mempool.info(inv.hash);
+                  // To protect privacy, do not answer getdata using the mempool when
+                  // that TX couldn't have been INVed in reply to a MEMPOOL request.
+                  if (txinfo.tx && txinfo.nTime <= pfrom->timeLastMempoolReq) {
+                      connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::TX, *txinfo.tx));
+                      push = true;
+                  }
+              }
+              if (!push) {
+                  vNotFound.push_back(inv);
+              }
           } else {
-          // Dash
+             // All node INV
              {
-                LogPrint(BCLog::NET, "ProcessGetData -- message from infinity node protocol: %d like InstantSend\n", inv.type);
                 bool pushed = false;
+                //priority for InstantSend
                 {
                     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                     {
@@ -1386,6 +1391,38 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                     if(pushed)
                         connman->PushMessage(pfrom, msgMaker.Make(inv.GetCommand(), ss));
                 }
+                // SIN
+                if (!pushed && inv.type == MSG_LOCKREWARD_INIT) {
+                    CLockRewardRequest lockRewardRequest;
+                    if(inflockreward.GetLockRewardRequest(inv.hash,lockRewardRequest)) {
+                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+                        ss.reserve(1000);
+                        ss << lockRewardRequest;
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::INFLOCKREWARDINIT, ss));
+                        pushed = true;
+                    }
+                }
+                if (!pushed && inv.type == MSG_INFCOMMITMENT) {
+                    CLockRewardCommitment commitment;
+                    if(inflockreward.GetLockRewardCommitment(inv.hash,commitment)) {
+                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+                        ss.reserve(1000);
+                        ss << commitment;
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::INFCOMMITMENT, ss));
+                        pushed = true;
+                    }
+                }
+                if (!pushed && inv.type == MSG_INFLRGROUP) {
+                    CGroupSigners gSigners;
+                    if(inflockreward.GetGroupSigners(inv.hash,gSigners)) {
+                        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+                        ss.reserve(1000);
+                        ss << gSigners;
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::INFLRGROUP, ss));
+                        pushed = true;
+                    }
+                }
+                //
                 if (!pushed && inv.type == MSG_TXLOCK_REQUEST) {
                     CTxLockRequest txLockRequest;
                     if(instantsend.GetTxLockRequest(inv.hash, txLockRequest)) {
@@ -1777,7 +1814,17 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
     }
 
-    if (strCommand == NetMsgType::REJECT)
+    //SIN exception
+    if (strCommand ==  NetMsgType::INFVERIFY)
+    {
+        //do nothing if i am in LiteMode or not InfinityNode
+        if(fLiteMode || !fInfinityNode) return true;
+
+        inflockreward.ProcessDirectMessage(pfrom, strCommand, vRecv, *connman);
+    }
+    //
+
+    else if (strCommand == NetMsgType::REJECT)
     {
         if (LogAcceptCategory(BCLog::NET)) {
             try {
@@ -3196,6 +3243,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             instantsend.ProcessMessage(pfrom, strCommand, vRecv, *connman);
             sporkManager.ProcessSpork(pfrom, strCommand, vRecv, *connman);
             masternodeSync.ProcessMessage(pfrom, strCommand, vRecv);
+            inflockreward.ProcessMessage(pfrom, strCommand, vRecv, *connman);
         }
         //
         else
@@ -3206,7 +3254,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         // Dash
     }
     //
-
     return true;
 }
 
@@ -3953,7 +4000,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
 
                     if (fTrickleWait)
                     {
-                        LogPrint(BCLog::NET, "SendMessages -- queued inv(vInvWait): %s  index=%d peer=%d\n", inv.ToString(), vInvWait.size(), pto->GetId());
+                        LogPrint(BCLog::NET, "SendMessages -- queued vInventoryToSend inv(vInvWait): %s  index=%d peer=%d\n", inv.ToString(), vInvWait.size(), pto->GetId());
                         vInvWait.push_back(inv);
                         continue;
                     }
@@ -3965,7 +4012,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
                 vInv.push_back(inv);
                 if (vInv.size() >= 1000)
                 {
-                    LogPrint(BCLog::NET, "SendMessages -- pushing inv's: count=%d peer=%d\n", vInv.size(), pto->GetId());
+                    LogPrint(BCLog::NET, "SendMessages -- pushing vInventoryToSend inv's: count=%d peer=%d\n", vInv.size(), pto->GetId());
                     connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
                     vInv.clear();
                 }
@@ -3974,7 +4021,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         }
         if (!vInv.empty()) {
             connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
-            LogPrint(BCLog::NET, "SendMessages -- pushing tailing inv's: count=%d peer=%d\n", vInv.size(), pto->GetId());
+            LogPrint(BCLog::NET, "SendMessages -- pushing vInventoryToSend tailing inv's: count=%d peer=%d\n", vInv.size(), pto->GetId());
         }
         //
 

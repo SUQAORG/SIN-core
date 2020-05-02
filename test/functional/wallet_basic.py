@@ -6,7 +6,7 @@
 from decimal import Decimal
 import time
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import (
     assert_array_result,
     assert_equal,
@@ -18,7 +18,7 @@ from test_framework.util import (
     wait_until,
 )
 
-class WalletTest(BitcoinTestFramework):
+class WalletTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
         self.setup_clean_chain = True

@@ -256,6 +256,11 @@ extern const char *MNPING;
 extern const char *DSEG;
 extern const char *SYNCSTATUSCOUNT;
 extern const char *MNVERIFY;
+extern const char *INFLOCKREWARDINIT;
+extern const char *INFVERIFY;
+extern const char *INFCOMMITMENT;
+extern const char *INFLRMUSIG;
+extern const char *INFLRGROUP;
 };
 
 /* Get a vector of all valid message types (see above) */
@@ -404,8 +409,13 @@ enum GetDataMsg
     MSG_MASTERNODE_QUORUM = 10, // not implemented
     MSG_MASTERNODE_ANNOUNCE = 11,
     MSG_MASTERNODE_PING = 12,
-    //MSG_DSTX = 13,
+
+    MSG_LOCKREWARD_INIT = 14,
+    MSG_INFVERIFY = 15,
     MSG_MASTERNODE_VERIFY = 16,
+    MSG_INFLRMUSIG = 17,
+    MSG_INFLRGROUP = 18,
+    MSG_INFCOMMITMENT = 19,
     // Witness flagged messages
     MSG_WITNESS_BLOCK = MSG_BLOCK | MSG_WITNESS_FLAG, //!< Defined in BIP144
     MSG_WITNESS_TX = MSG_TX | MSG_WITNESS_FLAG,       //!< Defined in BIP144

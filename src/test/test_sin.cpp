@@ -9,6 +9,7 @@
 #include <consensus/validation.h>
 #include <crypto/sha256.h>
 #include <validation.h>
+#include <init.h>
 #include <miner.h>
 #include <net_processing.h>
 #include <pow.h>
@@ -17,6 +18,8 @@
 #include <rpc/server.h>
 #include <rpc/register.h>
 #include <script/sigcache.h>
+
+const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 
 void CConnmanTest::AddNode(CNode& node)
 {
@@ -48,6 +51,11 @@ std::ostream& operator<<(std::ostream& os, const uint256& num)
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     : m_path_root(fs::temp_directory_path() / "test_sin" / strprintf("%lu_%i", (unsigned long)GetTime(), (int)(InsecureRandRange(1 << 30))))
 {
+    SelectParams(chainName);
+    gArgs.ForceSetArg("-printtoconsole", "0");
+    if (G_TEST_LOG_FUN) LogInstance().PushBackCallback(G_TEST_LOG_FUN);
+    InitLogging();
+    LogInstance().StartLogging();
     SHA256AutoDetect();
     RandomInit();
     ECC_Start();
@@ -56,12 +64,12 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     InitSignatureCache();
     InitScriptExecutionCache();
     fCheckBlockIndex = true;
-    SelectParams(chainName);
     noui_connect();
 }
 
 BasicTestingSetup::~BasicTestingSetup()
 {
+    LogInstance().DisconnectTestLogger();
     fs::remove_all(m_path_root);
     ECC_Stop();
 }
@@ -78,36 +86,36 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
 {
     SetDataDir("tempdir");
     const CChainParams& chainparams = Params();
-        // Ideally we'd move all the RPC tests to the functional testing framework
-        // instead of unit tests, but for now we need these here.
+    // Ideally we'd move all the RPC tests to the functional testing framework
+    // instead of unit tests, but for now we need these here.
 
-        RegisterAllCoreRPCCommands(tableRPC);
-        ClearDatadirCache();
+    RegisterAllCoreRPCCommands(tableRPC);
+    ClearDatadirCache();
 
-        // We have to run a scheduler thread to prevent ActivateBestChain
-        // from blocking due to queue overrun.
-        threadGroup.create_thread(boost::bind(&CScheduler::serviceQueue, &scheduler));
-        GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
+    // We have to run a scheduler thread to prevent ActivateBestChain
+    // from blocking due to queue overrun.
+    threadGroup.create_thread(boost::bind(&CScheduler::serviceQueue, &scheduler));
+    GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
-        mempool.setSanityCheck(1.0);
-        pblocktree.reset(new CBlockTreeDB(1 << 20, true));
-        pcoinsdbview.reset(new CCoinsViewDB(1 << 23, true));
-        pcoinsTip.reset(new CCoinsViewCache(pcoinsdbview.get()));
-        if (!LoadGenesisBlock(chainparams)) {
-            throw std::runtime_error("LoadGenesisBlock failed.");
+    mempool.setSanityCheck(1.0);
+    pblocktree.reset(new CBlockTreeDB(1 << 20, true));
+    pcoinsdbview.reset(new CCoinsViewDB(1 << 23, true));
+    pcoinsTip.reset(new CCoinsViewCache(pcoinsdbview.get()));
+    if (!LoadGenesisBlock(chainparams)) {
+        throw std::runtime_error("LoadGenesisBlock failed.");
+    }
+    {
+        CValidationState state;
+        if (!ActivateBestChain(state, chainparams)) {
+            throw std::runtime_error(strprintf("ActivateBestChain failed. (%s)", FormatStateMessage(state)));
         }
-        {
-            CValidationState state;
-            if (!ActivateBestChain(state, chainparams)) {
-                throw std::runtime_error(strprintf("ActivateBestChain failed. (%s)", FormatStateMessage(state)));
-            }
-        }
-        nScriptCheckThreads = 3;
-        for (int i=0; i < nScriptCheckThreads-1; i++)
-            threadGroup.create_thread(&ThreadScriptCheck);
-        g_connman = std::unique_ptr<CConnman>(new CConnman(0x1337, 0x1337)); // Deterministic randomness for tests.
-        connman = g_connman.get();
-        peerLogic.reset(new PeerLogicValidation(connman, scheduler, /*enable_bip61=*/true));
+    }
+    nScriptCheckThreads = 3;
+    for (int i=0; i < nScriptCheckThreads-1; i++)
+        threadGroup.create_thread(&ThreadScriptCheck);
+    g_connman = std::unique_ptr<CConnman>(new CConnman(0x1337, 0x1337)); // Deterministic randomness for tests.
+    connman = g_connman.get();
+    peerLogic.reset(new PeerLogicValidation(connman, scheduler, /*enable_bip61=*/true));
 }
 
 TestingSetup::~TestingSetup()

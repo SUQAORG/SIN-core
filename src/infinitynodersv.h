@@ -17,9 +17,6 @@ class CVote;
 
 extern CInfinitynodersv infnodersv;
 
-
-static const int INFINITYNODE_RSV_BEGIN = 300000;
-
 class CVote
 {
 private:

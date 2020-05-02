@@ -5,7 +5,7 @@
 
 #include <leveldbwrapper.h>
 
-#include <util.h>
+#include <util/system.h>
 
 #include <boost/filesystem.hpp>
 

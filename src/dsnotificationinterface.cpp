@@ -8,9 +8,10 @@
 #include <dsnotificationinterface.h>
 #include <instantx.h>
 #include <masternodeman.h>
-#include <infinitynodeman.h>
 #include <masternode-payments.h>
 #include <masternode-sync.h>
+#include <infinitynodeman.h>
+#include <infinitynodelockreward.h>
 
 void CDSNotificationInterface::InitializeCurrentBlockTip()
 {
@@ -39,9 +40,11 @@ void CDSNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, con
         return;
 
     mnodeman.UpdatedBlockTip(pindexNew);
-    infnodeman.UpdatedBlockTip(pindexNew);
     instantsend.UpdatedBlockTip(pindexNew);
     mnpayments.UpdatedBlockTip(pindexNew, connman);
+
+    infnodeman.UpdatedBlockTip(pindexNew);
+    inflockreward.UpdatedBlockTip(pindexNew, connman);
 }
 
 void CDSNotificationInterface::SyncTransaction(const CTransaction &tx, const CBlockIndex *pindex, int posInBlock)

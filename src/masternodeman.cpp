@@ -13,7 +13,7 @@
 #include <netfulfilledman.h>
 #include <netmessagemaker.h>
 #include <script/standard.h>
-#include <util.h>
+#include <util/system.h>
 
 /** Masternode manager */
 CMasternodeMan mnodeman;
@@ -157,8 +157,6 @@ void CMasternodeMan::Check()
 {
     LOCK2(cs_main, cs);
 
-    LogPrint(BCLog::MASTERNODE, "CMasternodeMan::Check -- nLastWatchdogVoteTime=%d, IsWatchdogActive()=%d\n", nLastWatchdogVoteTime, IsWatchdogActive());
-
     std::map<COutPoint, CMasternode>::iterator it = mapMasternodes.begin();
     while (it != mapMasternodes.end()) {
         it->second.updateInfinityNodeInfo(true);
@@ -195,8 +193,6 @@ void CMasternodeMan::CheckAndRemoveBurnFundNotUniqueNode(CConnman& connman)
             std::vector<CMasternode> vpMasternodesToBan; //list node will be banned
             for (auto& mnpair : mapMasternodes) {
                     CMasternode mnb = mnpair.second;
-                    LogPrint(BCLog::MASTERNODE, "CMasternodeMan::CheckAndRemoveBurnFundNotUniqueNode -- burntx %s size %d find %d\n", 
-                                mnb.vinBurnFund.prevout.ToString(), nBurnFundMap.size(), nBurnFundMap.count(mnb.vinBurnFund.prevout));
                     if (nBurnFundMap.count(mnb.vinBurnFund.prevout) > 0) {
                         // conflict situation with someone else, choose older sigtime
                             LogPrint(BCLog::MASTERNODE, "CMasternodeMan::CheckAndRemoveBurnFundNotUniqueNode -- burntx detected %s\n", mnb.vinBurnFund.prevout.ToStringShort());
@@ -254,60 +250,6 @@ void CMasternodeMan::CheckAndRemoveBurnFundNotUniqueNode(CConnman& connman)
             }
     }
 }
-
-void CMasternodeMan::CheckAndRemoveLimitNumberNode(CConnman& connman, int nSinType, int nLimit)
-{
-    if(!masternodeSync.IsMasternodeListSynced()) return;
-
-    std::vector<std::pair<int64_t, CMasternode*> > vecSigTimeType;
-    std::vector<CMasternode> vpMasternodesToBan; //list node will be banned
-
-    for (auto& mnpair : mapMasternodes) {
-        if (mnpair.second.GetSinTypeInt() == nSinType) {
-            vecSigTimeType.push_back(std::make_pair(mnpair.second.sigTime, &mnpair.second));
-        }
-    }
-
-    // Sort them low to high
-    sort(vecSigTimeType.begin(), vecSigTimeType.end(), CompareSigTime());
-
-    //at fork heigh, limit will very high, node will not removed
-    if (nCachedBlockHeight >= 330000){nLimit=5000;}
-    //in testnet, limit is removed from block 500
-    if (Params().NetworkIDString() == CBaseChainParams::TESTNET && nCachedBlockHeight >= 1000) {
-        nLimit=5000;
-    }
-
-    if ((int)vecSigTimeType.size() <= nLimit) return;
-
-	int count=0;
-    for (std::pair<int64_t, CMasternode*>& p : vecSigTimeType){
-        count++;
-        if (count >= nLimit) {
-            CMasternode mn = *p.second;
-            vpMasternodesToBan.push_back(mn);
-        }
-    }
-
-    if ((int)vpMasternodesToBan.size() > 0) {
-        LogPrint(BCLog::MASTERNODE, "CMasternodeMan::CheckAndRemoveBurnFundNotUniqueNode -- removing...\n");
-        std::vector<CNode*> vNodesCopy = connman.CopyNodeVector();
-        for (auto pmn : vpMasternodesToBan) {
-            std::map<COutPoint, CMasternode>::iterator it;
-            it = mapMasternodes.find(pmn.vin.prevout);
-
-            CMasternodeBroadcast mnb = CMasternodeBroadcast(it->second);
-            uint256 hash = mnb.GetHash();
-            // erase all of the broadcasts we've seen from this txin, ...
-            mapSeenMasternodeBroadcast.erase(hash);
-            mWeAskedForMasternodeListEntry.erase(pmn.vin.prevout);
-            mapMasternodes.erase(it);
-        }
-
-        NotifyMasternodeUpdates(connman);
-    }
-}
-
 
 void CMasternodeMan::CheckAndRemove(CConnman& connman)
 {

@@ -4,11 +4,11 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test for the ZMQ RPC methods."""
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import assert_equal
 
 
-class RPCZMQTest(BitcoinTestFramework):
+class RPCZMQTest(SinTestFramework):
 
     address = "tcp://127.0.0.1:28332"
 
@@ -18,7 +18,7 @@ class RPCZMQTest(BitcoinTestFramework):
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_py3_zmq()
-        self.skip_if_no_bitcoind_zmq()
+        self.skip_if_no_sind_zmq()
 
     def run_test(self):
         self._test_getzmqnotifications()

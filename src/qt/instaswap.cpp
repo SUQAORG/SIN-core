@@ -123,8 +123,8 @@ void InstaSwap::setupSwapList() {
     int columnSendCoinWidth = 80;
     int columnSendAmounWidth = 100;
     int columnReceiveAddressWidth = 160;
-    int columnReceiveCoinWidth = 80;
-    int columnReceiveAmountWidth = 100;
+    int columnReceiveCoinWidth = 140;
+    int columnReceiveAmountWidth = 140;
     int columnRefundAddressWidth = 160;
 
     ui->swapsTable->setColumnWidth(0, columnTransactionIdWidth);

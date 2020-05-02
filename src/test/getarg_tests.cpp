@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
+#include <util/system.h>
 #include <test/test_sin.h>
 
 #include <string>
@@ -35,7 +35,7 @@ static void SetupArgs(const std::vector<std::string>& args)
 {
     gArgs.ClearArgs();
     for (const std::string& arg : args) {
-        gArgs.AddArg(arg, "", false, OptionsCategory::OPTIONS);
+        gArgs.AddArg(arg, "", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     }
 }
 

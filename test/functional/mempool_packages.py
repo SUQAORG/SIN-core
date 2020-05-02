@@ -7,13 +7,13 @@
 from decimal import Decimal
 
 from test_framework.messages import COIN
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import assert_equal, assert_raises_rpc_error, satoshi_round, sync_blocks, sync_mempools
 
 MAX_ANCESTORS = 25
 MAX_DESCENDANTS = 25
 
-class MempoolPackagesTest(BitcoinTestFramework):
+class MempoolPackagesTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.extra_args = [["-maxorphantx=1000"], ["-maxorphantx=1000", "-limitancestorcount=5"]]
@@ -44,7 +44,7 @@ class MempoolPackagesTest(BitcoinTestFramework):
         vout = utxo[0]['vout']
         value = utxo[0]['amount']
 
-        fee = Decimal("0.0001")
+        fee = Decimal("0.00393")
         # MAX_ANCESTORS transactions off a confirmed tx should be fine
         chain = []
         for i in range(MAX_ANCESTORS):

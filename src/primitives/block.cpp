@@ -8,11 +8,12 @@
 #include <chainparams.h>
 #include <hash.h>
 #include <tinyformat.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <crypto/common.h>
 
 const int nSinHeightFinalnet = 5;
 const int nSinHeightTestnet  = 5;
+const int nSinHeightRegtest  = 5;
 const int nSinHeightMainnet  = 170000;
 
 uint256 CBlockHeader::GetHash() const
@@ -26,7 +27,8 @@ uint256 CBlockHeader::GetPoWHash(int nHeight) const
 
     if ((Params().NetworkIDString() == CBaseChainParams::MAIN && nHeight >= nSinHeightMainnet) ||
         (Params().NetworkIDString() == CBaseChainParams::TESTNET && nHeight >= nSinHeightTestnet) ||
-        (Params().NetworkIDString() == CBaseChainParams::FINALNET && nHeight >= nSinHeightFinalnet))
+        (Params().NetworkIDString() == CBaseChainParams::FINALNET && nHeight >= nSinHeightFinalnet) ||
+        (Params().NetworkIDString() == CBaseChainParams::REGTEST && nHeight >= nSinHeightRegtest))
         fSinMode = true;
 
     if (!fSinMode)

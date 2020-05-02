@@ -33,7 +33,7 @@
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
 #include <ui_interface.h>
-#include <util.h>
+#include <util/system.h>
 
 // Dash
 #include <masternode-sync.h>
@@ -322,34 +322,9 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
 
     connect(connectionsControl, SIGNAL(clicked(QPoint)), this, SLOT(toggleNetworkActive()));
 
-    ///start Exhange and Web Links
-    connect(openWebsite1, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot1()));
-    connect(openWebsite2, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot2()));
-    connect(openWebsite3, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot3()));
-    connect(openWebsite4, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot4()));
-    connect(openWebsite5, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot5()));
-    connect(openWebsite6, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot6()));
-    connect(openWebsite7, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot7()));
-    connect(openWebsite8, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot8()));
-    connect(openWebsite9, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot9()));
-    connect(openWebsite10, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot10()));
-    connect(openWebsite11, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot11()));
-    connect(openWebsite12, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks_slot12()));
+    ///Resorces Web Links
     
-    
-    connect(Exchangesite1, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot1()));
-    connect(Exchangesite2, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot2()));
-    connect(Exchangesite3, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot3()));
-    connect(Exchangesite4, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot4()));
-    connect(Exchangesite5, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot5()));
-    connect(Exchangesite6, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot6()));
-    connect(Exchangesite7, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot7()));
-    connect(Exchangesite8, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot8()));
-    connect(Exchangesite9, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot9()));
-    connect(Exchangesite10, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot10()));
-    connect(Exchangesite11, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot11()));
-    connect(Exchangesite12, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot12()));
-
+      
     connect(ResourcesWebsite1, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot1()));
     connect(ResourcesWebsite2, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot2()));
     connect(ResourcesWebsite3, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot3()));
@@ -357,9 +332,23 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     connect(ResourcesWebsite5, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot5()));
     connect(ResourcesWebsite6, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot6()));
     connect(ResourcesWebsite7, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot7()));
+    connect(ResourcesWebsite8, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot8()));
+    connect(ResourcesWebsite9, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot9()));
+    connect(ResourcesWebsite10, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks3_slot10()));
 
 
     ///end Exhange, Resources and Web Links
+
+
+    ////Governance and I.D.S. Menu
+
+    connect(GovernanceMenu1, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks1_slot1()));
+    connect(GovernanceMenu2, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks1_slot2()));
+        
+    connect(IDSMenu1, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot1()));
+    connect(IDSMenu2, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot2()));
+    connect(IDSMenu3, SIGNAL(triggered()), rpcConsole, SLOT(hyperlinks2_slot3()));
+
 
 
 
@@ -460,8 +449,9 @@ void BitcoinGUI::createActions()
     //
 
     // Instaswap
-    instaswapAction = new QAction(platformStyle->SingleColorIcon(":/icons/instaswap"), tr("&Instaswap"), this);
-    instaswapAction->setStatusTip(tr("Browse Infinitynodes"));
+    if (settings.value("fShowInstaSwapTab").toBool()) {
+    instaswapAction = new QAction(platformStyle->SingleColorIcon(":/icons/instaswap1"), tr("&Instaswap"), this);
+    instaswapAction->setStatusTip(tr("Exchange your SIN rapidly"));
     instaswapAction->setToolTip(instaswapAction->statusTip());
     instaswapAction->setCheckable(true);
 #ifdef Q_OS_MAC
@@ -472,6 +462,7 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(instaswapAction);
     connect(instaswapAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(instaswapAction, SIGNAL(triggered()), this, SLOT(gotoInstaswapPage()));
+	}
     //
 
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
@@ -618,35 +609,8 @@ void BitcoinGUI::createActions()
     // prevents an open debug window from becoming stuck/unusable on client shutdown
     connect(quitAction, SIGNAL(triggered()), rpcConsole, SLOT(hide()));
 
-//start Exchange and Web Links
-    openWebsite1 = new QAction(QIcon(":/icons/website1"), tr("&Sinovate.io"), this);
-    openWebsite2 = new QAction(QIcon(":/icons/discord1"), tr("&Discord"), this);
-    openWebsite3 = new QAction(QIcon(":/icons/twitter1"), tr("&Twitter"), this);
-    openWebsite4 = new QAction(QIcon(":/icons/btctalk1"), tr("&Bitcointalk"), this);
-    openWebsite5 = new QAction(QIcon(":/icons/reddit1"), tr("&Reddit"), this);
-    openWebsite6 = new QAction(QIcon(":/icons/github1"), tr("&github"), this);
-    openWebsite7 = new QAction(QIcon(":/icons/youtube1"), tr("&Youtube"), this);
-    openWebsite8 = new QAction(QIcon(":/icons/github1"), tr("&Github"), this);
-    openWebsite9 = new QAction(QIcon(":/icons/telegram1"), tr("&Telegram"), this);
-    openWebsite10 = new QAction(QIcon(":/icons/info"), tr("&Internationals"), this);
-    openWebsite11 = new QAction(QIcon(":/icons/facebook1"), tr("&Facebook"), this);
-    openWebsite12 = new QAction(QIcon(":/icons/info"), tr("&Minds"), this);
-
-    
-
-    Exchangesite1 = new QAction(QIcon(":/icons/cmc"), tr("&Coinmarketcap"), this);
-    Exchangesite2 = new QAction(QIcon(":/icons/tradeogre"), tr("&TradeOgre"), this);
-    Exchangesite3 = new QAction(QIcon(":/icons/catex"), tr("&Cat.Ex"), this);
-    Exchangesite4 = new QAction(QIcon(":/icons/coinsbit"), tr("&Coinsbit"), this);
-    Exchangesite5 = new QAction(QIcon(":/icons/crex24"), tr("&Crex24"), this);
-    Exchangesite6 = new QAction(QIcon(":/icons/qbtc"), tr("&QBTC"), this);
-    Exchangesite7 = new QAction(QIcon(":/icons/txbit"), tr("&Txbit"), this);
-    Exchangesite8 = new QAction(QIcon(":/icons/catex"), tr("&Cat.Ex ETH"), this);
-    Exchangesite9 = new QAction(QIcon(":/icons/crex24"), tr("&Crex24 ETH"), this);
-    Exchangesite10 = new QAction(QIcon(":/icons/stex"), tr("&Stex"), this);
-    Exchangesite11 = new QAction(QIcon(":/icons/citex"), tr("&Citex"), this);
-    Exchangesite12 = new QAction(QIcon(":/icons/instaswap"), tr("&InstaSwap"), this);
-
+//start Resources Web Links
+           
     ResourcesWebsite1 = new QAction(QIcon(":/icons/info"), tr("&Whitepaper"), this);
     ResourcesWebsite2 = new QAction(QIcon(":/icons/info"), tr("&Roadmap"), this);
     ResourcesWebsite3 = new QAction(QIcon(":/icons/info"), tr("&Documents"), this);
@@ -654,11 +618,22 @@ void BitcoinGUI::createActions()
     ResourcesWebsite5 = new QAction(QIcon(":/icons/info"), tr("&Wallets"), this);
     ResourcesWebsite6 = new QAction(QIcon(":/icons/explorer1"), tr("&Explorer"), this);
     ResourcesWebsite7 = new QAction(QIcon(":/icons/info"), tr("&SIN WebTool"), this);
+    ResourcesWebsite8 = new QAction(QIcon(":/icons/info"), tr("&Infinitynode Setup Guide"), this);
+    ResourcesWebsite9 = new QAction(QIcon(":/icons/cmc"), tr("&Exchanges"), this);
+    ResourcesWebsite10 = new QAction(QIcon(":/icons/info"), tr("&Social Media Channels"), this);
 
 
+//end Resources Web Links
 
-
-//end Exchange and Web Links
+/// Governance and I.D.S. Menu
+	GovernanceMenu1 = new QAction(QIcon(":/icons/info"), tr("&Make a proposal"), this);
+    GovernanceMenu2 = new QAction(QIcon(":/icons/info"), tr("&Cast a Vote"), this);
+    
+    
+    IDSMenu1 = new QAction(QIcon(":/icons/info"), tr("&Send Documents"), this);
+    IDSMenu2 = new QAction(QIcon(":/icons/info"), tr("&Receive Documents"), this);
+    IDSMenu3 = new QAction(QIcon(":/icons/info"), tr("&SIN Messenger"), this);
+///
 
 #ifdef ENABLE_WALLET
     if(walletFrame)
@@ -712,32 +687,37 @@ void BitcoinGUI::createMenuBar()
     file->addAction(quitAction);
 
    
+   //start Governance Menu
 
-    //start exchange Links
-    
-         if (walletFrame) {
-        QMenu* hyperlinks2 = appMenuBar->addMenu(tr("&Exchanges"));
-        hyperlinks2->addAction(Exchangesite1);
-        hyperlinks2->addSeparator();
-        hyperlinks2->addAction(Exchangesite2);
-        hyperlinks2->addAction(Exchangesite3);
-        hyperlinks2->addAction(Exchangesite4);
-        hyperlinks2->addAction(Exchangesite5);
-        hyperlinks2->addAction(Exchangesite6);
-        hyperlinks2->addAction(Exchangesite7);
-        hyperlinks2->addAction(Exchangesite8);
-        hyperlinks2->addAction(Exchangesite9);
-        hyperlinks2->addAction(Exchangesite10);
-        hyperlinks2->addAction(Exchangesite11);
-        hyperlinks2->addAction(Exchangesite12);
+    if (walletFrame) {
+        QMenu* hyperlinks1 = appMenuBar->addMenu(tr("&Governance"));
+        hyperlinks1->addAction(GovernanceMenu1);
+        hyperlinks1->addAction(GovernanceMenu2);
+        
+        
     }
+    //end Governance Menu
 
-    //end Exchange Links
+    //start I.D.S. Menu
+
+    if (walletFrame) {
+        QMenu* hyperlinks2 = appMenuBar->addMenu(tr("&I.D.S."));
+        hyperlinks2->addAction(IDSMenu1);
+        hyperlinks2->addAction(IDSMenu2);
+        hyperlinks2->addAction(IDSMenu3);
+        
+        
+    }
+    //end I.D.S. Menu
+
+    
 
     //start Resources Links
 
     if (walletFrame) {
         QMenu* hyperlinks3 = appMenuBar->addMenu(tr("&Resources"));
+        hyperlinks3->addAction(ResourcesWebsite10);
+        hyperlinks3->addAction(ResourcesWebsite9);
         hyperlinks3->addAction(ResourcesWebsite1);
         hyperlinks3->addAction(ResourcesWebsite2);
         hyperlinks3->addAction(ResourcesWebsite3);
@@ -745,6 +725,7 @@ void BitcoinGUI::createMenuBar()
         hyperlinks3->addAction(ResourcesWebsite5);
         hyperlinks3->addAction(ResourcesWebsite6);
         hyperlinks3->addAction(ResourcesWebsite7);
+        hyperlinks3->addAction(ResourcesWebsite8);
         hyperlinks3->addAction(showSpecsHelpAction);
         
     }
@@ -768,27 +749,7 @@ void BitcoinGUI::createMenuBar()
         //-//tools->addAction(showBackupsAction);
     }
 
-     //start Web Links
-
-    if (walletFrame) {
-        QMenu* hyperlinks = appMenuBar->addMenu(tr("&Social"));
-        hyperlinks->addAction(openWebsite1);
-        hyperlinks->addSeparator();
-        hyperlinks->addAction(openWebsite2);
-        hyperlinks->addAction(openWebsite3);
-        hyperlinks->addAction(openWebsite4);
-        hyperlinks->addAction(openWebsite5);
-        hyperlinks->addAction(openWebsite6);
-        hyperlinks->addAction(openWebsite7);
-        hyperlinks->addAction(openWebsite8);
-        hyperlinks->addAction(openWebsite9);
-        hyperlinks->addAction(openWebsite10);
-        hyperlinks->addAction(openWebsite11);
-        hyperlinks->addAction(openWebsite12);
-        
-    }
-    //end Web Links
-    //
+     
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     if(walletFrame)
@@ -837,13 +798,18 @@ void BitcoinGUI::createToolBars()
         {
             toolbar->addAction(masternodeAction);
         }
+        
+        //InstaSwap
+        if (settings.value("fShowInstaSwapTab").toBool())
+        {
         toolbar->addAction(instaswapAction);
+    	}
 
         //add LOGO
 
-        QLabel* label = new QLabel();
-        label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        toolbar->addWidget(label);
+        //QLabel* label = new QLabel();
+        //label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        //toolbar->addWidget(label);
 
         
         QLabel* labelLogo = new QLabel();
@@ -1019,7 +985,9 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     //
 
     // Instaswap
+    if (settings.value("fShowInstaSwapTab").toBool() && instaswapAction) {
     instaswapAction->setEnabled(enabled);
+	}
     //
 
     encryptWalletAction->setEnabled(enabled);
@@ -1056,33 +1024,9 @@ void BitcoinGUI::createTrayIconMenu()
     trayIcon->setContextMenu(trayIconMenu);
 
 
-//start Exchange and Web Links
-    trayIconMenu->addAction(openWebsite1);
-    trayIconMenu->addAction(openWebsite2);
-    trayIconMenu->addAction(openWebsite3);
-    trayIconMenu->addAction(openWebsite4);
-    trayIconMenu->addAction(openWebsite5);
-    trayIconMenu->addAction(openWebsite6);
-    trayIconMenu->addAction(openWebsite7);
-    trayIconMenu->addAction(openWebsite8);
-    trayIconMenu->addAction(openWebsite9);
-    trayIconMenu->addAction(openWebsite10);
-    trayIconMenu->addAction(openWebsite11);
-    trayIconMenu->addAction(openWebsite12);
-       
-    trayIconMenu->addAction(Exchangesite1);
-    trayIconMenu->addAction(Exchangesite2);
-    trayIconMenu->addAction(Exchangesite3);
-    trayIconMenu->addAction(Exchangesite4);
-    trayIconMenu->addAction(Exchangesite5);
-    trayIconMenu->addAction(Exchangesite6);
-    trayIconMenu->addAction(Exchangesite7);
-    trayIconMenu->addAction(Exchangesite8);
-    trayIconMenu->addAction(Exchangesite9);
-    trayIconMenu->addAction(Exchangesite10);
-    trayIconMenu->addAction(Exchangesite11);
-    trayIconMenu->addAction(Exchangesite12);
-
+//start Resources Web Links       
+      
+    trayIconMenu->addAction(ResourcesWebsite9);
     trayIconMenu->addAction(ResourcesWebsite1);
     trayIconMenu->addAction(ResourcesWebsite2);
     trayIconMenu->addAction(ResourcesWebsite3);
@@ -1090,10 +1034,21 @@ void BitcoinGUI::createTrayIconMenu()
     trayIconMenu->addAction(ResourcesWebsite5);
     trayIconMenu->addAction(ResourcesWebsite6);
     trayIconMenu->addAction(ResourcesWebsite7);
-
+    trayIconMenu->addAction(ResourcesWebsite8);
 
 //end Exchange and Web Links
 
+
+//start Governance and I.D.S. Menu
+
+    trayIconMenu->addAction(GovernanceMenu1);
+    trayIconMenu->addAction(GovernanceMenu2);
+    
+    trayIconMenu->addAction(IDSMenu1);
+    trayIconMenu->addAction(IDSMenu2);
+    trayIconMenu->addAction(IDSMenu3);
+
+//end Governance and I.D.S. Menu
 
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
@@ -1246,8 +1201,11 @@ void BitcoinGUI::gotoMasternodePage()
 // Instaswap
 void BitcoinGUI::gotoInstaswapPage()
 {
-    instaswapAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoInstaswapPage();
+    QSettings settings;
+    if (settings.value("fShowInstaSwapTab").toBool()) {
+    	instaswapAction->setChecked(true);
+    	if (walletFrame) walletFrame->gotoInstaswapPage();
+    }
 }
 //
 

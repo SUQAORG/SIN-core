@@ -9,6 +9,8 @@
 #include <validation.h>
 #include <script/standard.h>
 #include <key_io.h>
+#include <net.h>
+#include <netbase.h>
 
 using namespace std;
 
@@ -41,9 +43,7 @@ struct infinitynode_info_t
     CScript scriptPubKey{};
     std::string backupAddress = "BackupAddress";
     int nRank=0;
-    int nMetadataHeight=0;
-    std::string metadataNodeAddress = "NodeAddress";
-    CService metadataService{};
+    std::string metadataID="";
 };
 
 class CInfinitynode : public infinitynode_info_t
@@ -77,24 +77,26 @@ public:
         READWRITE(collateralAddress);
         READWRITE(scriptPubKey);
         READWRITE(backupAddress);
-        READWRITE(nMetadataHeight);
-        READWRITE(metadataNodeAddress);
-        READWRITE(metadataService);
+        READWRITE(metadataID);
     }
 
     void setHeight(int nInHeight){nHeight = nInHeight; nExpireHeight=nInHeight + 720*365;}
-    void setCollateralAddress(std::string address) { collateralAddress = address;}
+    void setCollateralAddress(std::string address) {
+        collateralAddress = address;
+        std::string burnfundTxId = vinBurnFund.prevout.ToStringShort().substr(0, 16);
+        std::ostringstream streamInfo;
+        streamInfo << collateralAddress << "-" << burnfundTxId;
+        metadataID = streamInfo.str();
+    }
     void setScriptPublicKey(CScript scriptpk){scriptPubKey = scriptpk;}
     void setBurnValue(CAmount burnFund){nBurnValue = burnFund;}
     void setSINType(int SINType){nSINType = SINType;}
     void setLastRewardHeight(int nReward){nLastRewardHeight = nReward;}
     void setRank(int nRankIn){nRank=nRankIn;}
     void setBackupAddress(std::string address) { backupAddress = address;}
-    void setNodeAddress(std::string address) { metadataNodeAddress = address;}
-    void setService(CService addrNew) { metadataService = addrNew;}
-    void setMetadataHeight(int nHeight) { nMetadataHeight = nHeight;}
 
     infinitynode_info_t GetInfo();
+    COutPoint getBurntxOutPoint(){return vinBurnFund.prevout;}
     std::string getCollateralAddress(){return collateralAddress;}
     std::string getBackupAddress(){return backupAddress;}
     CScript getScriptPublicKey(){return scriptPubKey;}
@@ -104,7 +106,14 @@ public:
     int getSINType(){return nSINType;}
     int getLastRewardHeight(){return nLastRewardHeight;}
     int getRank(){return nRank;}
-    int getMetadataHeight(){return nMetadataHeight;}
+    std::string getMetaID(){return metadataID;};
+    bool isRewardInNextStm(int nEndCurrentStmHeight){return nExpireHeight <= nEndCurrentStmHeight;}
+
+    bool IsValidNetAddr();
+    static bool IsValidNetAddr(CService addrIn);
+    static bool IsValidStateForAutoStart(int nMetadataHeight);
+
+    arith_uint256 CalculateScore(const uint256& blockHash);
 
     CInfinitynode& operator=(CInfinitynode const& from)
     {

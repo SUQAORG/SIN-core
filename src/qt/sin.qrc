@@ -158,8 +158,6 @@
      <file alias="about">res/images/about.png</file>
      <file alias="radio_unchecked">res/images/unchecked_radio.png</file>
      <file alias="radio_checked">res/images/checked_radio.png</file>
-     <file alias="button-bg">res/images/button-bg.png</file>
-     <file alias="sinbgmov">res/images/sinbg.gif</file>
      </qresource>
    <qresource prefix="/fonts">
        <file alias="Hind-Bold">res/fonts/Hind-Bold.ttf</file>

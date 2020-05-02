@@ -18,13 +18,18 @@ extern CInfinitynodeMan infnodeman;
 
 class CInfinitynodeMan
 {
+public:
+    typedef std::pair<arith_uint256, CInfinitynode*> score_pair_t;
+    typedef std::vector<score_pair_t> score_pair_vec_t;
+
 private:
     static const std::string SERIALIZATION_VERSION_STRING;
 
     // critical section to protect the inner data structures
     mutable CCriticalSection cs;
-    // Keep track of current block height
+    // Keep track of current block height and first download block
     int nCachedBlockHeight;
+    bool fMapInfinitynodeUpdated = false;
 
     //make sure that this value is sup than chain reorg limit. After this depth, situation of MAP is matured
     static const int INF_MATURED_LIMIT = 55;
@@ -89,12 +94,14 @@ public:
 
     std::string ToString() const;
 
-    bool Add(CInfinitynode &mn);
+    bool getMapStatus(){LOCK(cs);  return fMapInfinitynodeUpdated;}
+
+    bool Add(CInfinitynode &inf);
     bool AddUpdateLastPaid(CScript scriptPubKey, int nHeightLastPaid);
     /// Find an entry
     CInfinitynode* Find(const COutPoint& outpoint);
 
-    bool GetInfinitynodeInfo(std::string nodeowner, infinitynode_info_t& infInfoRet);
+    bool GetInfinitynodeInfo(std::string nodePublicKey, infinitynode_info_t& infInfoRet);
     bool GetInfinitynodeInfo(const COutPoint& outpoint, infinitynode_info_t& infInfoRet);
 
     /// Clear InfinityNode vector
@@ -134,18 +141,25 @@ public:
     bool buildInfinitynodeList(int nBlockHeight, int nLowHeight = 165000);
     bool buildListForBlock(int nBlockHeight);
     void updateLastPaid();
-    void updateMetadata(std::string nodeowner, std::string nodeAddress, CService nodeService, int nHeightUpdate);
     bool updateInfinitynodeList(int fromHeight);//call in init.cppp
     bool initialInfinitynodeList(int fromHeight);//call in init.cpp
 
+    //this function build the map of STM from genesis
     bool deterministicRewardStatement(int nSinType);
     bool deterministicRewardAtHeight(int nBlockHeight, int nSinType, CInfinitynode& infinitynodeRet);
-    std::map<int, CInfinitynode> calculInfinityNodeRank(int nBlockHeight, int nSinType, bool updateList=false);
+    std::map<int, CInfinitynode> calculInfinityNodeRank(int nBlockHeight, int nSinType, bool updateList=false, bool flagExtCall = false);
     void calculAllInfinityNodesRankAtLastStm();
     std::pair<int, int> getLastStatementBySinType(int nSinType);
     std::string getLastStatementString() const;
     int getRoi(int nSinType, int totalNode);
 
+    int isPossibleForLockReward(std::string nodeOwner);
+    bool getScoreVector(const uint256& nBlockHash, int nSinType, int nBlockHeight, CInfinitynodeMan::score_pair_vec_t& vecScoresRet);
+    bool getNodeScoreAtHeight(const COutPoint& outpoint, int nSinType, int nBlockHeight, int& nRankRet);
+    std::string getVectorNodeRankAtHeight(const std::vector<COutPoint>  &vOutpoint, int nSinType, int nBlockHeight);
+
+    //this function update lastStm and size from UpdatedBlockTip and map
+    void updateLastStmHeightAndSize(int nBlockHeight, int nSinType);
     void CheckAndRemove(CConnman& connman);
     /// This is dummy overload to be used for dumping/loading mncache.dat
     void CheckAndRemove() {}

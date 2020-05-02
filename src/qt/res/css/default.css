@@ -144,7 +144,7 @@ QComboBox { /* Dropdown Menus */
 border-color:#000000;
 border-radius:10px;
 padding: 3px 5px 3px 5px;
-background:#202677;
+background:#00023B;
 min-height:25px;
 color:#ffffff;
 background-color:#00023B;
@@ -176,7 +176,7 @@ border-image: url(':/images/downArrow') 0 0 0 0 stretch stretch;
 QComboBox QListView {
 border:1px solid #000000;
 color:#ffffff;
-background-color:#202677;
+background-color:#00023B;
 padding-right:1px;
 padding-left:1px;
 }
@@ -184,7 +184,7 @@ padding-left:1px;
 QComboBox QAbstractItemView::item { margin:4px; }
 
 QComboBox::item {
-color:#202677;
+color:#00023B;
 }
 
 QComboBox::item:alternate { background:#fff;}
@@ -376,7 +376,7 @@ QScrollBar:horizontal {
 }
 QScrollBar::handle:vertical {
 	/* Scroll Bar Slider - vertical */
-	background: #D6D7D8;
+	background: #555656;
     border-radius: 6px;
     min-height:50px;
     width:3px;
@@ -387,7 +387,7 @@ QScrollBar::handle:vertical {
 
 QScrollBar::handle:horizontal {
 	/* Scroll Bar Slider - horizontal */
-	background: #D6D7D8;
+	background: #555656;
     min-width: 50px;
     border-radius: 6px;
 }
@@ -773,7 +773,7 @@ background-color: #D6DCE5;
 }
 
 QDialog#OptionsDialog QValueComboBox {
-  background-color: #202677;
+  background-color: #00023B;
   min-width:102px;
   font-weight:bold;
   border-color: #000000;
@@ -1988,3 +1988,77 @@ QProgressBar {
 QToolTip { 
 	color: #000000; background-color: #ffffff; border: 1px solid white; 
 }
+
+/*INSTASWAP PAGE*/
+
+QWidget#InstaSwap .QLabel#receivingAddressLabel { /* receiving Address Label */
+  min-width:160px;
+  font-size:14px;
+  font-weight:bold;
+  color:#ffffff;
+  border-radius: 10px;
+  background-color:#00023B;
+  margin-right:5px;
+  padding-right:5px;
+}
+
+QWidget#InstaSwap .QLabel#refundAddressLabel { /*refund Address Label */
+  min-width:160px;
+  font-size:14px;
+  font-weight:bold;
+  color:#ffffff;
+  border-radius: 10px;
+  background-color:#00023B;
+  margin-right:5px;
+  padding-right:5px;
+}
+
+QWidget#InstaSwap .QLabel#depositAmountLabel { /* deposit Amount Label  */
+  min-width:160px;
+  font-size:14px;
+  font-weight:bold;
+  color:#ffffff;
+  border-radius: 10px;
+  background-color:#00023B;
+  margin-right:5px;
+  padding-right:5px;
+}
+
+
+QWidget#InstaSwap .QPushButton#addressBookButton {
+background-color: transparent;
+margin-left: 5px;
+}
+
+
+QWidget#InstaSwap .QLabel#allowedPairsLabel { /*allowed Pairs Label*/
+  min-width:160px;
+  font-size:14px;
+  font-weight:bold;
+  color:#ffffff;
+  border-radius: 10px;
+  background-color:#00023B;
+  margin-right:5px;
+  padding-right:5px;
+}
+
+QWidget#InstaSwap .QLabel#errorLabel {
+color: red;
+font-weight:bold;
+padding-left: 10px;
+}
+
+
+QWidget#InstaSwap .QLabel#receivingAmountTitleLabel {
+font-weight:bold;
+padding-right: 5px;
+}
+
+
+QWidget#InstaSwap .QLabel#receivingAmountLabel {
+color: #BC8F3A;
+font-weight:bold;
+}
+
+
+

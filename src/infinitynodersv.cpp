@@ -4,7 +4,7 @@
 
 #include <infinitynodersv.h>
 #include <infinitynodeman.h>
-#include <util.h> //fMasterNode variable
+#include <util/system.h> //fMasterNode variable
 #include <flat-database.h>
 
 CInfinitynodersv infnodersv;
@@ -109,7 +109,7 @@ bool CInfinitynodersv::rsvScan(int nBlockHeight)
 {
     Clear();
     LogPrintf("CInfinitynodersv::rsvScan -- Cleared map. Size is %d\n", (int)mapProposalVotes.size());
-    if (nBlockHeight <= INFINITYNODE_RSV_BEGIN) return false;
+    if (nBlockHeight <= Params().GetConsensus().nInfinityNodeGenesisStatement) return false;
     uint256 blockHash;
     if(!GetBlockHash(blockHash, nBlockHeight)) {
         LogPrint(BCLog::INFINITYNODE, "CInfinitynodeMan::buildInfinitynodeList -- can not read block hash\n");
@@ -120,7 +120,7 @@ bool CInfinitynodersv::rsvScan(int nBlockHeight)
     pindex = LookupBlockIndex(blockHash);
     CBlockIndex* prevBlockIndex = pindex;
 
-    while (prevBlockIndex->nHeight >= INFINITYNODE_RSV_BEGIN)
+    while (prevBlockIndex->nHeight >= Params().GetConsensus().nInfinityNodeGenesisStatement)
     {
         CBlock blockReadFromDisk;
         if (ReadBlockFromDisk(blockReadFromDisk, prevBlockIndex, Params().GetConsensus()))

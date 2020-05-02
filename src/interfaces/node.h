@@ -52,6 +52,11 @@ public:
     //! Choose network parameters.
     virtual void selectParams(const std::string& network) = 0;
 
+    //! Load <datadir>/settings.json file with saved settings. This needs to be
+    //! called after selectParams() because the settings file is
+    //! network-specific.
+    virtual bool readSettingsFile() = 0;
+
     //! Get network name.
     virtual std::string getNetwork() = 0;
 

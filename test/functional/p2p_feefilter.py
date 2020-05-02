@@ -9,7 +9,7 @@ import time
 
 from test_framework.messages import msg_feefilter
 from test_framework.mininode import mininode_lock, P2PInterface
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import sync_blocks, sync_mempools
 
 def hashToHex(hash):
@@ -38,7 +38,7 @@ class TestP2PConn(P2PInterface):
         with mininode_lock:
             self.txinvs = []
 
-class FeeFilterTest(BitcoinTestFramework):
+class FeeFilterTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
 

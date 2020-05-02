@@ -1,36 +1,36 @@
 #!/usr/bin/env bash
 #
-#  bitcoind The bitcoin core server.
+#  sind The bitcoin core server.
 #
 #
 # chkconfig: 345 80 20
-# description: bitcoind
-# processname: bitcoind
+# description: sind
+# processname: sind
 #
 
 # Source function library.
 . /etc/init.d/functions
 
-# you can override defaults in /etc/sysconfig/bitcoind, see below
-if [ -f /etc/sysconfig/bitcoind ]; then
-        . /etc/sysconfig/bitcoind
+# you can override defaults in /etc/sysconfig/sind, see below
+if [ -f /etc/sysconfig/sind ]; then
+        . /etc/sysconfig/sind
 fi
 
 RETVAL=0
 
-prog=bitcoind
-# you can override the lockfile via BITCOIND_LOCKFILE in /etc/sysconfig/bitcoind
-lockfile=${BITCOIND_LOCKFILE-/var/lock/subsys/bitcoind}
+prog=sind
+# you can override the lockfile via SIND_LOCKFILE in /etc/sysconfig/sind
+lockfile=${SIND_LOCKFILE-/var/lock/subsys/sind}
 
-# bitcoind defaults to /usr/bin/bitcoind, override with BITCOIND_BIN
-bitcoind=${BITCOIND_BIN-/usr/bin/bitcoind}
+# sind defaults to /usr/bin/sind, override with SIND_BIN
+sind=${SIND_BIN-/usr/bin/sind}
 
-# bitcoind opts default to -disablewallet, override with BITCOIND_OPTS
-bitcoind_opts=${BITCOIND_OPTS--disablewallet}
+# sind opts default to -disablewallet, override with SIND_OPTS
+sind_opts=${SIND_OPTS--disablewallet}
 
 start() {
     echo -n $"Starting $prog: "
-    daemon $DAEMONOPTS $bitcoind $bitcoind_opts
+    daemon $DAEMONOPTS $sind $sind_opts
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch $lockfile

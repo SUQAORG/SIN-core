@@ -144,6 +144,11 @@ void CActiveMasternode::ManageStateInitial(CConnman& connman)
 
     // First try to find whatever local address is specified by externalip option
     bool fFoundLocal = GetLocal(service) && CMasternode::IsValidNetAddr(service);
+    if (!fFoundLocal && Params().NetworkIDString() == CBaseChainParams::REGTEST) {
+        if (Lookup("127.0.0.1", service, GetListenPort(), false)) {
+            fFoundLocal = true;
+        }
+    }
     if(!fFoundLocal) {
         bool empty = true;
         // If we have some peers, let's try to find our local address from one of them
@@ -168,39 +173,39 @@ void CActiveMasternode::ManageStateInitial(CConnman& connman)
         LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
         return;
     }
-
-    const auto defaultChainParams = CreateChainParams(CBaseChainParams::MAIN);
-    int mainnetDefaultPort = defaultChainParams->GetDefaultPort();
-    if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        if(service.GetPort() != mainnetDefaultPort) {
+    if (Params().NetworkIDString() != CBaseChainParams::REGTEST) {
+        const auto defaultChainParams = CreateChainParams(CBaseChainParams::MAIN);
+        int mainnetDefaultPort = defaultChainParams->GetDefaultPort();
+        if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
+            if(service.GetPort() != mainnetDefaultPort) {
+                nState = ACTIVE_MASTERNODE_NOT_CAPABLE;
+                strNotCapableReason = strprintf("Invalid port: %u - only %d is supported on mainnet.", service.GetPort(), mainnetDefaultPort);
+                LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+                return;
+            }
+        } else if(service.GetPort() == mainnetDefaultPort) {
             nState = ACTIVE_MASTERNODE_NOT_CAPABLE;
-            strNotCapableReason = strprintf("Invalid port: %u - only %d is supported on mainnet.", service.GetPort(), mainnetDefaultPort);
+            strNotCapableReason = strprintf("Invalid port: %u - %d is only supported on mainnet.", service.GetPort(), mainnetDefaultPort);
             LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
             return;
         }
-    } else if(service.GetPort() == mainnetDefaultPort) {
-        nState = ACTIVE_MASTERNODE_NOT_CAPABLE;
-        strNotCapableReason = strprintf("Invalid port: %u - %d is only supported on mainnet.", service.GetPort(), mainnetDefaultPort);
-        LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
-        return;
+
+        LogPrintf("CActiveMasternode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
+
+        bool fConnected = false;
+        SOCKET hSocket = CreateSocket(service);
+        if (hSocket != INVALID_SOCKET) {
+            fConnected = ConnectSocketDirectly(service, hSocket, nConnectTimeout, true) && IsSelectableSocket(hSocket);
+            CloseSocket(hSocket);
+        }
+
+        if (!fConnected) {
+            nState = ACTIVE_MASTERNODE_NOT_CAPABLE;
+            strNotCapableReason = "Could not connect to " + service.ToString();
+            LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
+            return;
+        }
     }
-
-    LogPrintf("CActiveMasternode::ManageStateInitial -- Checking inbound connection to '%s'\n", service.ToString());
-
-    bool fConnected = false;
-    SOCKET hSocket = CreateSocket(service);
-    if (hSocket != INVALID_SOCKET) {
-        fConnected = ConnectSocketDirectly(service, hSocket, nConnectTimeout, true) && IsSelectableSocket(hSocket);
-        CloseSocket(hSocket);
-    }
-
-    if (!fConnected) {
-        nState = ACTIVE_MASTERNODE_NOT_CAPABLE;
-        strNotCapableReason = "Could not connect to " + service.ToString();
-        LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);
-        return;
-    }
-
     // Default to REMOTE
     eType = MASTERNODE_REMOTE;
 

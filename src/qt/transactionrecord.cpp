@@ -33,6 +33,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
     CAmount nDebit = wtx.debit;
     CAmount nNet = nCredit - nDebit;
     uint256 hash = wtx.tx->GetHash();
+    std::string message = "";
     std::map<std::string, std::string> mapValue = wtx.value_map;
 
     if (nNet > 0 || wtx.is_coinbase)
@@ -42,6 +43,17 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
         //
         for(unsigned int i = 0; i < wtx.tx->vout.size(); i++)
         {
+            // SIN
+                std::string data = "";
+                std::vector<std::vector<unsigned char>> vSolutions;
+                txnouttype whichType;
+                Solver(wtx.tx->vout[i].scriptPubKey, whichType, vSolutions);
+                if (whichType == TX_BURN_DATA && vSolutions.size() == 2){
+                        std::string dataTemp(vSolutions[1].begin(), vSolutions[1].end());
+                        data = dataTemp;
+                        message = "Message in Transaction";
+                }
+            //
             const CTxOut& txout = wtx.tx->vout[i];
             isminetype mine = wtx.txout_is_mine[i];
             if(mine)
@@ -51,6 +63,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
                 sub.idx = i; // vout index
                 sub.credit = txout.nValue;
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
+                //SIN
+                sub.message = data;
+                //
                 if (wtx.txout_address_is_mine[i])
                 {
                     // Received by Bitcoin Address
@@ -108,11 +123,24 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
 
             for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
             {
+                // SIN
+                std::string data = "";
+                std::vector<std::vector<unsigned char>> vSolutions;
+                txnouttype whichType;
+                Solver(wtx.tx->vout[nOut].scriptPubKey, whichType, vSolutions);
+                if (whichType == TX_BURN_DATA && vSolutions.size() == 2){
+                        std::string dataTemp(vSolutions[1].begin(), vSolutions[1].end());
+                        data = dataTemp;
+                        message = "Message in Transaction";
+                }
+                //
                 const CTxOut& txout = wtx.tx->vout[nOut];
                 TransactionRecord sub(hash, nTime);
                 sub.idx = nOut;
                 sub.involvesWatchAddress = involvesWatchAddress;
-
+                //SIN
+                sub.message = data;
+                //
                 if(wtx.txout_is_mine[nOut])
                 {
                     // Ignore parts sent to self, as this is usually the change

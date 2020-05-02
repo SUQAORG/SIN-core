@@ -5,7 +5,7 @@
 """Test the wallet accounts properly when there is a double-spend conflict."""
 from decimal import Decimal
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import (
     assert_equal,
     connect_nodes,
@@ -14,7 +14,7 @@ from test_framework.util import (
     sync_blocks,
 )
 
-class TxnMallTest(BitcoinTestFramework):
+class TxnMallTest(SinTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
 

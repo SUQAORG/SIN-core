@@ -22,7 +22,7 @@
 #include <netbase.h>
 #include <scheduler.h>
 #include <ui_interface.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include <instantx.h>
 #include <netmessagemaker.h>
@@ -2759,14 +2759,11 @@ void CConnman::RelayTransaction(const CTransaction& tx)
     ss.reserve(10000);
     uint256 hash = tx.GetHash();
     
-    LogPrintf("Net::RelayTransaction -- tx %s\n", hash.ToString());
     CTxLockRequest txLockRequestRet;
     if(instantsend.GetTxLockRequest(hash, txLockRequestRet)) { // MSG_TXLOCK_REQUEST
         ss << txLockRequestRet;
-        LogPrintf("Net::RelayTransaction -- InstantSend MSG_TXLOCK_REQUEST %s\n", hash.ToString());
     } else { // MSG_TX
         ss << tx;
-        LogPrintf("Net::RelayTransaction -- Transaction MSG_TX %s\n", hash.ToString());
     }
     RelayTransaction(tx, ss);
 }
@@ -2776,7 +2773,6 @@ void CConnman::RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 {
     uint256 hash = tx.GetHash();
     int nInv = static_cast<bool>(instantsend.HasTxLockRequest(hash) ? MSG_TXLOCK_REQUEST : MSG_TX);
-    LogPrintf("Net::RelayTransaction -- Type in protocol CInv(%d-%s)\n", nInv, hash.ToString());
     CInv inv(nInv, hash);
     {
         LOCK(cs_mapRelayDash);
@@ -2786,21 +2782,15 @@ void CConnman::RelayTransaction(const CTransaction& tx, const CDataStream& ss)
             mapRelayDash.erase(vRelayExpirationDash.front().second);
             vRelayExpirationDash.pop_front();
         }
-        LogPrint(BCLog::NET, "Add relay invenroty for infinity node like InstantSend...\n");
         // Save original serialized message so newer versions are preserved
         mapRelayDash.insert(std::make_pair(inv, ss));
         vRelayExpirationDash.push_back(std::make_pair(GetTime() + 15 * 60, inv));
     }
     LOCK(cs_vNodes);
-    LogPrint(BCLog::NET, "CConnman::InstantSend -- RelayTransaction to %d nodes\n", vNodes.size());
     for (auto* pnode : vNodes)
     {
         if (nInv == MSG_TXLOCK_REQUEST) {
             LOCK(pnode->cs_filter);
-            /*if(!pnode->fRelayTxes)
-                continue;
-            LogPrint(BCLog::NET, "CConnman::InstantSend -- PushInventory node: peer=%d addr=%s nRefCount=%d fNetworkNode=%d fInbound=%d fMasternode=%d\n",                                                                                    
-                    pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fNetworkNode, pnode->fInbound, pnode->fMasternode);*/
             if(pnode->pfilter && !pnode->pfilter->IsRelevantAndUpdate(tx)) continue;
         }
         pnode->PushInventory(inv);

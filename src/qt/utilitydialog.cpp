@@ -20,7 +20,7 @@
 #include <clientversion.h>
 #include <init.h>
 #include <interfaces/node.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <stdio.h>
 
@@ -138,11 +138,13 @@ HelpMessageDialog::HelpMessageDialog(interfaces::Node& node, QWidget *parent, He
 <br>\
 <b>Difficulty Retargeting Algo:</b> LWMA\
 <br>\
+<b>E-Governance:</b> R.S.V. Revolving Sovereignty Votes\
+<br>\
 <b>51% Attack Solution:</b> LWMA & Reorg 55 (fork rejection)\
 <br>\
 <b>Infinity Nodes Collateral:</b> 100K-500K-1000K (three-tiers)\
 <br>\
-Max Block Size:</b> 16 mb\
+<b>Max Block Size:</b> 16 mb\
 <br>\
 <b>Max Supply:</b> Always less than 800 million infinitely\
 <br>\
@@ -155,6 +157,14 @@ Max Block Size:</b> 16 mb\
 <b>Transactions per second:</b> Up to 533 tx/s\
 <br>\
 <b>Treasury:</b> 10%\
+<br>\
+<b>Usecases:</b> I.D.S. Incorruptible Data Storage\
+<br>\
+– Decentralized Cloud 3.0\
+<br>\
+– Private direct messaging and electronic mail\
+<br>\
+– Proof-of-integrity, proof-of-inheritance\
 <ol type=\"1\"> \
 "
         ));

@@ -5,13 +5,13 @@
 """Test the importprunedfunds and removeprunedfunds RPCs."""
 from decimal import Decimal
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import SinTestFramework
 from test_framework.util import (
     assert_equal,
     assert_raises_rpc_error,
 )
 
-class ImportPrunedFundsTest(BitcoinTestFramework):
+class ImportPrunedFundsTest(SinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2

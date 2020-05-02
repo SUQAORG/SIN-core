@@ -22,6 +22,7 @@
 #include <sync.h>
 #include <tinyformat.h>
 #include <util/memory.h>
+#include <util/settings.h>
 #include <util/time.h>
 
 #include <atomic>
@@ -34,12 +35,38 @@
 #include <utility>
 #include <vector>
 
+#include <boost/signals2/signal.hpp>
 #include <boost/thread/condition_variable.hpp> // for boost::thread_interrupted
+
+// Dash
+// Debugging macros
+
+// Uncomment the following line to enable debugging messages
+// or enable on a per file basis prior to inclusion of util.h
+//#define ENABLE_DASH_DEBUG
+#ifdef ENABLE_DASH_DEBUG
+#define DBG( x ) x
+#else
+#define DBG( x )
+#endif
 
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
 
+// Dash only features
+extern bool fMasterNode;
+extern bool fLiteMode;
+extern int nWalletBackups;
+extern bool fDebug;
+extern bool fInfinityNode;
+
+extern const char * const MASTERNODE_CONF_FILENAME;
+extern const char * const MASTERNODE_CONF_FILENAME_ARG;
+
 extern const char * const BITCOIN_CONF_FILENAME;
+extern const char * const BITCOIN_SETTINGS_FILENAME;
+
+extern const char * const BITCOIN_PID_FILENAME;
 
 /** Translate a message to the native language of the user. */
 const extern std::function<std::string(const char*)> G_TRANSLATION_FUN;
@@ -83,12 +110,19 @@ fs::path GetDefaultDataDir();
 // The blocks directory is always net specific.
 const fs::path &GetBlocksDir();
 const fs::path &GetDataDir(bool fNetSpecific = true);
+// Return true if -datadir option points to a valid directory or is not specified.
+bool CheckDataDirOption();
 void ClearDatadirCache();
 fs::path GetConfigFile(const std::string& confPath);
 #ifdef WIN32
 fs::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
 #endif
 void runCommand(const std::string& strCommand);
+
+#ifndef WIN32
+fs::path GetPidFile();
+void CreatePidFile(const fs::path &path, pid_t pid);
+#endif
 
 /**
  * Most paths passed as configuration arguments are treated as relative to
@@ -129,6 +163,23 @@ enum class OptionsCategory {
 
 class ArgsManager
 {
+    public:
+        enum Flags {
+            NONE = 0x00,
+            // Boolean options can accept negation syntax -noOPTION or -noOPTION=1
+            ALLOW_BOOL = 0x01,
+            ALLOW_INT = 0x02,
+            ALLOW_STRING = 0x04,
+            ALLOW_ANY = ALLOW_BOOL | ALLOW_INT | ALLOW_STRING,
+            DEBUG_ONLY = 0x100,
+            /* Some options would cause cross-contamination if values for
+             * mainnet were used while running on regtest/testnet (or vice-versa).
+             * Setting them as NETWORK_ONLY ensures that sharing a config file
+             * between mainnet and regtest/testnet won't cause problems due to these
+             * parameters by accident. */
+            NETWORK_ONLY = 0x200,
+        };
+
 protected:
     friend class ArgsManagerHelper;
 
@@ -136,14 +187,11 @@ protected:
     {
         std::string m_help_param;
         std::string m_help_text;
-        bool m_debug_only;
-
-        Arg(const std::string& help_param, const std::string& help_text, bool debug_only) : m_help_param(help_param), m_help_text(help_text), m_debug_only(debug_only) {};
+        unsigned int m_flags;
     };
 
     mutable CCriticalSection cs_args;
-    std::map<std::string, std::vector<std::string>> m_override_args GUARDED_BY(cs_args);
-    std::map<std::string, std::vector<std::string>> m_config_args GUARDED_BY(cs_args);
+    util::Settings m_settings GUARDED_BY(cs_args);
     std::string m_network GUARDED_BY(cs_args);
     std::set<std::string> m_network_only_args GUARDED_BY(cs_args);
     std::map<OptionsCategory, std::map<std::string, Arg>> m_available_args GUARDED_BY(cs_args);
@@ -153,6 +201,7 @@ protected:
 
 public:
     ArgsManager();
+    ~ArgsManager();
 
     /**
      * Select the network in use
@@ -258,7 +307,7 @@ public:
     /**
      * Add argument
      */
-    void AddArg(const std::string& name, const std::string& help, const bool debug_only, const OptionsCategory& cat);
+    void AddArg(const std::string& name, const std::string& help, unsigned int flags, const OptionsCategory& cat);
 
     /**
      * Add many hidden arguments
@@ -271,6 +320,7 @@ public:
     void ClearArgs() {
         LOCK(cs_args);
         m_available_args.clear();
+        m_network_only_args.clear();
     }
 
     /**
@@ -279,9 +329,38 @@ public:
     std::string GetHelpMessage() const;
 
     /**
-     * Check whether we know of this arg
+     * Return Flags for known arg.
+     * Return ArgsManager::NONE for unknown arg.
      */
-    bool IsArgKnown(const std::string& key) const;
+    unsigned int FlagsOfKnownArg(const std::string& key) const;
+
+    /**
+     * Return whether read-write settings are enabled. This is true unless
+     * bitcoin was configured with -nosettings to disable storing changed
+     * dynamic settings from the GUI or RPC methods.
+     */
+    bool HasSettingsFile();
+
+    /**
+     * Load <datadir>/settings.json file with saved settings. This needs to be
+     * called after SelectParams() because the settings file is network-specific.
+     */
+    bool ReadSettingsFile();
+
+    /**
+     * Save <datadir>/settings.json file with persistent settings.
+     */
+    bool WriteSettingsFile() const;
+
+    /**
+     * Access settings with lock held.
+     */
+    template <typename Fn>
+    void LockSettings(Fn&& fn)
+    {
+        LOCK(cs_args);
+        fn(m_settings);
+    }
 };
 
 extern ArgsManager gArgs;
@@ -386,5 +465,35 @@ private:
 #endif
 
 } // namespace util
+
+// Dash
+/**
+ * @brief Converts version strings to 4-byte unsigned integer
+ * @param strVersion version in "x.x.x" format (decimal digits only)
+ * @return 4-byte unsigned integer, most significant byte is always 0
+ * Throws std::bad_cast if format doesn\t match.
+ */
+uint32_t StringVersionToInt(const std::string& strVersion);
+
+/**
+ * @brief Converts version as 4-byte unsigned integer to string
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * Throws std::bad_cast if format doesn\t match.
+ */
+std::string IntVersionToString(uint32_t nVersion);
+
+
+/**
+ * @brief Copy of the IntVersionToString, that returns "Invalid version" string
+ * instead of throwing std::bad_cast
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * or "Invalid version" if can't cast the given value
+ */
+std::string SafeIntVersionToString(uint32_t nVersion);
+//
+
+boost::filesystem::path GetMasternodeConfigFile();
 
 #endif // BITCOIN_UTIL_SYSTEM_H

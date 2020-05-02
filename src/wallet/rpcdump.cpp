@@ -14,7 +14,7 @@
 #include <script/standard.h>
 #include <sync.h>
 #include <util/bip32.h>
-#include <util.h>
+#include <util/system.h>
 #include <util/time.h>
 #include <validation.h>
 #include <wallet/wallet.h>

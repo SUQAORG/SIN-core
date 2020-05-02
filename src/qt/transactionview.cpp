@@ -186,6 +186,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     connect(prefix_typing_delay, SIGNAL(timeout()), this, SLOT(changedSearch()));
 
     connect(view, SIGNAL(doubleClicked(QModelIndex)), this, SIGNAL(doubleClicked(QModelIndex)));
+    connect(view, SIGNAL(clicked(QModelIndex)), this, SLOT(computeSum()));
     connect(view, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextualMenu(QPoint)));
 
     connect(bumpFeeAction, SIGNAL(triggered()), this, SLOT(bumpFee()));
@@ -523,6 +524,24 @@ void TransactionView::showDetails()
     }
 }
 
+
+/** Compute sum of all selected transactions */
+void TransactionView::computeSum()
+{
+    qint64 amount = 0;
+    int nDisplayUnit = model->getOptionsModel()->getDisplayUnit();
+    if(!transactionView->selectionModel())
+        return;
+    QModelIndexList selection = transactionView->selectionModel()->selectedRows();
+
+    for (QModelIndex index : selection){
+        amount += index.data(TransactionTableModel::AmountRole).toLongLong();
+    }
+    QString strAmount(BitcoinUnits::formatWithUnit(nDisplayUnit, amount, true, BitcoinUnits::separatorAlways));
+    if (amount < 0) strAmount = "<span style='color: red;'>" + strAmount + "</span>";
+    Q_EMIT trxAmount(strAmount);
+}
+
 void TransactionView::openThirdPartyTxUrl(QString url)
 {
     if(!transactionView || !transactionView->selectionModel())
@@ -582,6 +601,8 @@ void TransactionView::focusTransaction(const QModelIndex &idx)
     if(!transactionProxyModel)
         return;
     QModelIndex targetIdx = transactionProxyModel->mapFromSource(idx);
+    transactionView->selectRow(targetIdx.row());
+    computeSum();
     transactionView->scrollTo(targetIdx);
     transactionView->setCurrentIndex(targetIdx);
     transactionView->setFocus();

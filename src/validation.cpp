@@ -39,8 +39,8 @@
 #include <txmempool.h>
 #include <ui_interface.h>
 #include <undo.h>
-#include <util.h>
-#include <utilmoneystr.h>
+#include <util/system.h>
+#include <util/moneystr.h>
 #include <util/strencodings.h>
 #include <validationinterface.h>
 #include <warnings.h>
@@ -965,7 +965,17 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             }
         }
 
-        constexpr unsigned int scriptVerifyFlags = STANDARD_SCRIPT_VERIFY_FLAGS;
+        uint32_t scriptVerifyFlags = STANDARD_SCRIPT_VERIFY_FLAGS;
+
+        uint32_t additionalFlags = SCRIPT_VERIFY_NONE;
+        
+        // Add Schnorr flags only after fork
+        if (chainActive.Height() >= Params().GetConsensus().nSchnorrActivationHeight) {
+            additionalFlags |= SCRIPT_ENABLE_SCHNORR;
+        }
+        
+        // Make sure we're using the correct flags
+        scriptVerifyFlags |= additionalFlags;
 
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
@@ -1283,6 +1293,7 @@ CAmount GetMasternodePayment(int nHeight, int sintype)
 	if (sintype == 1) {
 		if (Params().NetworkIDString() == CBaseChainParams::FINALNET && nHeight >=105 && nHeight <  150000) return 8 * COIN;
 		if (Params().NetworkIDString() == CBaseChainParams::TESTNET && nHeight >=105 && nHeight <  150000) return 8 * COIN;
+        if (Params().NetworkIDString() == CBaseChainParams::REGTEST && nHeight >=105 && nHeight <  150000) return 8 * COIN;
 
 		if (nHeight <  150000) return  0 * COIN;  //testnet
 		if (nHeight <  170100) return  0 * COIN;  //hard fork
@@ -1292,6 +1303,7 @@ CAmount GetMasternodePayment(int nHeight, int sintype)
 	if (sintype == 5) {
 		if (Params().NetworkIDString() == CBaseChainParams::FINALNET && nHeight >=105 && nHeight <  150000) return 41 * COIN;
 		if (Params().NetworkIDString() == CBaseChainParams::TESTNET && nHeight >=105 && nHeight <  150000) return 41 * COIN;
+        if (Params().NetworkIDString() == CBaseChainParams::REGTEST && nHeight >=105 && nHeight <  150000) return 41 * COIN;
 
 		if (nHeight <  150000) return  0 * COIN;  //testnet
 		if (nHeight <  170100) return  0 * COIN;  //hard fork
@@ -1301,6 +1313,7 @@ CAmount GetMasternodePayment(int nHeight, int sintype)
 	if (sintype == 10) {
 		if (Params().NetworkIDString() == CBaseChainParams::FINALNET && nHeight >=105 && nHeight <  150000) return 85 * COIN;
 		if (Params().NetworkIDString() == CBaseChainParams::TESTNET && nHeight >=105 && nHeight <  150000) return 85 * COIN;
+        if (Params().NetworkIDString() == CBaseChainParams::REGTEST && nHeight >=105 && nHeight <  150000) return 85 * COIN;
 
 		if (nHeight <  150000) return  0 * COIN;  //testnet
 		if (nHeight <  170100) return  0 * COIN;  //hard fork
@@ -1936,6 +1949,11 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
 
     if (IsNullDummyEnabled(pindex->pprev, consensusparams)) {
         flags |= SCRIPT_VERIFY_NULLDUMMY;
+    }
+
+    // Add Schnorr flags only after fork
+    if (pindex->nHeight >= consensusparams.nSchnorrActivationHeight) {
+        flags |= SCRIPT_ENABLE_SCHNORR;
     }
 
     return flags;

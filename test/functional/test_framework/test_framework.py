@@ -14,6 +14,7 @@ import shutil
 import sys
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from .authproxy import JSONRPCException
 from . import coverage
@@ -23,13 +24,18 @@ from .util import (
     MAX_NODES,
     PortSeed,
     assert_equal,
+    copy_datadir,
     check_json_precision,
     connect_nodes_bi,
+    connect_nodes,
     disconnect_nodes,
     get_datadir_path,
     initialize_datadir,
+    l2_forced_sync,
     p2p_port,
     set_node_times,
+    set_mocktime,
+    get_mocktime,
     sync_blocks,
     sync_mempools,
 )
@@ -43,6 +49,19 @@ TEST_EXIT_PASSED = 0
 TEST_EXIT_FAILED = 1
 TEST_EXIT_SKIPPED = 77
 
+### IN parameters ###
+BIG_COLLATERAL = 1000000
+MID_COLLATERAL = 500000
+LIL_COLLATERAL = 100000
+COLLATERAL = 10000
+
+class InfinityNodeInfo:
+    def __init__(self, in_key, collateral_tx, collateral_vout, burn_tx, burn_vout):
+        self.in_key = in_key
+        self.collateral_tx = collateral_tx
+        self.collateral_vout = collateral_vout
+        self.burn_tx = burn_tx
+        self.burn_vout = burn_vout
 
 class SkipTest(Exception):
     """This exception is raised to skip a test"""
@@ -51,30 +70,30 @@ class SkipTest(Exception):
         self.message = message
 
 
-class BitcoinTestMetaClass(type):
-    """Metaclass for BitcoinTestFramework.
+class SinTestMetaClass(type):
+    """Metaclass for SinTestFramework.
 
-    Ensures that any attempt to register a subclass of `BitcoinTestFramework`
+    Ensures that any attempt to register a subclass of `SinTestFramework`
     adheres to a standard whereby the subclass overrides `set_test_params` and
     `run_test` but DOES NOT override either `__init__` or `main`. If any of
     those standards are violated, a ``TypeError`` is raised."""
 
     def __new__(cls, clsname, bases, dct):
-        if not clsname == 'BitcoinTestFramework':
+        if not clsname == 'SinTestFramework':
             if not ('run_test' in dct and 'set_test_params' in dct):
-                raise TypeError("BitcoinTestFramework subclasses must override "
+                raise TypeError("SinTestFramework subclasses must override "
                                 "'run_test' and 'set_test_params'")
             if '__init__' in dct or 'main' in dct:
-                raise TypeError("BitcoinTestFramework subclasses may not override "
+                raise TypeError("SinTestFramework subclasses may not override "
                                 "'__init__' or 'main'")
 
         return super().__new__(cls, clsname, bases, dct)
 
 
-class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
-    """Base class for a bitcoin test script.
+class SinTestFramework(metaclass=SinTestMetaClass):
+    """Base class for a sin test script.
 
-    Individual bitcoin test scripts should subclass this class and override the set_test_params() and run_test() methods.
+    Individual sin test scripts should subclass this class and override the set_test_params() and run_test() methods.
 
     Individual tests can also override the following methods to customize the test setup:
 
@@ -91,6 +110,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         """Sets test framework defaults. Do not override this method. Instead, override the set_test_params() method"""
         self.setup_clean_chain = False
         self.nodes = []
+        self.infinitynodeinfo = []
         self.network_thread = None
         self.mocktime = 0
         self.rpc_timewait = 60  # Wait for up to 60 seconds for the RPC server to respond
@@ -105,9 +125,9 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
 
         parser = argparse.ArgumentParser(usage="%(prog)s [options]")
         parser.add_argument("--nocleanup", dest="nocleanup", default=False, action="store_true",
-                            help="Leave bitcoinds and test.* datadir on exit or error")
+                            help="Leave sinds and test.* datadir on exit or error")
         parser.add_argument("--noshutdown", dest="noshutdown", default=False, action="store_true",
-                            help="Don't stop bitcoinds after the test execution")
+                            help="Don't stop sinds after the test execution")
         parser.add_argument("--cachedir", dest="cachedir", default=os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../../cache"),
                             help="Directory for caching pregenerated datadirs (default: %(default)s)")
         parser.add_argument("--tmpdir", dest="tmpdir", help="Root directory for datadirs")
@@ -125,7 +145,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         parser.add_argument("--pdbonfailure", dest="pdbonfailure", default=False, action="store_true",
                             help="Attach a python debugger if test fails")
         parser.add_argument("--usecli", dest="usecli", default=False, action="store_true",
-                            help="use bitcoin-cli instead of RPC for all commands")
+                            help="use sin-cli instead of RPC for all commands")
         self.add_options(parser)
         self.options = parser.parse_args()
 
@@ -137,8 +157,8 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
 
         config = configparser.ConfigParser()
         config.read_file(open(self.options.configfile))
-        self.options.bitcoind = os.getenv("BITCOIND", default=config["environment"]["BUILDDIR"] + '/src/bitcoind' + config["environment"]["EXEEXT"])
-        self.options.bitcoincli = os.getenv("BITCOINCLI", default=config["environment"]["BUILDDIR"] + '/src/bitcoin-cli' + config["environment"]["EXEEXT"])
+        self.options.sind = os.getenv("SIND", default=config["environment"]["BUILDDIR"] + '/src/sind' + config["environment"]["EXEEXT"])
+        self.options.sincli = os.getenv("SINCLI", default=config["environment"]["BUILDDIR"] + '/src/sin-cli' + config["environment"]["EXEEXT"])
 
         os.environ['PATH'] = os.pathsep.join([
             os.path.join(config['environment']['BUILDDIR'], 'src'),
@@ -196,7 +216,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         else:
             for node in self.nodes:
                 node.cleanup_on_exit = False
-            self.log.info("Note: bitcoinds were not stopped and may still be running")
+            self.log.info("Note: sin daemons were not stopped and may still be running")
 
         if not self.options.nocleanup and not self.options.noshutdown and success != TestStatus.FAILED:
             self.log.info("Cleaning up {} on exit".format(self.options.tmpdir))
@@ -288,15 +308,15 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         if extra_args is None:
             extra_args = [[]] * num_nodes
         if binary is None:
-            binary = [self.options.bitcoind] * num_nodes
+            binary = [self.options.sind] * num_nodes
         assert_equal(len(extra_confs), num_nodes)
         assert_equal(len(extra_args), num_nodes)
         assert_equal(len(binary), num_nodes)
         for i in range(num_nodes):
-            self.nodes.append(TestNode(i, get_datadir_path(self.options.tmpdir, i), rpchost=rpchost, timewait=self.rpc_timewait, bitcoind=binary[i], bitcoin_cli=self.options.bitcoincli, mocktime=self.mocktime, coverage_dir=self.options.coveragedir, extra_conf=extra_confs[i], extra_args=extra_args[i], use_cli=self.options.usecli))
+            self.nodes.append(TestNode(i, get_datadir_path(self.options.tmpdir, i), rpchost=rpchost, timewait=self.rpc_timewait, sind=binary[i], sin_cli=self.options.sincli, mocktime=self.mocktime, coverage_dir=self.options.coveragedir, extra_conf=extra_confs[i], extra_args=extra_args[i], use_cli=self.options.usecli))
 
     def start_node(self, i, *args, **kwargs):
-        """Start a bitcoind"""
+        """Start a sind"""
 
         node = self.nodes[i]
 
@@ -307,7 +327,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
             coverage.write_all_rpc_commands(self.options.coveragedir, node.rpc)
 
     def start_nodes(self, extra_args=None, *args, **kwargs):
-        """Start multiple bitcoinds"""
+        """Start multiple sinds"""
 
         if extra_args is None:
             extra_args = [None] * self.num_nodes
@@ -326,16 +346,16 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
             for node in self.nodes:
                 coverage.write_all_rpc_commands(self.options.coveragedir, node.rpc)
 
-    def stop_node(self, i, expected_stderr=''):
-        """Stop a bitcoind test node"""
-        self.nodes[i].stop_node(expected_stderr)
+    def stop_node(self, i, expected_stderr='', wait=0):
+        """Stop a sind test node"""
+        self.nodes[i].stop_node(expected_stderr, wait=wait)
         self.nodes[i].wait_until_stopped()
 
-    def stop_nodes(self):
-        """Stop multiple bitcoind test nodes"""
+    def stop_nodes(self, wait=0):
+        """Stop multiple sind test nodes"""
         for node in self.nodes:
             # Issue RPC to stop nodes
-            node.stop_node()
+            node.stop_node(wait=wait)
 
         for node in self.nodes:
             # Wait for nodes to stop
@@ -387,6 +407,9 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
     def disable_mocktime(self):
         self.mocktime = 0
 
+    def bump_mocktime(self, t):
+        self.mocktime += t
+
     # Private helper methods. These should not be accessed by the subclass test scripts.
 
     def _start_logging(self):
@@ -401,7 +424,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         # User can provide log level as a number or string (eg DEBUG). loglevel was caught as a string, so try to convert it to an int
         ll = int(self.options.loglevel) if self.options.loglevel.isdigit() else self.options.loglevel.upper()
         ch.setLevel(ll)
-        # Format logs the same as bitcoind's debug.log with microprecision (so log files can be concatenated and sorted)
+        # Format logs the same as sind's debug.log with microprecision (so log files can be concatenated and sorted)
         formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d000Z %(name)s (%(levelname)s): %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
         formatter.converter = time.gmtime
         fh.setFormatter(formatter)
@@ -411,7 +434,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         self.log.addHandler(ch)
 
         if self.options.trace_rpc:
-            rpc_logger = logging.getLogger("BitcoinRPC")
+            rpc_logger = logging.getLogger("SinRPC")
             rpc_logger.setLevel(logging.DEBUG)
             rpc_handler = logging.StreamHandler(sys.stdout)
             rpc_handler.setLevel(logging.DEBUG)
@@ -438,13 +461,13 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
                 if os.path.isdir(get_datadir_path(self.options.cachedir, i)):
                     shutil.rmtree(get_datadir_path(self.options.cachedir, i))
 
-            # Create cache directories, run bitcoinds:
+            # Create cache directories, run sinds:
             for i in range(MAX_NODES):
                 datadir = initialize_datadir(self.options.cachedir, i)
-                args = [self.options.bitcoind, "-datadir=" + datadir, '-disablewallet']
+                args = [self.options.sind, "-datadir=" + datadir, '-disablewallet']
                 if i > 0:
                     args.append("-connect=127.0.0.1:" + str(p2p_port(0)))
-                self.nodes.append(TestNode(i, get_datadir_path(self.options.cachedir, i), extra_conf=["bind=127.0.0.1"], extra_args=[], rpchost=None, timewait=self.rpc_timewait, bitcoind=self.options.bitcoind, bitcoin_cli=self.options.bitcoincli, mocktime=self.mocktime, coverage_dir=None))
+                self.nodes.append(TestNode(i, get_datadir_path(self.options.cachedir, i), extra_conf=["bind=127.0.0.1"], extra_args=[], rpchost=None, timewait=self.rpc_timewait, sind=self.options.sind, sin_cli=self.options.sincli, mocktime=self.mocktime, coverage_dir=None))
                 self.nodes[i].args = args
                 self.start_node(i)
 
@@ -481,14 +504,14 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
             for i in range(MAX_NODES):
                 os.rmdir(cache_path(i, 'wallets'))  # Remove empty wallets dir
                 for entry in os.listdir(cache_path(i)):
-                    if entry not in ['chainstate', 'blocks']:
+                    if entry not in ['chainstate', 'blocks', 'indexes', 'sporks', 'debug.log']:
                         os.remove(cache_path(i, entry))
 
         for i in range(self.num_nodes):
             from_dir = get_datadir_path(self.options.cachedir, i)
             to_dir = get_datadir_path(self.options.tmpdir, i)
             shutil.copytree(from_dir, to_dir)
-            initialize_datadir(self.options.tmpdir, i)  # Overwrite port/rpcport in bitcoin.conf
+            initialize_datadir(self.options.tmpdir, i)  # Overwrite port/rpcport in sin.conf
 
     def _initialize_chain_clean(self):
         """Initialize empty blockchain for use by the test.
@@ -505,10 +528,10 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         except ImportError:
             raise SkipTest("python3-zmq module not available.")
 
-    def skip_if_no_bitcoind_zmq(self):
-        """Skip the running test if bitcoind has not been compiled with zmq support."""
+    def skip_if_no_sind_zmq(self):
+        """Skip the running test if sind has not been compiled with zmq support."""
         if not self.is_zmq_compiled():
-            raise SkipTest("bitcoind has not been built with zmq enabled.")
+            raise SkipTest("sind has not been built with zmq enabled.")
 
     def skip_if_no_wallet(self):
         """Skip the running test if wallet has not been compiled."""
@@ -516,12 +539,12 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
             raise SkipTest("wallet has not been compiled.")
 
     def skip_if_no_cli(self):
-        """Skip the running test if bitcoin-cli has not been compiled."""
+        """Skip the running test if sin-cli has not been compiled."""
         if not self.is_cli_compiled():
-            raise SkipTest("bitcoin-cli has not been compiled.")
+            raise SkipTest("sin-cli has not been compiled.")
 
     def is_cli_compiled(self):
-        """Checks whether bitcoin-cli was compiled."""
+        """Checks whether sin-cli was compiled."""
         config = configparser.ConfigParser()
         config.read_file(open(self.options.configfile))
 
@@ -540,3 +563,228 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         config.read_file(open(self.options.configfile))
 
         return config["components"].getboolean("ENABLE_ZMQ")
+
+    def get_infinitynode_conf_file(self):
+        return os.path.join(self.options.tmpdir, "node0/infinitynode.conf")
+
+    def write_infinitynode_conf_file_family(self):
+        conf = self.get_infinitynode_conf_file()
+        f = open(conf, 'a')
+        for idx in range(0, self.infinitynode_number_family * 3):
+            f.write("in%d 127.0.0.1:%d %s %s %s %s %s\n" % (idx + 1, p2p_port(idx + 1),
+                                                      self.infinitynodeinfo[idx].in_key,
+                                                      self.infinitynodeinfo[idx].collateral_tx,
+                                                      self.infinitynodeinfo[idx].collateral_vout,
+                                                      self.infinitynodeinfo[idx].burn_tx,
+                                                      self.infinitynodeinfo[idx].burn_vout))
+        f.close()
+
+    def setup_infinitynode_params(self, infinitynode_number_family, extra_args=None):
+        self.infinitynode_number_family = infinitynode_number_family
+        if extra_args is None:
+            extra_args = [[]] * (len(self.nodes))
+        assert_equal(len(extra_args), len(self.nodes))
+        self.extra_args = extra_args
+
+    def create_simple_node(self):
+        idx = len(self.nodes)
+        self.add_nodes(1, extra_args=[self.extra_args[idx]])
+        self.start_node(idx)
+        for i in range(0, idx):
+            connect_nodes(self.self.num_nodes[i], idx)
+
+    def create_infinitynode_families(self):
+        self.log.info("Test env running with %d InfinityNode families, preparing..." % self.infinitynode_number_family)
+        # create multiple INs here
+        for idx in range(0, self.infinitynode_number_family):
+            self.create_infinitynode_family(idx)
+
+    def create_infinitynode_family(self, idx):
+        # init basic setup params for a family of tiered nodes
+
+        # get us privkeys
+        privkeyLil = self.nodes[0].masternode('genkey')
+        privkeyMid = self.nodes[0].masternode('genkey')
+        privkeyBig = self.nodes[0].masternode('genkey')
+
+        # get us backup addresses
+        backupaddressLil = self.nodes[0].getnewaddress()
+        backupaddressMid = self.nodes[0].getnewaddress()
+        backupaddressBig = self.nodes[0].getnewaddress()
+        
+        # get us addresses
+        addressLil = self.nodes[0].getnewaddress()
+        addressMid = self.nodes[0].getnewaddress()
+        addressBig = self.nodes[0].getnewaddress()
+
+        ######## burn ###########
+
+        # send proper tiered collaterals first
+        txidLil = self.nodes[0].sendtoaddress(addressLil, LIL_COLLATERAL)
+        txidMid = self.nodes[0].sendtoaddress(addressMid, MID_COLLATERAL)
+        txidBig = self.nodes[0].sendtoaddress(addressBig, BIG_COLLATERAL)
+
+        # get us 2 confirmations
+        self.nodes[0].generate(2)
+
+        # proper burn
+        burnfundLil = self.nodes[0].infinitynodeburnfund(addressLil, '100000', backupaddressLil)
+        burnfundMid = self.nodes[0].infinitynodeburnfund(addressMid, '500000', backupaddressMid)
+        burnfundBig = self.nodes[0].infinitynodeburnfund(addressBig, '1000000', backupaddressBig)
+
+        # grab txid for burn
+        txidLilBurn = burnfundLil[0]['txid']
+        txidMidBurn = burnfundMid[0]['txid']
+        txidBigBurn = burnfundBig[0]['txid']
+
+        # grab vout for burn
+        burn_vout_lil = burnfundLil[0]['vout']
+        burn_vout_mid = burnfundMid[0]['vout']
+        burn_vout_big = burnfundBig[0]['vout']
+
+        # grab txids for collaterals for the whole family
+        txidLockLil = self.nodes[0].sendtoaddress(addressLil, COLLATERAL)
+
+        # get us 6 confirmations
+        self.nodes[0].generate(6)
+
+        rawtxLil = self.nodes[0].getrawtransaction(txidLockLil, True)
+
+        # lil
+        collateral_vout_lil = 0
+        for vout_idx_lil in range(0, len(rawtxLil["vout"])):
+            vout_lil = rawtxLil["vout"][vout_idx_lil]
+            if vout_lil["value"] == COLLATERAL:
+                collateral_vout_lil = vout_idx_lil
+        self.nodes[0].lockunspent(False, [{'txid': txidLockLil, 'vout': collateral_vout_lil}])
+
+        txidLockMid = self.nodes[0].sendtoaddress(addressMid, COLLATERAL)
+
+        # get us 6 confirmations
+        self.nodes[0].generate(6)
+
+        rawtxMid = self.nodes[0].getrawtransaction(txidLockMid, True)
+
+        # mid
+        collateral_vout_mid = 0
+        for vout_idx_mid in range(0, len(rawtxMid["vout"])):
+            vout_mid = rawtxMid["vout"][vout_idx_mid]
+            if vout_mid["value"] == COLLATERAL:
+                collateral_vout_mid = vout_idx_mid
+        self.nodes[0].lockunspent(False, [{'txid': txidLockMid, 'vout': collateral_vout_mid}])
+
+        txidLockBig = self.nodes[0].sendtoaddress(addressBig, COLLATERAL)
+
+        # get us 6 confirmations
+        self.nodes[0].generate(6)
+
+        rawtxBig = self.nodes[0].getrawtransaction(txidLockBig, True)
+
+        # big
+        collateral_vout_big = 0
+        for vout_idx_big in range(0, len(rawtxBig["vout"])):
+            vout_big = rawtxBig["vout"][vout_idx_big]
+            if vout_big["value"] == COLLATERAL:
+                collateral_vout_big = vout_idx_big
+        self.nodes[0].lockunspent(False, [{'txid': txidLockBig, 'vout': collateral_vout_big}])
+
+        # save what we just made
+        self.infinitynodeinfo.append(InfinityNodeInfo(privkeyLil, txidLockLil, collateral_vout_lil, txidLilBurn, burn_vout_lil))
+        self.infinitynodeinfo.append(InfinityNodeInfo(privkeyMid, txidLockMid, collateral_vout_mid, txidMidBurn, burn_vout_mid))
+        self.infinitynodeinfo.append(InfinityNodeInfo(privkeyBig, txidLockBig, collateral_vout_big, txidBigBurn, burn_vout_big))
+
+    def prepare_datadirs(self):
+        # stop controller node so that we can copy the datadir, and start at the end of the datadir
+        self.stop_node(0)
+
+        start_idx = len(self.nodes)
+        for idx in range(0, self.infinitynode_number_family * 3):
+            copy_datadir(0, idx + start_idx, self.options.tmpdir)
+
+        self.start_node(0)
+
+    def start_infinitynode_family(self):
+        self.log.info("Starting %d infinitynodes", self.infinitynode_number_family * 3)
+
+        node_delta = len(self.nodes) - (self.infinitynode_number_family * 3)
+
+        executor = ThreadPoolExecutor(max_workers=20)
+
+        def do_start(idx):
+            args = ['-externalip=127.0.0.1', '-masternode=1',
+                    '-masternodeprivkey=%s' % self.infinitynodeinfo[idx].in_key] + self.extra_args[idx + node_delta]
+            self.stop_node(idx + node_delta)
+            self.start_node(idx + node_delta, extra_args=args)
+            self.infinitynodeinfo[idx].nodeIdx = idx + node_delta
+            self.infinitynodeinfo[idx].node = self.nodes[idx + node_delta]
+            l2_forced_sync(self.infinitynodeinfo[idx].node)
+
+        def do_connect(idx):
+            # Connect to the control node only, masternodes should take care of intra-quorum connections themselves
+            connect_nodes(self.infinitynodeinfo[idx].node, 0)
+
+        jobs = []
+
+        # start up nodes in parallel
+        for idx in range(0, (self.infinitynode_number_family * 3)):
+            jobs.append(executor.submit(do_start, idx))
+
+        # wait for all nodes to start up
+        for job in jobs:
+            job.result()
+        jobs.clear()
+
+        # connect nodes in parallel
+        for idx in range(0, (self.infinitynode_number_family * 3)):
+            jobs.append(executor.submit(do_connect, idx))
+
+        # wait for all nodes to connect
+        for job in jobs:
+            job.result()
+        jobs.clear()
+
+        executor.shutdown()
+
+    def init_sinovate_stuff(self):
+        assert self.infinitynode_number_family > 0
+        assert ((self.infinitynode_number_family) * 3) <= (len(self.nodes))
+        # create masternodes
+        required_balance = ((LIL_COLLATERAL + MID_COLLATERAL + BIG_COLLATERAL) * self.infinitynode_number_family) + (COLLATERAL * 3 * self.infinitynode_number_family) + 1
+        self.log.info("Generating %d coins" % required_balance)
+        while self.nodes[0].getbalance() < required_balance:
+            self.bump_mocktime(1)
+            set_node_times(self.nodes, self.mocktime)
+            self.nodes[0].generate(1)
+        # sync controller node up
+        l2_forced_sync(self.nodes[0])
+        # create IN txes for a family
+        self.create_infinitynode_families()
+        # prepare datadirs
+        self.prepare_datadirs()
+        # write the params to the conf file of the controller node
+        self.write_infinitynode_conf_file_family()
+        # restart controller node so it can load the in conf file we just created
+        self.restart_node(0)
+        # sync it up again
+        l2_forced_sync(self.nodes[0])
+        # start the IN family
+        self.start_infinitynode_family()
+        set_mocktime(self.mocktime + 60)
+        set_node_times(self.nodes, get_mocktime())
+        self.nodes[0].generate(1)
+        #make sure we're all connected to the controller node
+        for i in range(1, len(self.nodes)):
+            connect_nodes(self.nodes[i], 0)
+        # sync nodes
+        self.sync_all()
+        set_mocktime(self.mocktime + 60)
+        set_node_times(self.nodes, get_mocktime())
+        # check local status vs expected status
+        for i in range(1, (self.infinitynode_number_family * 3) + 1):
+            res = self.nodes[0].masternode("start-alias", "in%d" % i)
+            assert (res["result"] == 'successful')
+        # check total number of enabled nodes vs how many nodes we wanted to enable
+        infinitynode_info = self.nodes[0].masternodelist("status")
+        assert (len(infinitynode_info) == (self.infinitynode_number_family * 3))
+        for status in infinitynode_info.values():
+            assert (status == 'ENABLED')

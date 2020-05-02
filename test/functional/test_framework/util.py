@@ -292,7 +292,7 @@ def initialize_datadir(dirname, n):
     datadir = get_datadir_path(dirname, n)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
-    with open(os.path.join(datadir, "bitcoin.conf"), 'w', encoding='utf8') as f:
+    with open(os.path.join(datadir, "sin.conf"), 'w', encoding='utf8') as f:
         f.write("regtest=1\n")
         f.write("[regtest]\n")
         f.write("port=" + str(p2p_port(n)) + "\n")
@@ -310,15 +310,28 @@ def get_datadir_path(dirname, n):
     return os.path.join(dirname, "node" + str(n))
 
 def append_config(datadir, options):
-    with open(os.path.join(datadir, "bitcoin.conf"), 'a', encoding='utf8') as f:
+    with open(os.path.join(datadir, "sin.conf"), 'a', encoding='utf8') as f:
         for option in options:
             f.write(option + "\n")
+
+def copy_datadir(from_node, to_node, dirname):
+    from_datadir = os.path.join(dirname, "node"+str(from_node), "regtest")
+    to_datadir = os.path.join(dirname, "node"+str(to_node), "regtest")
+
+    dirs = ["blocks", "chainstate"]
+    for d in dirs:
+        try:
+            src = os.path.join(from_datadir, d)
+            dst = os.path.join(to_datadir, d)
+            shutil.copytree(src, dst)
+        except:
+            pass
 
 def get_auth_cookie(datadir):
     user = None
     password = None
-    if os.path.isfile(os.path.join(datadir, "bitcoin.conf")):
-        with open(os.path.join(datadir, "bitcoin.conf"), 'r', encoding='utf8') as f:
+    if os.path.isfile(os.path.join(datadir, "sin.conf")):
+        with open(os.path.join(datadir, "sin.conf"), 'r', encoding='utf8') as f:
             for line in f:
                 if line.startswith("rpcuser="):
                     assert user is None  # Ensure that there is only one rpcuser line
@@ -569,3 +582,20 @@ def find_vout_for_address(node, txid, addr):
         if any([addr == a for a in tx["vout"][i]["scriptPubKey"]["addresses"]]):
             return i
     raise RuntimeError("Vout not found for address: txid=%s, addr=%s" % (txid, addr))
+
+# dash utils
+
+MOCKTIME = 0
+
+def set_mocktime(t):
+    global MOCKTIME
+    MOCKTIME = t
+
+def get_mocktime():
+    return MOCKTIME
+
+def l2_forced_sync(node):
+    while True:
+        if node.mnsync("status")['IsSynced']:
+            break
+        node.mnsync("next")

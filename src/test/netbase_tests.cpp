@@ -4,7 +4,7 @@
 
 #include <netbase.h>
 #include <test/test_sin.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include <string>
 

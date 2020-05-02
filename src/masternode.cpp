@@ -17,7 +17,7 @@
 
 #include <shutdown.h>
 
-#include <util.h>
+#include <util/system.h>
 #ifdef ENABLE_WALLET
 #include <wallet/wallet.h>
 #endif // ENABLE_WALLET
@@ -130,6 +130,7 @@ void CMasternode::updateInfinityNodeInfo(bool fAllowFull)
     if (whichType == TX_BURN_DATA){burnTxStandard="burn_and_data";}
 
     nExpireHeight = coinBurnFund.nHeight + 720*365;
+    if(Params().NetworkIDString() == CBaseChainParams::TESTNET){nExpireHeight = coinBurnFund.nHeight + 720*7;}
     nBurnAmount = coinBurnFund.out.nValue / COIN + 1; //automaticaly round
     nCollateralAmount = coinCollateral.out.nValue / COIN;
     collateralAddress = EncodeDestination(addressCollateral);

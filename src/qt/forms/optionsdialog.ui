@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>4</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -223,6 +223,13 @@
             </property>
             <property name="text">
              <string>Show InfinityNodes Tab</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="showInstaSwapTab">
+            <property name="text">
+             <string>Show InstaSwap Tab</string>
             </property>
            </widget>
           </item>

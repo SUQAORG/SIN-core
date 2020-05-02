@@ -1,0 +1,33 @@
+# /etc/conf.d/sind: config file for /etc/init.d/sind
+
+# Config file location
+#SIND_CONFIGFILE="/etc/sin/sin.conf"
+
+# What directory to write pidfile to?  (created and owned by $SIND_USER)
+#SIND_PIDDIR="/var/run/sind"
+
+# What filename to give the pidfile
+#SIND_PIDFILE="${SIND_PIDDIR}/sind.pid"
+
+# Where to write sind data (be mindful that the blockchain is large)
+#SIND_DATADIR="/var/lib/sind"
+
+# User and group to own sind process
+#SIND_USER="bitcoin"
+#SIND_GROUP="bitcoin"
+
+# Path to sind executable
+#SIND_BIN="/usr/bin/sind"
+
+# Nice value to run sind under
+#SIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#SIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for sind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+SIND_SIGTERM_TIMEOUT=60

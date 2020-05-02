@@ -8,7 +8,7 @@
 #include <arith_uint256.h>
 #include <hash.h>
 #include <tinyformat.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <test/bignum.h>
 
 std::string COutPoint::ToString() const

@@ -77,7 +77,7 @@ class ImportMultiTest(BitcoinTestFramework):
 
         # RPC importmulti -----------------------------------------------
 
-        # Bitcoin Address (implicit non-internal)
+        # Sin Address (implicit non-internal)
         self.log.info("Should import an address")
         key = get_key(self.nodes[0])
         self.test_importmulti({"scriptPubKey": {"address": key.p2pkh_addr},

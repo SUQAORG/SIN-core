@@ -9,12 +9,25 @@
 #include <pubkey.h>
 #include <random.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <cuckoocache.h>
 #include <boost/thread.hpp>
 
 namespace {
+/**
+ * Declare which flags absolutely do not affect VerifySignature() result.
+ * We this to reduce unnecessary cache misses (such as when policy and consensus
+ * flags differ on unrelated aspects).
+ */
+static const uint32_t INVARIANT_FLAGS =
+    SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC | SCRIPT_VERIFY_DERSIG |
+    SCRIPT_VERIFY_LOW_S | SCRIPT_VERIFY_NULLDUMMY | SCRIPT_VERIFY_SIGPUSHONLY |
+    SCRIPT_VERIFY_MINIMALDATA | SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS |
+    SCRIPT_VERIFY_CLEANSTACK | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY |
+    SCRIPT_VERIFY_CHECKSEQUENCEVERIFY | SCRIPT_VERIFY_MINIMALIF |
+    SCRIPT_VERIFY_NULLFAIL;
+
 /**
  * Valid signature cache, to avoid doing expensive ECDSA signature checking
  * twice for every transaction (once when accepted into memory pool, and
@@ -36,9 +49,10 @@ public:
     }
 
     void
-    ComputeEntry(uint256& entry, const uint256 &hash, const std::vector<unsigned char>& vchSig, const CPubKey& pubkey)
+    ComputeEntry(uint256& entry, const uint256 &hash, const std::vector<unsigned char>& vchSig, const CPubKey& pubkey, uint32_t flags)
     {
-        CSHA256().Write(nonce.begin(), 32).Write(hash.begin(), 32).Write(&pubkey[0], pubkey.size()).Write(&vchSig[0], vchSig.size()).Finalize(entry.begin());
+        flags &= ~INVARIANT_FLAGS;
+        CSHA256().Write(nonce.begin(), 32).Write(reinterpret_cast<uint8_t *>(&flags), sizeof(flags)).Write(hash.begin(), 32).Write(&pubkey[0], pubkey.size()).Write(&vchSig[0], vchSig.size()).Finalize(entry.begin());
     }
 
     bool
@@ -80,13 +94,13 @@ void InitSignatureCache()
             (nElems*sizeof(uint256)) >>20, (nMaxCacheSize*2)>>20, nElems);
 }
 
-bool CachingTransactionSignatureChecker::VerifySignature(const std::vector<unsigned char>& vchSig, const CPubKey& pubkey, const uint256& sighash) const
+bool CachingTransactionSignatureChecker::VerifySignature(const std::vector<unsigned char>& vchSig, const CPubKey& pubkey, const uint256& sighash, uint32_t flags) const
 {
     uint256 entry;
-    signatureCache.ComputeEntry(entry, sighash, vchSig, pubkey);
+    signatureCache.ComputeEntry(entry, sighash, vchSig, pubkey, flags);
     if (signatureCache.Get(entry, !store))
         return true;
-    if (!TransactionSignatureChecker::VerifySignature(vchSig, pubkey, sighash))
+    if (!TransactionSignatureChecker::VerifySignature(vchSig, pubkey, sighash, flags))
         return false;
     if (store)
         signatureCache.Set(entry);

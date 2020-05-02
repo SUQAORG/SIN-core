@@ -35,7 +35,7 @@
 #include <rpc/server.h>
 #include <ui_interface.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 #include <warnings.h>
 
 #include <walletinitinterface.h>
@@ -79,13 +79,10 @@ static void InitMessage(const std::string &message)
     LogPrintf("init message: %s\n", message);
 }
 
-/*
-   Translate string to current locale using Qt.
- */
-static std::string Translate(const char* psz)
-{
+/** Translate string to current locale using Qt. */
+const std::function<std::string(const char*)> G_TRANSLATION_FUN = [](const char* psz) {
     return QCoreApplication::translate("sin-core", psz).toStdString();
-}
+};
 
 static QString GetLangTerritory()
 {
@@ -544,15 +541,15 @@ WId BitcoinApplication::getMainWinId() const
 static void SetupUIArgs()
 {
 #ifdef ENABLE_WALLET
-    gArgs.AddArg("-allowselfsignedrootcertificates", strprintf("Allow self signed root certificates (default: %u)", DEFAULT_SELFSIGNED_ROOTCERTS), true, OptionsCategory::GUI);
+    gArgs.AddArg("-allowselfsignedrootcertificates", strprintf("Allow self signed root certificates (default: %u)", DEFAULT_SELFSIGNED_ROOTCERTS), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::GUI);
 #endif
-    gArgs.AddArg("-choosedatadir", strprintf("Choose data directory on startup (default: %u)", DEFAULT_CHOOSE_DATADIR), false, OptionsCategory::GUI);
-    gArgs.AddArg("-lang=<lang>", "Set language, for example \"de_DE\" (default: system locale)", false, OptionsCategory::GUI);
-    gArgs.AddArg("-min", "Start minimized", false, OptionsCategory::GUI);
-    gArgs.AddArg("-resetguisettings", "Reset all settings changed in the GUI", false, OptionsCategory::GUI);
-    gArgs.AddArg("-rootcertificates=<file>", "Set SSL root certificates for payment request (default: -system-)", false, OptionsCategory::GUI);
-    gArgs.AddArg("-splash", strprintf("Show splash screen on startup (default: %u)", DEFAULT_SPLASHSCREEN), false, OptionsCategory::GUI);
-    gArgs.AddArg("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", BitcoinGUI::DEFAULT_UIPLATFORM), true, OptionsCategory::GUI);
+    gArgs.AddArg("-choosedatadir", strprintf("Choose data directory on startup (default: %u)", DEFAULT_CHOOSE_DATADIR), ArgsManager::ALLOW_ANY, OptionsCategory::GUI);
+    gArgs.AddArg("-lang=<lang>", "Set language, for example \"de_DE\" (default: system locale)", ArgsManager::ALLOW_ANY, OptionsCategory::GUI);
+    gArgs.AddArg("-min", "Start minimized", ArgsManager::ALLOW_ANY, OptionsCategory::GUI);
+    gArgs.AddArg("-resetguisettings", "Reset all settings changed in the GUI", ArgsManager::ALLOW_ANY, OptionsCategory::GUI);
+    gArgs.AddArg("-rootcertificates=<file>", "Set SSL root certificates for payment request (default: -system-)", ArgsManager::ALLOW_ANY, OptionsCategory::GUI);
+    gArgs.AddArg("-splash", strprintf("Show splash screen on startup (default: %u)", DEFAULT_SPLASHSCREEN), ArgsManager::ALLOW_ANY, OptionsCategory::GUI);
+    gArgs.AddArg("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", BitcoinGUI::DEFAULT_UIPLATFORM), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::GUI);
 }
 
 #ifndef BITCOIN_QT_TEST
@@ -616,7 +613,7 @@ int main(int argc, char *argv[])
     // Now that QSettings are accessible, initialize translations
     QTranslator qtTranslatorBase, qtTranslator, translatorBase, translator;
     initTranslations(qtTranslatorBase, qtTranslator, translatorBase, translator);
-    translationInterface.Translate.connect(Translate);
+    //translationInterface.Translate.connect(Translate);
 
     // Show help message immediately after parsing command-line options (for "-lang") and setting locale,
     // but before showing splash screen.
@@ -633,7 +630,7 @@ int main(int argc, char *argv[])
 
     /// 6. Determine availability of data and blocks directory and parse sin.conf
     /// - Do not call GetDataDir(true) before this step finishes
-    if (!fs::is_directory(GetDataDir(false)))
+    if (!CheckDataDirOption())
     {
         QMessageBox::critical(0, QObject::tr(PACKAGE_NAME),
                               QObject::tr("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(gArgs.GetArg("-datadir", ""))));
@@ -662,6 +659,11 @@ int main(int argc, char *argv[])
     // Parse URIs on command line -- this can affect Params()
     PaymentServer::ipcParseCommandLine(*node, argc, argv);
 #endif
+    if (!node->readSettingsFile()) {
+        QMessageBox::critical(nullptr, QObject::tr(PACKAGE_NAME),
+                              QObject::tr("Error: Cannot read settings file."));
+        return EXIT_FAILURE;
+    }
 
     QScopedPointer<const NetworkStyle> networkStyle(NetworkStyle::instantiate(QString::fromStdString(Params().NetworkIDString())));
     assert(!networkStyle.isNull());

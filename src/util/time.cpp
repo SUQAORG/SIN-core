@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/bitcoin-config.h>
+#include <config/sin-config.h>
 #endif
 
 #include <util/time.h>
@@ -108,3 +108,20 @@ std::string FormatISO8601Time(int64_t nTime) {
 #endif
     return strprintf("%02i:%02i:%02iZ", ts.tm_hour, ts.tm_min, ts.tm_sec);
 }
+
+// Dash
+std::string DurationToDHMS(int64_t nDurationTime)
+{
+    int seconds = nDurationTime % 60;
+    nDurationTime /= 60;
+    int minutes = nDurationTime % 60;
+    nDurationTime /= 60;
+    int hours = nDurationTime % 24;
+    int days = nDurationTime / 24;
+    if(days)
+        return strprintf("%dd %02dh:%02dm:%02ds", days, hours, minutes, seconds);
+    if(hours)
+        return strprintf("%02dh:%02dm:%02ds", hours, minutes, seconds);
+    return strprintf("%02dm:%02ds", minutes, seconds);
+}
+//

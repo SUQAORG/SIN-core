@@ -7,8 +7,8 @@
 #include <chainparams.h>
 #include <masternodeconfig.h>
 //#include <netbase.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>

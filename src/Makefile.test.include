@@ -21,7 +21,7 @@ RAW_TEST_FILES =
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
 BITCOIN_TEST_SUITE = \
-  test/test_sin_main.cpp \
+  test/test_main.cpp \
   test/test_sin.h \
   test/test_sin.cpp
 
@@ -117,11 +117,11 @@ test_test_sin_LDADD += $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMO
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
 test_test_sin_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_sin_LDADD += $(LIBBITCOIN_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+test_test_sin_LDADD += $(LIBBITCOIN_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBBITCOIN_WALLET)
 test_test_sin_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-test_test_sin_LDADD += $(ZMQ_LIBS)
+test_test_sin_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
 #
 
@@ -174,7 +174,7 @@ endif
 
 %.cpp.test: %.cpp
 	@echo Running tests: `cat $< | grep -E "(BOOST_FIXTURE_TEST_SUITE\\(|BOOST_AUTO_TEST_SUITE\\()" | cut -d '(' -f 2 | cut -d ',' -f 1 | cut -d ')' -f 1` from $<
-	$(AM_V_at)$(TEST_BINARY) -l test_suite -t "`cat $< | grep -E "(BOOST_FIXTURE_TEST_SUITE\\(|BOOST_AUTO_TEST_SUITE\\()" | cut -d '(' -f 2 | cut -d ',' -f 1 | cut -d ')' -f 1`" > $<.log 2>&1 || (cat $<.log && false)
+	$(AM_V_at)$(TEST_BINARY) -l test_suite -t "`cat $< | grep -E "(BOOST_FIXTURE_TEST_SUITE\\(|BOOST_AUTO_TEST_SUITE\\()" | cut -d '(' -f 2 | cut -d ',' -f 1 | cut -d ')' -f 1`" -- DEBUG_LOG_OUT > $<.log 2>&1 || (cat $<.log && false)
 
 %.json.h: %.json
 	@$(MKDIR_P) $(@D)

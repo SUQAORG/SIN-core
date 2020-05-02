@@ -9,10 +9,13 @@
 #include <chain.h>
 #include <primitives/block.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Params& params)
 {
+    if (params.fPowNoRetargeting)
+        return pindexLast->nBits;
+
     const CBlockIndex *BlockLastSolved = pindexLast;
     const CBlockIndex *BlockReading = pindexLast;
     int64_t nActualTimespan = 0;
@@ -97,6 +100,9 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const Consens
 
 unsigned int Lwma3CalculateNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params)
 {
+    if (params.fPowNoRetargeting)
+        return pindexLast->nBits;
+    
     const int64_t T = params.nPowTargetSpacing;
 
    // For T=600, 300, 150 use approximately N=60, 90, 120

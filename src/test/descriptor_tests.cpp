@@ -9,7 +9,7 @@
 #include <test/test_sin.h>
 #include <boost/test/unit_test.hpp>
 #include <script/descriptor.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 namespace {
 

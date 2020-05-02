@@ -134,3 +134,13 @@ src/qt/sin-qt
 src/sin-tx
 
 src/sind
+
+src/bench/bench_sin
+
+src/qt/test/test_sin-qt
+
+src/test/test_sin
+
+src/test/test_sin_fuzzy
+
+test/cache/*
