@@ -604,12 +604,14 @@ bool CInfinitynodeMan::buildInfinitynodeListFromGenesis(int nBlockHeight)
                             uint256 hashblock;
                             if(!GetTransaction(txin.prevout.hash, prevtx, Params().GetConsensus(), hashblock, false, nullptr, false)) {
                                 LogPrint(BCLog::INFINITYMAN,"CInfinitynodeMeta::metaScan -- PrevBurnFund tx is not in block.\n");
+				free(signerIndexes);
                                 return false;
                             }
 
                             //identify owner of tx
                             CLockRewardExtractInfo lrinfo(pindex->nHeight, nSINtype, nRewardHeight, prevtx->vout[index].scriptPubKey, stringLRRegister);
                             infnodelrinfo.Add(lrinfo);
+			    free(signerIndexes);
                         }//end lockreward
 
                     } //end loop for all output
