@@ -1189,7 +1189,7 @@ bool CInfinitynodeMan::deterministicRewardAtHeight(int nBlockHeight, int nSinTyp
 
     //LOCK(cs);
     //step2: find last Statement for nBlockHeight (user can enter nBlockHeight, so it may be in past, current or future)
-    int nDelta = 1000; //big enough > number of 
+    int nDelta = 2000; //big enough > number of 
     int lastStatement = 0;
     int lastStatementSize = 0;
     bool fUpdateStm = false;
@@ -1276,7 +1276,7 @@ void CInfinitynodeMan::updateLastStmHeightAndSize(int nBlockHeight, int nSinType
 
     LOCK(cs);
     //step2: find last Statement for nBlockHeight;
-    int nDelta = 1000; //big enough > number of node by SIN type (Stm size). Delta is distant from Stm begin to last block
+    int nDelta = 2000; //big enough > number of node by SIN type (Stm size). Delta is distant from Stm begin to last block
     int lastStatement = 0;
     int lastStatementSize = 0;
     for(auto& stm : mapStatementSinType)
