@@ -80,9 +80,9 @@
         <file alias="biglogo_dark">res/icons/biglogo-dark.svg</file>
         <file alias="about_white">res/icons/about_white.png</file>
         <file alias="about_black">res/icons/about_black.png</file>
-        <file alias="setuOk">res/icons/ok.svg</file>
+        <file alias="setupOk">res/icons/ok.svg</file>
         <file alias="setupKo">res/icons/ko.svg</file>
-        <file alias="setuWait">res/icons/waitgif.gif</file>
+        <file alias="setupWait">res/icons/waitgif.gif</file>
         
     </qresource>
     <qresource prefix="/movies">
@@ -192,6 +192,9 @@
         <file alias="toolbutton_down_arrow">res/styles/theme1/app-icons/toolbutton_down_arrow.png</file>
         <file alias="toolbutton_right_arrow">res/styles/theme1/app-icons/toolbutton_right_arrow.png</file>
         <file alias="down_arrow_unit">res/styles/theme1/app-icons/down_arrow_unit.png</file>
+        <file alias="setupOk">res/styles/theme1/app-icons/ok.svg</file>
+        <file alias="setupKo">res/styles/theme1/app-icons/ko.svg</file>
+        <file alias="setupWait">res/styles/theme1/app-icons/wait.gif</file>
     </qresource>
     <qresource prefix="/styles/theme2">
         <file alias="app">res/styles/theme2/app.css</file>
@@ -253,6 +256,9 @@
         <file alias="webtool_white">res/styles/theme2/app-icons/webtool_white.svg</file>
         <file alias="whitepaper_white">res/styles/theme2/app-icons/whitepaper_white.svg</file>
         <file alias="faq_white">res/styles/theme2/app-icons/faq_white.svg</file>
+        <file alias="setupOk">res/styles/theme2/app-icons/ok.svg</file>
+        <file alias="setupKo">res/styles/theme2/app-icons/ko.svg</file>
+        <file alias="setupWait">res/styles/theme2/app-icons/wait.gif</file>
     </qresource>
     <qresource prefix="/styles/theme3">
         <file alias="app">res/styles/theme3/app.css</file>
@@ -270,5 +276,8 @@
         <file alias="down_arrow_unit">res/styles/theme3/app-icons/down_arrow_unit.png</file>
         <file alias="bg">res/styles/theme3/app-icons/bg.png</file>
         <file alias="splash_bg">res/styles/theme3/app-icons/splash_bg.png</file>
+        <file alias="setupOk">res/styles/theme3/app-icons/ok.svg</file>
+        <file alias="setupKo">res/styles/theme3/app-icons/ko.svg</file>
+        <file alias="setupWait">res/styles/theme3/app-icons/wait.gif</file>
     </qresource>
 </RCC>

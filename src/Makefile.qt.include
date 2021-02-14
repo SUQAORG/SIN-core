@@ -338,6 +338,9 @@ qt/res/styles/theme1/app-icons/slider_switcher_hover.png \
 qt/res/styles/theme1/app-icons/checkbox_unchecked_disabled.png \
 qt/res/styles/theme1/app-icons/splash_bg.png \
 qt/res/styles/theme1/app-icons/bg.png \
+qt/res/styles/theme1/app-icons/ok.svg \
+qt/res/styles/theme1/app-icons/ko.svg \
+qt/res/styles/theme1/app-icons/wait.gif \
 qt/res/styles/theme2/app.css \
 qt/res/styles/theme2/config.ini \
 qt/res/styles/theme2/buttontransparent.css \
@@ -377,6 +380,9 @@ qt/res/styles/theme2/app-icons/right_arrow.png \
 qt/res/styles/theme2/app-icons/down_arrow_unit.png \
 qt/res/styles/theme2/app-icons/splash_bg.png \
 qt/res/styles/theme2/app-icons/bg.png \
+qt/res/styles/theme2/app-icons/ok.svg \
+qt/res/styles/theme2/app-icons/ko.svg \
+qt/res/styles/theme2/app-icons/wait.gif \
 qt/res/styles/theme3/app.css \
 qt/res/styles/theme3/config.ini \
 qt/res/styles/theme3/buttontransparent.css \
@@ -389,6 +395,9 @@ qt/res/styles/theme3/tableviewlight.css \
 qt/res/styles/theme3/invalid.css \
 qt/res/styles/theme3/app-icons/down_arrow_unit.png \
 qt/res/styles/theme3/app-icons/splash_bg.png \
+qt/res/styles/theme3/app-icons/ok.svg \
+qt/res/styles/theme3/app-icons/ko.svg \
+qt/res/styles/theme3/app-icons/wait.gif \
 qt/res/styles/theme3/app-icons/bg.png
 
 RES_ICONS = \
