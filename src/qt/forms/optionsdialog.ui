@@ -849,6 +849,12 @@ width: 80px;
            <property name="text">
             <string>User Interface &amp;style:</string>
            </property>
+           <property name="textFormat">
+            <enum>Qt::PlainText</enum>
+           </property>
+           <property name="buddy">
+            <cstring>lang</cstring>
+           </property>
           </widget>
          </item>
          <item row="3" column="1">

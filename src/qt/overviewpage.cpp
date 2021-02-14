@@ -772,7 +772,7 @@ void OverviewPage::on_toolButtonWebTool_clicked() {
 }
 
 void OverviewPage::on_toolButtonWhitePaper_clicked() {
-    QDesktopServices::openUrl(QUrl("https://sinovate.io/light-whitepaper/", QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("https://docs.sinovate.io/#/sin_webtool_guide/", QUrl::TolerantMode));
 }
 
 void OverviewPage::showDetails()

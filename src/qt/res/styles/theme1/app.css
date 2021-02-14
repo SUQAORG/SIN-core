@@ -467,14 +467,14 @@ QScrollBar::handle:horizontal:disabled {
 Table View CSS
 --------------------------------------------*/
 QHeaderView{
-    color: #696869;
+    color: #ffffff;
     background-color: transparent;
     border: none;
 }
 QHeaderView:section{
     padding: 6px 20px 6px 6px;
     border: none;
-    background-color: #c2c2c2;
+    background-color: #004FFF;
 }
 TransactionView QHeaderView:section{
     margin-top: 10px;
@@ -508,7 +508,7 @@ QTableView::item{
 }
 QTableView::item:selected{
     qproperty-showGrid: false;
-    background: #004FFF;
+    background: #1e2b47;
     color: white;
 }
 QHeaderView::disabled{
@@ -649,7 +649,7 @@ QTabBar::tab {
 }
 QTabBar::tab:selected {
     color: white;
-    border-bottom: 5px solid rgba(0, 138, 200, 40%);
+    border-bottom: 5px solid #004FFF;
 }
 QTabBar::tab:hover:!selected {
     color: rgba(255, 255, 255, 85%);
@@ -1198,7 +1198,7 @@ ToolBar CSS
 --------------------------------------------*/
 QToolBar {
     background-color: #000000;
-    border-right: 1px solid #cccccc;
+    border-right: 1px solid #004FFF;
     height:100%;
     padding-top:20px
     }
@@ -1239,8 +1239,9 @@ QWidget#toolBoxWidget .QToolButton {
     border:  1px solid  #004FFF;
     background-color: transparent;
     font-size:12px;
+    font-weight: bold;
     padding:4px 6px;
-    color: #cccccc;
+    color: #004FFF;
     border-radius: 12px;
     }
   
@@ -1354,5 +1355,5 @@ StatsPage #hline1Stats,
 #hline2Stats,
 #hline3Stats,
 #hline4Stats {
-    background-color: #cccccc;
+    background-color: #004FFF;
 }

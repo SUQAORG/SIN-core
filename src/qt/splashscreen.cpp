@@ -37,7 +37,7 @@ SplashScreen::SplashScreen(interfaces::Node& node, Qt::WindowFlags f, const Netw
     devicePixelRatio = static_cast<QGuiApplication*>(QCoreApplication::instance())->devicePixelRatio();
 
     // define text to place
-    QString titleText       = "SIN Core";
+    QString titleText       = "SIN Desktop";
     QString versionText     = QString("%1").arg(QString::fromStdString(FormatFullVersion()));
     QString copyrightText   = QString::fromUtf8(CopyrightHolders(strprintf("\xc2\xA9 %u ", COPYRIGHT_YEAR)).c_str());
     QString titleAddText    = networkStyle->getTitleAddText();
@@ -99,7 +99,16 @@ SplashScreen::SplashScreen(interfaces::Node& node, Qt::WindowFlags f, const Netw
 
     QRect welcomeRect(0, splashSize.height() - statusHeight - welcomeTextHeight - 40, splashSize.width() -20, welcomeTextHeight);
     pixPaint.setFont(QFont(font, 10 * fontFactor, QFont::Bold));
-    pixPaint.drawText(welcomeRect, Qt::AlignRight | Qt::AlignTop, "Sinovate-Qt Wallet");
+    #ifdef Q_OS_WIN 
+    pixPaint.drawText(welcomeRect, Qt::AlignRight | Qt::AlignTop, "Sinovate-Windows Wallet");
+    #endif
+    #ifdef Q_OS_MAC 
+    pixPaint.drawText(welcomeRect, Qt::AlignRight | Qt::AlignTop, "Sinovate-Mac Wallet");
+    #endif
+    #ifdef Q_OS_LINUX 
+    pixPaint.drawText(welcomeRect, Qt::AlignRight | Qt::AlignTop, "Sinovate-Linux Wallet");
+    #endif
+
 
     // draw copyright stuff
     QFont statusFont = QApplication::font();
