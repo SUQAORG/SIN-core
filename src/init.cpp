@@ -1305,10 +1305,7 @@ bool AppInitLockDataDirectory()
 void ThreadCheckInfinityNode(CConnman& connman)
 {
     if(fLiteMode) return; // disable all Dash specific functionality
-    static bool fOneThread;
-    if(fOneThread) return;
-    fOneThread = true;
-    RenameThread("sinovate-ps");
+    RenameThread("sinovate-check-in");
     unsigned int nTick = 0;
     unsigned int nTickDIN = 0;
     //if this node is an Infinitynode peer, so verify the state

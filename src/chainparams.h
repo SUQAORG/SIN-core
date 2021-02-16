@@ -90,6 +90,7 @@ public:
     std::string SporkPubKey() const { return strSporkPubKey; }
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
+    int getNodeDelta(int nHeight) const;
 protected:
     CChainParams() {}
 
@@ -116,6 +117,7 @@ protected:
     //-//std::string strMasternodePaymentsPubKey;
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;
+    int nDeltaChangeHeight;
 };
 
 /**

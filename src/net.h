@@ -427,9 +427,6 @@ private:
     void AcceptConnection(const ListenSocket& hListenSocket);
     void ThreadSocketHandler();
     void ThreadDNSAddressSeed();
-    // Dash
-    void ThreadMnbRequestConnections();
-    //
 
     uint64_t CalculateKeyedNetGroup(const CAddress& ad) const;
 
@@ -507,7 +504,6 @@ private:
     ServiceFlags nLocalServices;
 
     std::unique_ptr<CSemaphore> semOutbound;
-    std::unique_ptr<CSemaphore> semMasternodeOutbound;
     std::unique_ptr<CSemaphore> semAddnode;
     int nMaxConnections;
     int nMaxOutbound;
@@ -534,7 +530,6 @@ private:
     std::thread threadOpenAddedConnections;
     std::thread threadOpenConnections;
     // Dash
-    std::thread threadMnbRequestConnections;
     std::thread threadMessageHandler;
 
     /** flag for deciding to connect to an extra outbound peer,

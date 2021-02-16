@@ -2068,54 +2068,6 @@ void CConnman::ThreadOpenAddedConnections()
     }
 }
 
-// Dash
-void CConnman::ThreadMnbRequestConnections()
-{
-    // Connecting to specific addresses, no masternode connections available
-    if (gArgs.IsArgSet("-connect") && gArgs.GetArgs("-connect").size() > 0)
-        return;
-
-    while (!interruptNet)
-    {
-        if (!interruptNet.sleep_for(std::chrono::milliseconds(1000)))
-            return;
-
-        CSemaphoreGrant grant(*semMasternodeOutbound);
-        if (interruptNet)
-            return;
-
-        std::pair<CService, std::set<uint256> > p = mnodeman.PopScheduledMnbRequestConnection();
-        if(p.first == CService() || p.second.empty()) continue;
-
-        LogPrint(BCLog::NET, "ThreadMnbRequestConnections -- ConnectNode(addr=%s)\n", p.first.ToString());
-        OpenNetworkConnection(CAddress(p.first, NODE_NETWORK), false, nullptr, NULL, false, false, false, true);
-
-        LOCK(cs_vNodes);
-
-        CNode *pnode = FindNode(p.first);
-        if(!pnode || pnode->fDisconnect) continue;
-		/*
-        LogPrint(BCLog::NET, "ThreadMnbRequestConnections -- adding node: peer=%d addr=%s nRefCount=%d fNetworkNode=%d fInbound=%d fMasternode=%d\n",
-                   pnode->id, pnode->addr.ToString(), pnode->GetRefCount(), pnode->fNetworkNode, pnode->fInbound, pnode->fMasternode);
-		*/
-        grant.MoveTo(pnode->grantMasternodeOutbound);
-
-        // compile request vector
-        std::vector<CInv> vToFetch;
-        std::set<uint256>::iterator it = p.second.begin();
-        while(it != p.second.end()) {
-            if(*it != uint256()) {
-                vToFetch.push_back(CInv(MSG_MASTERNODE_ANNOUNCE, *it));
-                LogPrint(BCLog::MASTERNODE, "ThreadMnbRequestConnections -- asking for mnb %s from addr=%s\n", it->ToString(), p.first.ToString());
-            }
-            ++it;
-        }
-
-        // ask for data
-        PushMessage(pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::GETDATA, vToFetch));
-    }
-}
-
 // if successful, this moves the passed grant to the constructed node
 CNode* CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound, const char *pszDest, bool fOneShot, bool fFeeler, bool manual_connection, bool fConnectToMasternode)
 {
@@ -2358,9 +2310,6 @@ CConnman::CConnman(uint64_t nSeed0In, uint64_t nSeed1In) : nSeed0(nSeed0In), nSe
     nLastNodeId = 0;
     nSendBufferMaxSize = 0;
     nReceiveFloodSize = 0;
-    // Dash
-    semMasternodeOutbound = NULL;
-    //
     flagInterruptMsgProc = false;
     SetTryNewOutboundPeer(false);
 
@@ -2475,12 +2424,6 @@ bool CConnman::Start(CScheduler& scheduler, const Options& connOptions)
         // initialize semaphore
         semOutbound = MakeUnique<CSemaphore>(std::min((nMaxOutbound + nMaxFeeler), nMaxConnections));
     }
-    // Dash
-    if (semMasternodeOutbound == nullptr) {
-        // initialize semaphore
-        semMasternodeOutbound = MakeUnique<CSemaphore>(MAX_OUTBOUND_MASTERNODE_CONNECTIONS);
-    }
-    //
     if (semAddnode == nullptr) {
         // initialize semaphore
         semAddnode = MakeUnique<CSemaphore>(nMaxAddnode);
@@ -2520,11 +2463,6 @@ bool CConnman::Start(CScheduler& scheduler, const Options& connOptions)
     }
     if (connOptions.m_use_addrman_outgoing || !connOptions.m_specified_outgoing.empty())
         threadOpenConnections = std::thread(&TraceThread<std::function<void()> >, "opencon", std::function<void()>(std::bind(&CConnman::ThreadOpenConnections, this, connOptions.m_specified_outgoing)));
-
-    // Dash
-    // Initiate masternode connections
-    threadMnbRequestConnections = std::thread(&TraceThread<std::function<void()> >, "mnbcon", std::function<void()>(std::bind(&CConnman::ThreadMnbRequestConnections, this)));
-    //
 
     // Process messages
     threadMessageHandler = std::thread(&TraceThread<std::function<void()> >, "msghand", std::function<void()>(std::bind(&CConnman::ThreadMessageHandler, this)));
@@ -2578,10 +2516,6 @@ void CConnman::Stop()
 {
     if (threadMessageHandler.joinable())
         threadMessageHandler.join();
-    // Dash
-    if (threadMnbRequestConnections.joinable())
-        threadMnbRequestConnections.join();
-    //
     if (threadOpenConnections.joinable())
         threadOpenConnections.join();
     if (threadOpenAddedConnections.joinable())
@@ -2590,12 +2524,6 @@ void CConnman::Stop()
         threadDNSAddressSeed.join();
     if (threadSocketHandler.joinable())
         threadSocketHandler.join();
-
-    // Dash
-    if (semMasternodeOutbound)
-        for (int i=0; i<MAX_OUTBOUND_MASTERNODE_CONNECTIONS; i++)
-            semMasternodeOutbound->post();
-    //
 
     if (fAddressesInitialized)
     {
@@ -2622,9 +2550,6 @@ void CConnman::Stop()
     vNodesDisconnected.clear();
     vhListenSocket.clear();
     semOutbound.reset();
-    // Dash
-    semMasternodeOutbound.reset();
-    //
     semAddnode.reset();
 }
 
