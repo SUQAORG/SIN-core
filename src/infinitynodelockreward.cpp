@@ -2543,6 +2543,13 @@ void CInfinityNodeLockReward::TryConnectToMySigners(int rewardHeight, CConnman& 
             } else {
                  LogPrint(BCLog::INFINITYLOCK,"CInfinityNodeLockReward::TryConnectToMySigners -- Cannot try to connect TopNode score: %d, id: %s.\n",
                                  score, s.getBurntxOutPoint().ToStringShort());
+                if(!connman.IsBanned(add)){
+                    int64_t banTime = 600;
+                    bool absolute = false;
+                    connman.Ban(add, BanReasonManuallyAdded, banTime, absolute);
+                    LogPrintf("CInfinityNodeLockReward::TryConnectToMySigners -- Banned for %d seconds TopNode score: %d, addr: %s, id: %s\n",
+                                 banTime, score, add.ToStringIP(), s.getBurntxOutPoint().ToStringShort());
+                }
             }
         }
 
