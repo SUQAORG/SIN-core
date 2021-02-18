@@ -239,7 +239,7 @@ public:
                 { 300000, uint256S("0xe0f5ecb094c6a26b3b57a259b9d4efa9903b8bae6f3194effd50c1c633c30e05")},
                 { 400000, uint256S("0x130bd010d1c8bc52637660938bfbea90f2ff6aadcb562d62ea838f2130d2dc83")},
                 { 500000, uint256S("0x9c642efedac61f56aabed01972cc5648def5a5a4c7373289f427895304d93d9a")},
-                { 550001, uint256S("0x3ad39235119d78fa2c2dd33343bedf88fccac6a6659f1baf9fa200a1b6d256c9")}, // DIN fork block
+                { 550001, uint256S("0xe60931fb2105c58942c3c168b89f7de81b9e4bbb4abdcae31ba5a2466b0e27e3")}, // DIN fork block
             }
         };
 
