@@ -1801,7 +1801,6 @@ bool CInfinityNodeLockReward::FindAndBuildMusigLockReward()
                     free(pubkeys); pubkeys = NULL;
                     free(commitmentpk); commitmentpk = NULL;
                     free(verifier_signer_data); verifier_signer_data = NULL;
-                    secp256k1_scratch_space_destroy(secp256k1_context_musig, scratch);
                     for(int c = 0; c < Params().GetConsensus().nInfinityNodeLockRewardSigners; c++) {
                         free(commitmenthash[c]);
                     }
