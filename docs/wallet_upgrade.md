@@ -85,61 +85,62 @@ Replace the `sin-qt app` file in the compressed file you downloaded with the `si
 
 :warning: **You must log in with the user you created during installation.**
 
-**disable it if you are using a crontab**
+**1- disable it if you are using a crontab**
 ```bash
 crontab -l > my_cron_backup.txt
 crontab -r
 ```
 
-**if running Infinity Node, stop it.**
+**2- if running Infinity Node, stop it.**
 ```bash
 sudo systemctl stop sinovate.service
 ./sin-cli stop
 ```
 
-**update Latest Wallet** 
+**3- update Latest Wallet** 
 ```bash
 wget -O daemon.tar.gz https://github.com/SINOVATEblockchain/SIN-core/releases/latest/download/daemon.tar.gz
 
 tar -xzvf daemon.tar.gz
 ```
-# install unzip package
+:warning: **If you don't have a sync problem, you can skip to step 9 and ignore step 11.**
+# 4- install unzip package
 ```bash
 sudo apt update && sudo apt install unzip
 ```
-# remove old files and folders
+# 5- remove old files and folders
 ```bash
 rm -rf ~/.sin/{blocks,chainstate,indexes,debug.log,mnpayments.dat,mncache.dat,banlist.dat,peers.dat,netfulfilled.dat,governance.dat,fee_estimates.dat}
 ```
 
-# download latest bootstrap archive
+# 6- download latest bootstrap archive
 ```bash
 wget -O ~/bootstrap.zip https://github.com/SINOVATEblockchain/SIN-core/releases/latest/download/bootstrap.zip
 ```
 
-# unzip the bootstrap archive
+# 7- unzip the bootstrap archive
 ```
 unzip ~/bootstrap.zip
 ```
 
-# move bootstrap files
+# 8- move bootstrap files
 ```bash
 mv -ft ~/.sin ~/bootstrap/blocks ~/bootstrap/chainstate ~/bootstrap/indexes ~/bootstrap/infinitynode*.dat
 ```
 
-# run daemon 
+# 9- run daemon 
 ```bash
 ./sind
 ```
 
-# To restore crontab
+# 10- To restore crontab
 
 ```bash
 crontab my_cron_backup.txt
 crontab -l
 ```
 
-# remove unnecessary files
+# 11- remove unnecessary files
 ```bash
 rm -rf ~/{bootstrap,bootstrap.zip}
 ```
