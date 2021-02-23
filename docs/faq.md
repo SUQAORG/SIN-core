@@ -20,3 +20,5 @@ Sinovate Burn means Infinity nodes collateral (1 000 000 SIN coins for example) 
 With this "BurnTx" you'll have, you can start Infinity node and they will provide you with rewards every X blocks (every day), rewards is burned coins + more, in 1 year time limit. 
 "BurnTx" limited with 1 year, this very unique burn system very good fight with inflation. Investor cant sell all at any time like masternodes, nothing to sell - collateral burned.
 
+**Why my node dont have rewards or blocks count stuck, stoped?**
+The nodes made to protect blockchain, every day hackers trying to attack chain, every day we fix and improve code. If your server are fine, posible node just need restart or re-sync. A lot Wallets updates already released and more to come.
