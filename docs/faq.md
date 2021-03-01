@@ -22,3 +22,6 @@ With this "BurnTx" you'll have, you can start Infinity node and they will provid
 
 **Why my node dont have rewards or blocks count stuck, stoped?**
 The nodes made to protect blockchain, every day hackers trying to attack chain, every day we fix and improve code. If your server are fine, posible node just need restart or re-sync. A lot Wallets updates already released and more to come.
+
+**My node are fine but i dont have rewards !**
+Please make sure your wallet are latest version and actual block count, you simply don't see rewards.
