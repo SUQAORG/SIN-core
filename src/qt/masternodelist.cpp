@@ -2088,7 +2088,7 @@ void MasternodeList::onResult(QNetworkReply* replystats)
     
 void MasternodeList::getStatistics()
 {
-    QUrl summaryUrl("https://explorer.sinovate.io/ext/summary");
+    QUrl summaryUrl("https://stats.sinovate.io/summary.php");
     QNetworkRequest request;
     request.setUrl(summaryUrl);
     m_networkManager->get(request);
