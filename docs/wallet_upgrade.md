@@ -35,7 +35,7 @@ Download the latest version of Windows Wallet at [https://github.com/SINOVATEblo
 - Close the wallet
 - Back up
 - Delete everything except wallet.dat and infinitynode.conf
-- Copy the files extracted from the [bootstrap.zip](https://github.com/SINOVATEblockchain/SIN-core/releases/latest/download/bootstrap.zip) file to the SIN directory.
+- Copy the files extracted from the [bootstrap.zip](https://bootstrap.sinovate.io/index.php/s/Y9T2JR3ZiiqDIWl/download) file to the SIN directory.
 - Start the wallet.
  
 
@@ -115,7 +115,7 @@ rm -rf ~/.sin/{blocks,chainstate,indexes,debug.log,mnpayments.dat,mncache.dat,ba
 
 # 6- download latest bootstrap archive
 ```bash
-wget -O ~/bootstrap.zip https://github.com/SINOVATEblockchain/SIN-core/releases/latest/download/bootstrap.zip
+curl -J -O https://bootstrap.sinovate.io/index.php/s/Y9T2JR3ZiiqDIWl/download
 ```
 
 # 7- unzip the bootstrap archive
