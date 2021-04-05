@@ -815,8 +815,8 @@ static UniValue sendwithlockedtoaddress(const JSONRPCRequest& request)
     int nBlockLocked;
     nBlockLocked = atoi(request.params[3].get_str());
 
-    if (nBlockLocked <= Params().MaxReorganizationDepth() + 1)
-       throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid lock time (inf 55 blocks)");
+    if (nBlockLocked < 5)
+       throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid lock time (inf 5 blocks)");
 
     // Wallet comments
     mapValue_t mapValue;

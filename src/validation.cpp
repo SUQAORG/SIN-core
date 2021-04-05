@@ -608,6 +608,24 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
 }
 //
 
+//>SIN
+bool CheckInputTimeLockInterest(const CTransaction &tx, const CCoinsViewCache& view, int nBlockHeight)
+{
+    for (const auto& txin : tx.vin)
+    {
+        const COutPoint &prevout = txin.prevout;
+        const Coin& coin = view.AccessCoin(prevout);
+
+        txnouttype whichType;
+        std::vector<std::vector<unsigned char>> vSolutions;
+        Solver(coin.out.scriptPubKey, whichType, vSolutions);
+
+        if (whichType == TX_CHECKLOCKTIMEVERIFY && coin.nHeight <= nBlockHeight) return true;
+    }
+    return false;
+}
+//<SIN
+
 static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool& pool, CValidationState& state, const CTransactionRef& ptx,
                               bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced,
                               bool bypass_limits, const CAmount& nAbsurdFee, std::vector<COutPoint>& coins_to_uncache, bool test_accept)
@@ -1028,6 +1046,15 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             if (!pool.exists(hash))
                 return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool full");
         }
+
+//>SIN
+        if (CheckInputTimeLockInterest(tx, view, 170000) && chainActive.Height() >= 600000) {
+            LogPrint(BCLog::MEMPOOL, "Timelock: Detected tx timelock with interest: %s. Denied it\n",
+                    hash.ToString());
+            return state.DoS(0, false,
+                                 REJECT_INVALID, "txn-timelock-interest", false, "dont allow old timelock with interest");
+        }
+//<SIN
     }
 
     GetMainSignals().TransactionAddedToMempool(ptx);

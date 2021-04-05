@@ -144,6 +144,7 @@ public:
     //build DIN map by scan from nBlockHeight to nLowHeight
     bool updateLastPaidList(int nBlockHeight, int nLowHeight = 0); /* init this to zero for better compat with regtest/testnet/devnets */
     bool buildInfinitynodeListFromGenesis(int nBlockHeight);
+    bool buildInfinitynodeList(int nBeginHeight, int nEndHeight);
 
     //build DIN map immediate when connect block
     bool buildNonMaturedListFromBlock(const CBlock& block, CBlockIndex* pindex,

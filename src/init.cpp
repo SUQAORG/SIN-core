@@ -240,6 +240,17 @@ void Shutdown()
     // Because these depend on each-other, we make sure that neither can be
     // using the other before destroying them.
     if (peerLogic) UnregisterValidationInterface(peerLogic.get());
+
+    {
+        LOCK(cs_main);
+        int nLastBlock = chainActive.Height();
+        int nLowHeight = nLastBlock - Params().MaxReorganizationDepth();
+        LogPrintf("Sinovate: scan blocks before close from: %d, to: %d\n", nLowHeight, nLastBlock);
+        infnodeman.buildInfinitynodeList(nLowHeight, nLastBlock);
+        LogPrintf("SINOVATE INFO:\n");
+        LogPrintf("Statement: %s\n", infnodeman.getLastStatementString());
+    }
+
     if (g_connman) g_connman->Stop();
     if (g_txindex) g_txindex->Stop();
 
