@@ -534,6 +534,7 @@ public:
 
     bool InMempool() const;
     bool IsTrusted() const;
+    bool isOutputTermDeposit(int i) const;
 
     int64_t GetTxTime() const;
 

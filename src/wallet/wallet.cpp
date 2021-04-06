@@ -2258,6 +2258,15 @@ bool CWalletTx::IsTrusted() const
     return true;
 }
 
+bool CWalletTx::isOutputTermDeposit(int i) const {
+    std::vector<valtype> vSolutions;
+    txnouttype whichType;
+    Solver(tx->vout[i].scriptPubKey, whichType, vSolutions);
+    if (whichType == TX_CHECKLOCKTIMEVERIFY)
+        return true;
+    return false;
+}
+
 int CWalletTx::GetTimeLockReleaseBlock(int i) const{
     std::vector<valtype> vSolutions;
     txnouttype whichType;
@@ -2524,8 +2533,18 @@ void CWallet::AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe, const
     // CAmount nTotal = 0;
     for (const auto& entry : mapWallet)
     {
+        bool skip = false;
         const uint256& wtxid = entry.first;
         const CWalletTx* pcoin = &entry.second;
+        for (size_t i = 0; i < pcoin->tx->vout.size(); i++) {
+            if(pcoin->isOutputTermDeposit(i)){
+                skip = true;
+            }
+        }
+        if (skip) {
+            LogPrintf("AvailableCoins found interest, skipping\n");
+            continue;
+        }
 
         if (!CheckFinalTx(*pcoin->tx))
             continue;
