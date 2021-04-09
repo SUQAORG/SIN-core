@@ -30,11 +30,11 @@ Download the latest version of Windows Wallet at [https://github.com/SINOVATEblo
  
  Replace the sin-qt.exe file in the compressed file you downloaded with the sin-qt.exe file you are currently using.
 
-:warning: For users who will upgrade from older versions to 1.0.0.0. Important Notice :
+:warning: Important Notic. Please pay attention!! :warning: :
 
 - Close the wallet
 - Back up
-- Delete everything except wallet.dat and infinitynode.conf
+- Delete everything except wallet.dat.
 - Copy the files extracted from the [bootstrap.zip](https://bootstrap.sinovate.io/index.php/s/Y9T2JR3ZiiqDIWl/download) file to the SIN directory.
 - Start the wallet.
  
