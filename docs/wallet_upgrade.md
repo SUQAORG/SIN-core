@@ -27,6 +27,9 @@ Download the latest version of Windows Wallet at [https://github.com/SINOVATEblo
  
 
 ![release](assets/img/misc/release.png)
+
+
+<br>
  
  Replace the sin-qt.exe file in the compressed file you downloaded with the sin-qt.exe file you are currently using.
 
@@ -38,7 +41,7 @@ Download the latest version of Windows Wallet at [https://github.com/SINOVATEblo
 - Copy the files extracted from the [bootstrap.zip](https://bootstrap.sinovate.io/index.php/s/Y9T2JR3ZiiqDIWl/download) file to the SIN directory.
 - Start the wallet.
  
-
+<br>
 
 
 # MAC QT Wallet Backup and Upgrade Guide
