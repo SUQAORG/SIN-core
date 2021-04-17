@@ -209,6 +209,8 @@ infinitynodeburnfund [YourAddress] [Amount 1M / 500K / 100K] [YourBackupAddress]
 
 <br>
   
+**Send 3 SINs to DIN Node address.**
+
 ![](assets/img/send3sin.png)
 
   <br>
