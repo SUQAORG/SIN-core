@@ -215,7 +215,6 @@ infinitynodeburnfund [YourAddress] [Amount 1M / 500K / 100K] [YourBackupAddress]
   
 
 ![](https://lh3.googleusercontent.com/7ntvMjgCOelzwj3UFkSlPJEUyEBkR-hYLgWlIW0uJwZMQ57_iFzL4KGo1lM6cYHGzSe6xYwlnGEp-EMCBsVvd7T5T1b8z4lwv5aepYdYSBjsW_MT7UWWyNQXyoywmLaUm43wTTUm)
-
   <br>
 
 Please wait for 2 confirmations!
