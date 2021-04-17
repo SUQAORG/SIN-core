@@ -209,7 +209,7 @@ infinitynodeburnfund [YourAddress] [Amount 1M / 500K / 100K] [YourBackupAddress]
 
 <br>
   
-![](https://lh6.googleusercontent.com/aJS21ECOqIm8tD3j8_HtN5eVHWbCRpQOVh20DERA9I-LnZK1aTQMzKkX0wItINPGkOvZ_sAxGzKzVFxxvRPuT-sAUsg9TDmnrugDXOiQ6tLp0FdEk5PwUW98r7u7JNQoMZeVxM3Y)
+![](assets/img/send3sin.png)
 
   <br>
   
