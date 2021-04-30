@@ -6,7 +6,7 @@ Download the current T-Rex version for your Nvidia graphics card.
 
 Cuda 10 is preferred.
 
-[https://github.com/trexminer/T-Rex/releases](https://github.com/trexminer/T-Rex/releases)
+[https://github.com/trexminer/T-Rex/releases](https://github.com/trexminer/T-Rex/releases/tag/0.19.14)
 
 ![](assets/img/x25x_pow_gpu_mining/1.png)
 
@@ -37,15 +37,15 @@ Server addresses by region are given below…
 
 Europe stratum:
 
-[t-rex](https://github.com/trexminer/T-Rex/releases) -a x25x -o stratum+tcp://eupool.sinovate.io:3253 -u <WALLET_ADDRESS>.%COMPUTERNAME% -p c=SIN
+[t-rex](https://github.com/trexminer/T-Rex/releases/tag/0.19.14) -a x25x -o stratum+tcp://eupool.sinovate.io:3253 -u <WALLET_ADDRESS>.%COMPUTERNAME% -p c=SIN
 
 Asia stratum:
 
-[t-rex](https://github.com/trexminer/T-Rex/releases) -a x25x -o stratum+tcp://asiapool.sinovate.io:3253 -u <WALLET_ADDRESS>.%COMPUTERNAME% -p c=SIN
+[t-rex](https://github.com/trexminer/T-Rex/releases/tag/0.19.14) -a x25x -o stratum+tcp://asiapool.sinovate.io:3253 -u <WALLET_ADDRESS>.%COMPUTERNAME% -p c=SIN
 
 USA stratum:
 
-[t-rex](https://github.com/trexminer/T-Rex/releases) -a x25x -o stratum+tcp://uspool.sinovate.io:3253 -u <WALLET_ADDRESS>.%COMPUTERNAME% -p c=SIN
+[t-rex](https://github.com/trexminer/T-Rex/releases/tag/0.19.14) -a x25x -o stratum+tcp://uspool.sinovate.io:3253 -u <WALLET_ADDRESS>.%COMPUTERNAME% -p c=SIN
 
   
 
