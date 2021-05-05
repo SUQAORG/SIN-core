@@ -92,4 +92,3 @@ Please double-click the start.bat file you just created. The T-Rex will connect 
 
 ![](assets/img/x25x_pow_gpu_mining/6.png)
 
-For more detailed use of the T-Rex Miner, please see the Readme file at [https://github.com/trexminer/T-Rex](https://github.com/trexminer/T-Rex)
