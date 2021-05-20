@@ -9,7 +9,6 @@
 
 - **Tutorials & Guides**
 - [Bootstrap](bootstrap)
-- [HCO Earn Guide](hco_guide)
 - [SUQA Coins Conflict](suqa_conflict)
 - [Wallet Upgrade](wallet_upgrade)
 - [WebTool](sin_webtool_guide)
@@ -17,7 +16,7 @@
 - [Coin control](Coincontrolenable)
 - [F.A.Q.](faq)
 - **Whitepapers**
-- [Whitepaper Light](https://sinovate.io/light-whitepaper/)
+- [Whitepaper Light](https://sinovate.io/SINOVATE_litepaper.pdf)
 - [X25X PoW Algorithm Whitepaper](https://sinovate.io/x25x.pdf)
 - **Troubleshooting**
 - [Transaction too large](transactiontoohigh)
