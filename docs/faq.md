@@ -1,27 +1,27 @@
-**What is infinity node?**
-Infinity nodes is Sinovate custom code servers based on masternodes idea. The features and economically difference is huge.
+**What is an Infinity Node?**
+Infinity nodes are SINOVATE's custom collateralized service nodes, somewhat similar to masternodes. The features and economically differences are enormous.
 
 **What does the infinity node actually do?**
-Infinity nodes provides blockchain with calculations, security checks, sync data for peers, and other servers features. 
+Infinity nodes provide blockchain with calculations, security checks, sync data for peers, and other servers features. 
 
-**Do i need to keep computer on to keep the wallet running and receive the rewards?**
-You start Infinity node server with you own hosted server or simply use "1click in-wallet" hosting and that's all, no need to run wallet or keep opened.
+**Do I need to keep the computer on to keep the wallet running and receive the rewards?**
+It is possible to start the Infinity node server with your own hosted server or simply use "1-click in-wallet setUP" hosting, and that is all that is needed, no need to run the wallet or keep it open.
 
 **Do Sinovate blockchain have nodes limit?**
-Nodes limit is more like ROI limit, unique Sinovate "Burn" system lovers nodes count every year, less nodes - more ROI. You can see next nodes expired time from the Explorer.
+Nodes limit is more like ROI limit; unique Sinovate "Burn" system lowers nodes count every year, fewer nodes, and more ROI. You can see the upcoming expired nodes timeline from the official explorer.
 
 **What is ROI?**
 Return on Investment.
-is a performance measure used to evaluate the efficiency or profitability of an investment or compare the efficiency of a number of different investments. 
-ROI tries to directly measure the amount of return on a particular investment, relative to the investment’s cost.
+ROI is a performance measure used to evaluate the efficiency or profitability of an investment or compare the efficiency of several different investments. 
+ROI tries to directly measure the return on a particular investment relative to the investment's cost.
 
 **What is Burn system?**
-Sinovate Burn means Infinity nodes collateral (1 000 000 SIN coins for example) Burned in exchange "BurnTx". No one can use them after Burn, you also can see total burned amount from the Explorer.
-With this "BurnTx" you'll have, you can start Infinity node and they will provide you with rewards every X blocks (every day), rewards is burned coins + more, in 1 year time limit. 
-"BurnTx" limited with 1 year, this very unique burn system very good fight with inflation. Investor cant sell all at any time like masternodes, nothing to sell - collateral burned.
+SINOVATE Burn means Infinity nodes collateral (1 000 000 SIN coins, for example) Burned in exchange "BurnTx". No one can use them after Burn; you also can see the total burned amount from the explorer.
+With this "BurnTx" you will have, you can start Infinity node, and they will provide you with rewards for every X blocks (every day); rewards are burned coins + more, in a 1-year time limit. 
+"BurnTx" limited to one year; this unique burn system is an excellent fight against inflation. The investors can not sell all at any time like masternodes, nothing to sell - collateral burned.
 
-**Why my node dont have rewards or blocks count stuck, stoped?**
-The nodes made to protect blockchain, every day hackers trying to attack chain, every day we fix and improve code. If your server are fine, posible node just need restart or re-sync. A lot Wallets updates already released and more to come.
+**Why my node do not have rewards or blocks count stuck, stoped?**
+The nodes made to protect blockchain, everyday hackers try to attack the chain, fix and improve code every day. If your server is fine, it is possible that the node just needs to restart or re-sync. Many wallet updates have already been released, and there will be more to come for improvement and fixes.
 
-**My node are fine but i dont have rewards !**
-Please make sure your wallet are latest version and actual block count, you simply don't see rewards.
+**My node is fine, but I do not have rewards !**
+Please make sure your wallet is the latest version and you have the actual block count.
