@@ -21,7 +21,7 @@ With this "BurnTx" you will have, you can start Infinity node, and they will pro
 "BurnTx" limited to one year; this unique burn system is an excellent fight against inflation. The investors can not sell all at any time like masternodes, nothing to sell - collateral burned.
 
 **Why my node do not have rewards or blocks count stuck, stoped?**
-The nodes made to protect blockchain, everyday hackers try to attack the chain, fix and improve code every day. If your server is fine, it is possible that the node just needs to restart or re-sync. Many wallet updates have already been released, and there will be more to come for improvement and fixes.
+The nodes made to protect blockchain in first, deliver calculated data and support blockchain with server hardware to peers, everyday hackers try to attack the chain, rewards can be lost becouse this. We are fix and improve blockchain code every day. If your server hardware is fine to deliver data in time, it is possible that the node was attacked and stuck, node just need to restart or re-sync. A lot blockchain updates have been already released, and there will be more to come with anti-attack improvements and fixes.
 
 **My node is fine, but I do not have rewards !**
 Please make sure your wallet is the latest version and you have the actual block count.
