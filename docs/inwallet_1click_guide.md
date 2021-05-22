@@ -17,7 +17,7 @@ Please follow the below guide in order to set up a Deterministic Infinity Node u
 
   
 
->  3. Select the “MINI Node” (100,000 SIN), “MID Node” (500,000 SIN), or “BIG Node” (1,000,000 SIN) circle, according to your desired level of investment. Participants can ensure that they have sufficient funds to set up a node by clicking “Check.”
+>  3. Select the “MINI Node” (100,000 SIN), “MID Node” (500,000 SIN), or “BIG Node” (1,000,000 SIN) circle, according to your desired level of investment.
 
   
 
