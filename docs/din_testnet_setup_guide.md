@@ -1,7 +1,7 @@
 
 D.I.N. Setup Guide : For SINOVATE Star Cradle Testnet
 
-**An Ubuntu 18.04 VPS with 1 Cpu and  512 MB Ram is needed.**
+**An Ubuntu 18 VPS with 2 Cpu and 512 MB Ram is needed (testnet only).**
   
 
 Download putty or any SSH client program of your choice [https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html.)
@@ -35,7 +35,7 @@ Some VPS providers may ask you to change your temporary password immediately.
 
 Enter the following command to download the installation script. Please enter the code as a single line.
 
-wget -q https://github.com/hardwarewise/SIN-vps-create/releases/latest/download/sin_install_vps_noroot.sh
+wget -q https://github.com/008/testnetv21/raw/main/sin_install_vps_noroot.sh
 
   
   
