@@ -15,7 +15,7 @@ SINOVATE’s X25X proof-of-work (PoW) algorithm is GPU mineable and ensures temp
 **Difficulty Retargeting Algo:** LWMA  
 **51% Attack Solution:** LWMA & Reorg 55 (fork rejection)  
 **Infinity Nodes Collateral:** 100K-500K-1000K (three-tiers)   
-**Max Supply:** Always less than 800 million infinitely  
+**Max Supply:** Self-regulated deflationary circulating supply  
 **Pre-Mine:** No  
 **P2P Port:** 20970  
 **RPC Port:** 20971  
